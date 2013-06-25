@@ -4,6 +4,7 @@
 
 #include <string>
 #include "miniunzip/unzip.h"
+#include "miniunzip/zip.h"
 
 namespace LibTinyThing {
 
@@ -22,10 +23,16 @@ namespace LibTinyThing {
 		std::string getThumbnailFileContents();
 		std::string getToolpathFileContents();
 
+		bool addThumbnailFile(const std::string& filePath);
+		bool addToolpathFile(const std::string& filePath);
+		bool addMetadataFile(const std::string& filePath);
+
 		// checks to see if all files are present
 		bool isValid();
 
 	private:
+
+		bool addFile(const std::string& fileName, const std::string& filePath);
 
 		bool unzipFile(const std::string& fileName,
 				  	   std::string &output);

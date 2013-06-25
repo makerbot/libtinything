@@ -21,9 +21,39 @@ bool UnzipToolpath(TinyThing* tinything){
 }
 
 extern "C"
+bool UnzipMetadata(TinyThing* tinything){
+	bool success = tinything->unzipMetadataFile();
+	return success;
+}
+
+extern "C"
 const char* GetToolpath(TinyThing* tinything){
     std::string toolpath = tinything->getToolpathFileContents();
     return toolpath.c_str();
+}
+
+extern "C"
+const char* GetMetadata(TinyThing* tinything){
+    std::string metdata = tinything->getMetadataFileContents();
+    return metdata.c_str();
+}
+
+extern "C"
+bool AddMetadata(TinyThing* tinything, char const * const filepath){
+	std::string const str_filepath(filepath);
+	return tinything->addMetadataFile(str_filepath);
+}
+
+extern "C"
+bool AddToolpath(TinyThing* tinything, char const * const filepath){
+	std::string const str_filepath(filepath);
+	return tinything->addToolpathFile(str_filepath);
+}
+
+extern "C"
+bool AddThumbnail(TinyThing* tinything, char const * const filepath){
+	std::string const str_filepath(filepath);
+	return tinything->addThumbnailFile(str_filepath);
 }
 
 }

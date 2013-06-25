@@ -14,7 +14,7 @@ paths = {
     'yajl'      : '../../../yajl/'
     }
 
-install_dir = ARGUMENTS.get('install_dir', '') 
+install_dir = ARGUMENTS.get('install_dir', '/usr/lib') 
 
 env['CCFLAGS'] = [
     '-Wall',
@@ -45,4 +45,4 @@ source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c')
 env['CPPPATH'] = cpp_path
 
 tinything = env.SharedLibrary("lib/tinything", source_files, LIBS=libraries, LIBPATH=library_paths, RPATH=runtime_paths)
-Alias("install", env.Install(install_dir + '/usr/lib', tinything))
+Alias("install", env.Install(install_dir, tinything))
