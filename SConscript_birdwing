@@ -1,0 +1,54 @@
+import os
+
+env = Environment(ENV = os.environ)
+
+paths = {
+    'json-cpp'  : '/home/paul/json-cpp',
+    }
+
+BWROOTFS=GetOption('rootfs')
+COMPILER="../Birdwing-toolchain/toolchain/cross-linaro"
+
+env.PrependENVPath('PATH', COMPILER + '/bin')
+
+env['RANLIB']='arm-mb-linux-gnueabi-ranlib' 
+env['CC']='arm-mb-linux-gnueabi-gcc' 
+env['LD']='arm-mb-linux-gnueabi-ld' 
+env['CCLD']='arm-mb-linux-gnueabi-ld' 
+env['CPP']='arm-mb-linux-gnueabi-cpp' 
+env['CXX']='arm-mb-linux-gnueabi-g++'  
+
+env['CCFLAGS'] = [
+    '-Wall',
+    '-D__DEBUG'
+    ]
+
+cpp_path = [
+    'src',
+    paths['json-cpp'] + '/include',
+    BWROOTFS + '/usr/include'
+]
+
+library_paths = [
+    BWROOTFS + '/usr/lib',
+    BWROOTFS + '/lib',
+    ]
+
+runtime_paths = [
+    '/usr/lib'
+]
+
+libraries = [
+    'json-cpp'
+    ]
+
+
+source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c')
+
+env['CPPPATH'] = cpp_path
+
+env.PrependENVPath('PATH', COMPILER + '/bin')
+
+tinything = env.SharedLibrary("lib/tinything", source_files, LIBS=libraries, LIBPATH=library_paths, RPATH=runtime_paths)
+
+Alias("install", env.Install(BWROOTFS+'/usr/lib', tinything))
