@@ -13,3 +13,24 @@ To install to local /usr/lib run:
 
 To cross compile and install to the /usr/lib of a NFS run:
 `scons --embedded --nfs=/path/to/nfs/root`
+
+Python Bindings
+===============
+
+Here is an example of extracting a jsontoolpath using the python bindings
+
+    from ctypes import *
+    libtinything = CDLL("/home/paul/libtinything/lib/libtinything.so")
+    tinything = libtinything.NewTinyThing("/home/paul/libtinything/davesthing.tinything")
+    libtinything.UnzipToolpath(tinything) # 1 = success, 0 = failed
+    libtinything.GetToolpath.restype=c_char_p
+    libtinything.GetToolpath(tinything)
+
+Here is an example of creating a jsontoolpath using the python bindings
+
+    from ctypes import *
+    libtt = CDLL("/home/paul/libtinything/lib/libtinything.so")
+    tt = libtt.NewTinyThing("/home/paul/new.tinything")
+    libtt.AddMetadata(tt, "/home/paul/meta.json")
+    libtt.AddThumbnail(tt, "/home/paul/Firefox_wallpaper.png")
+    libtt.AddToolpath(tt, "/home/paul/meta.json")
