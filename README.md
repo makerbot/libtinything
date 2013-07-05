@@ -16,6 +16,8 @@ To cross compile and install to the /usr/lib of a NFS run:
 
 Run `scons install` to copy the compiled library to the appropriate directory.
 
+Note: zlib is required to be present as a sibling directory to libtinything
+
 Python Bindings
 ===============
 
