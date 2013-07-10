@@ -6,6 +6,10 @@
 
 namespace LibTinyThing {
 
+    TinyThing::~TinyThing() {
+	    if (m_toolpathFile != NULL) unzClose(m_toolpathFile);
+    }
+
 	bool TinyThing::unzipMetadataFile() {
 		return unzipFile(METADATA_FILENAME, m_metadataFileContents);
 	}
@@ -19,6 +23,7 @@ namespace LibTinyThing {
 	}
 
 	std::string TinyThing::getMetadataFileContents(){
+        
 		return m_metadataFileContents;
 	}
 	std::string TinyThing::getThumbnailFileContents(){
@@ -57,7 +62,7 @@ namespace LibTinyThing {
 
 			if (unzGetCurrentFileInfo(tinyThingFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
 
-				// Create a buffer large enough to hold the uncompressed thumbnail
+				// Create a buffer large enough to hold the uncompressed file
 				output.resize(fileInfo.uncompressed_size);
 
 				if (unzReadCurrentFile(tinyThingFile,
@@ -73,6 +78,63 @@ namespace LibTinyThing {
 			unzClose(tinyThingFile);
 		return false;
 
+	}
+
+
+    // returns true if succesful
+    bool TinyThing::resetToolpath(){
+
+        m_toolpathPos = 0;
+
+        std::cout << "Reset toolpath" << std::endl;
+
+        if (m_toolpathFile != NULL) unzClose(m_toolpathFile);
+
+        m_toolpathFile = unzOpen(m_filePath.c_str());
+
+		if (m_toolpathFile != NULL   &&
+			unzLocateFile(m_toolpathFile, TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
+			unzOpenCurrentFile(m_toolpathFile) == UNZ_OK) {
+
+			unz_file_info fileInfo;
+
+			if (unzGetCurrentFileInfo(m_toolpathFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+                m_toolpathSize = fileInfo.uncompressed_size;
+                return true;
+            }
+        }
+        return false;        
+    }
+
+    // if length of return string is < bytes, you have reached end of file
+    std::string TinyThing::getToolpathIncr(const int chars) {
+
+        if (m_toolpathFile == NULL) resetToolpath();
+
+        std::cout << "At character " << m_toolpathPos << " of " << m_toolpathSize << std::endl;
+
+        int chars_to_read = chars;
+        if (m_toolpathPos >= m_toolpathSize) {
+            // end of file
+            std::cout << "At end of file" << std::endl;
+            return "";
+        } else if ((m_toolpathPos + chars) > m_toolpathSize) {
+            // getting to end of file
+            std::cout << "Reached end of file" << std::endl;
+            chars_to_read = m_toolpathSize - m_toolpathPos;
+        }
+
+        std::cout << "Reading " << chars_to_read << " characters" << std::endl;
+
+        m_toolpathPos += chars_to_read;
+
+        std::string output;
+		output.resize(chars_to_read);
+
+		unzReadCurrentFile(m_toolpathFile,
+			const_cast<char*>(output.c_str()),
+			chars_to_read);
+        return output;
 	}
 
 	bool TinyThing::addMetadataFile(const std::string& filePath){
@@ -150,7 +212,7 @@ namespace LibTinyThing {
 
 	}
 
-	const std::string TinyThing::METADATA_FILENAME = "meta.json";;
+	const std::string TinyThing::METADATA_FILENAME = "meta.json";
 	const std::string TinyThing::THUMBNAIL_FILENAME = "thumbnail.png";
 	const std::string TinyThing::TOOLPATH_FILENAME = "print.jsontoolpath";
 

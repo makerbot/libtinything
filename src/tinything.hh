@@ -13,22 +13,36 @@ namespace LibTinyThing {
 
 		TinyThing(const std::string& filePath) : m_filePath(filePath) {}
 
-		~TinyThing() { }
+		~TinyThing();
 
+		// these functions unzip the contents of each of these files,
+		// and cache them in memory. they return true if the unzip is
+		// succesful 
 		bool unzipMetadataFile();
 		bool unzipThumbnailFile();
 		bool unzipToolpathFile();
 
+
+		// these are accessors for the unzipped contents of each of the 
+		// files. they should only be called after each has been
+		// unzipped 
 		std::string getMetadataFileContents();
 		std::string getThumbnailFileContents();
 		std::string getToolpathFileContents();
 
+		// these functions add a file into the tinything,
+		// but need some work 
 		bool addThumbnailFile(const std::string& filePath);
 		bool addToolpathFile(const std::string& filePath);
 		bool addMetadataFile(const std::string& filePath);
 
 		// checks to see if all files are present
+		// TODO: implement multiple levels of validity?
 		bool isValid();
+
+        // incremental unzipping of toolpath
+        bool resetToolpath();
+        std::string getToolpathIncr(const int chars);
 
 	private:
 
@@ -47,7 +61,10 @@ namespace LibTinyThing {
 		static const std::string THUMBNAIL_FILENAME;
 		static const std::string TOOLPATH_FILENAME;
 
-
+        // variables to support incremental toolpath unzipping
+        unzFile m_toolpathFile;
+        int m_toolpathSize;
+        int m_toolpathPos;
 	};
 
 }

@@ -30,6 +30,12 @@ bool AddToolpath(TinyThing* tinything, char const * const filepath);
 extern "C"
 bool AddThumbnail(TinyThing* tinything, char const * const filepath);
 
+extern "C"
+bool ResetToolpath(TinyThing* tinything);
+
+extern "C"
+const char* GetToolpathIncr(TinyThing* tinything, const int bytes);
+
 
 
 }

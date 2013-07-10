@@ -56,4 +56,14 @@ bool AddThumbnail(TinyThing* tinything, char const * const filepath){
 	return tinything->addThumbnailFile(str_filepath);
 }
 
+extern "C"
+bool ResetToolpath(TinyThing* tinything){
+    return tinything->resetToolpath();
+}
+
+extern "C"
+const char* GetToolpathIncr(TinyThing* tinything, const int bytes){
+    return tinything->getToolpathIncr(bytes).c_str();
+}
+
 }
