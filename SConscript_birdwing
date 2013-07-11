@@ -3,7 +3,8 @@ import os
 env = Environment(ENV = os.environ)
 
 paths = {
-    'json-cpp'  : '/home/paul/json-cpp',
+    'json-cpp'  : '../json-cpp',
+    'zlib' : '../zlib-1.2.7/'
     }
 
 BWROOTFS=GetOption('rootfs')
@@ -26,20 +27,21 @@ env['CCFLAGS'] = [
 cpp_path = [
     'src',
     paths['json-cpp'] + '/include',
-    BWROOTFS + '/usr/include'
+    paths['zlib'] 
 ]
 
 library_paths = [
-    BWROOTFS + '/usr/lib',
-    BWROOTFS + '/lib',
+    paths['json-cpp'] + '/obj',
+    paths['zlib'] 
     ]
 
 runtime_paths = [
     '/usr/lib'
-]
+    ]
 
 libraries = [
-    'json-cpp'
+    'z',
+    'jsoncpp'
     ]
 
 

@@ -3,8 +3,8 @@ import os
 env = Environment(ENV = os.environ)
 
 paths = {
-    'common'    : '../common',
-    'json-cpp'  : '../../../json-cpp/'
+    'json-cpp'  : '../json-cpp/',
+    'zlib' : '../zlib-1.2.7/'
     }
 
 install_dir = ARGUMENTS.get('install_dir', '/usr/lib') 
@@ -16,12 +16,13 @@ env['CCFLAGS'] = [
 
 cpp_path = [
     'src',
-    paths['common'],
+    paths['zlib'],
     paths['json-cpp'] + '/include'
     
 ]
 
 library_paths = [
+    paths['zlib'],
     paths['json-cpp'] + '/obj'
     ]
 
@@ -30,6 +31,7 @@ runtime_paths = [
 ]
 
 libraries = [
+    'z',
     'jsoncpp'
     ]
 
