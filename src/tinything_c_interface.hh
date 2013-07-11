@@ -1,40 +1,34 @@
 #include <string>
-#include "tinything.hh"
+#include "TinyThingReader.hh"
+#include "TinyThingWriter.hh"
 
 namespace LibTinyThing {
 
-extern "C"
-TinyThing* NewTinyThing(const char* filepath);
+// READER FUNCTIONS
 
 extern "C"
-int DestroyTinyThing(TinyThing* tinything);
+TinyThingReader* NewTinyThingReader(const char* filepath);
 
 extern "C"
-bool UnzipToolpath(TinyThing* tinything);
+int DestroyTinyThingReader(TinyThingReader* tinything);
 
 extern "C"
-bool UnzipMetadata(TinyThing* tinything);
+bool UnzipToolpath(TinyThingReader* tinything);
 
 extern "C"
-const char* GetToolpath(TinyThing* tinything);
+bool UnzipMetadata(TinyThingReader* tinything);
 
 extern "C"
-const char* GetMetadata(TinyThing* tinything);
+const char* GetToolpath(TinyThingReader* tinything);
 
 extern "C"
-bool AddMetadata(TinyThing* tinything, char const * const filepath);
+const char* GetMetadata(TinyThingReader* tinything);
 
 extern "C"
-bool AddToolpath(TinyThing* tinything, char const * const filepath);
+bool ResetToolpath(TinyThingReader* tinything);
 
 extern "C"
-bool AddThumbnail(TinyThing* tinything, char const * const filepath);
-
-extern "C"
-bool ResetToolpath(TinyThing* tinything);
-
-extern "C"
-const char* GetToolpathIncr(TinyThing* tinything, const int bytes);
+const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes);
 
 
 
