@@ -11,7 +11,8 @@ namespace LibTinyThing {
 	class TinyThingReader {
 	public:
 
-		TinyThingReader(const std::string& filePath) : m_filePath(filePath) {}
+		TinyThingReader(const std::string& filePath) : m_filePath(filePath),
+			m_toolpathFile(NULL), m_toolpathSize(0), m_toolpathPos(0) {}
 
 		~TinyThingReader();
 
