@@ -50,4 +50,42 @@ const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes){
     return tinything->getToolpathIncr(bytes).c_str();
 }
 
+
+// WRITER FUNCTIONS
+
+extern "C"
+TinyThingWriter* NewTinyThingWriter(const char* filepath){
+	TinyThingWriter* tinything = new TinyThingWriter(filepath);
+    return tinything;
+}
+
+extern "C"
+int DestroyTinyThingWriter(TinyThingWriter* tinything){
+    delete tinything;
+    return 0;
+}
+
+extern "C"
+void SetToolpathFile(TinyThingWriter* tinything, const char* filepath){
+	tinything->setToolpathFile(filepath);
+}
+
+extern "C"
+void SetThumbnailFile(TinyThingWriter* tinything, const char* filepath){
+	tinything->setThumbnailFile(filepath);
+}
+
+extern "C"
+void SetMetadataFile(TinyThingWriter* tinything, const char* filepath){
+	tinything->setMetadataFile(filepath);
+}
+
+extern "C"
+bool Zip(TinyThingWriter* tinything){
+    return tinything->zip();
+}
+
+
+
+
 }

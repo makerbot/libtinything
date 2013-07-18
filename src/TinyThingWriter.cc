@@ -3,21 +3,59 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <string>
 
 namespace LibTinyThing {
 
 
-	bool TinyThingWriter::addMetadataFile(const std::string& filePath){
-		return addFile(METADATA_FILENAME, filePath);
+	void TinyThingWriter::setMetadataFile(const std::string& filePath){
+		m_metadataFilePath = filePath;
 	}
 
-	bool TinyThingWriter::addThumbnailFile(const std::string& filePath){
-		return addFile(THUMBNAIL_FILENAME, filePath);
+	void TinyThingWriter::setThumbnailFile(const std::string& filePath){
+		m_thumbnailFilePath = filePath;
 	}
 
-	bool TinyThingWriter::addToolpathFile(const std::string& filePath){
-		return addFile(TOOLPATH_FILENAME, filePath);
+	void TinyThingWriter::setToolpathFile(const std::string& filePath){
+		m_toolpathFilePath = filePath;
 	}
+
+	bool TinyThingWriter::zip(){
+
+		// we need a toolpath file
+		if(m_toolpathFilePath.empty()){
+			std::cout << "ERROR: No toolpath file" << std::endl;
+			return false;
+		}
+		if (!addFile(TOOLPATH_FILENAME, m_toolpathFilePath, true))
+			return false;
+
+
+		// add metadata if it is set
+		if (!m_metadataFilePath.empty()){
+			if(!addFile(METADATA_FILENAME, m_metadataFilePath, false)){
+				std::cout << "could not add metadata" << std::endl;
+				return false;
+			}
+		} else {
+			std::cout << "skipping metadata, not specified" << std::endl;
+		}
+
+		// add metadata if it is set
+		if (!m_toolpathFilePath.empty()){
+			if(!addFile(THUMBNAIL_FILENAME, m_thumbnailFilePath, false)){
+				std::cout << "could not add thumbnail" << std::endl;
+				return false;
+			}
+		} else {
+			std::cout << "skipping thumbnail, not specified" << std::endl;
+		}
+
+		return true;
+
+	}
+
+
 
 	bool TinyThingWriter::addFile(const std::string& fileName,
 				 const std::string& filePath, bool createZip) {
@@ -79,8 +117,6 @@ namespace LibTinyThing {
 
 	}
 
-    //bool zip(){
-    //}
 
 	const std::string TinyThingWriter::METADATA_FILENAME = "meta.json";
 	const std::string TinyThingWriter::THUMBNAIL_FILENAME = "thumbnail.png";

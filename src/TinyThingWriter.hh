@@ -11,15 +11,18 @@ namespace LibTinyThing {
 	class TinyThingWriter {
 	public:
 
-		TinyThingWriter(const std::string& filePath) : m_filePath(filePath) {}
+		TinyThingWriter(const std::string& filePath) : m_filePath(filePath),
+			m_metadataFilePath(""),
+			m_toolpathFilePath(""),
+			m_thumbnailFilePath("") {}
 
-		~TinyThingWriter();
+		~TinyThingWriter() {};
 
-		// these functions add a file into the tinything,
-		// but need some work 
-		bool addThumbnailFile(const std::string& filePath);
-		bool addToolpathFile(const std::string& filePath);
-		bool addMetadataFile(const std::string& filePath);
+		void setThumbnailFile(const std::string& filePath);
+		void setToolpathFile(const std::string& filePath);
+		void setMetadataFile(const std::string& filePath);
+
+		bool zip();
 
 		static const std::string METADATA_FILENAME;
 		static const std::string THUMBNAIL_FILENAME;
@@ -28,10 +31,13 @@ namespace LibTinyThing {
 	private:
 
 		const std::string m_filePath;
+		std::string m_metadataFilePath;
+		std::string m_toolpathFilePath;
+		std::string m_thumbnailFilePath;
 
 		bool addFile(const std::string& fileName, 
                      const std::string& filePath, 
-                     bool createNew = 1);
+                     bool createNew);
 
 
 
