@@ -25,26 +25,27 @@ Here is an example of extracting a jsontoolpath using the python bindings
 
     from ctypes import *
     libtt = CDLL("/home/paul/libtinything/lib/libtinything.so")
-    tt = libtt.NewTinyThing("/home/paul/test.tinything")
+    tt = libtt.NewTinyThingReader("/home/paul/test.tinything")
     libtt.UnzipToolpath(tinything) # 1 = success, 0 = failed
     libtt.GetToolpath.restype=c_char_p
     libtt.GetToolpath(tinything)
-
-Here is an example of creating a jsontoolpath using the python bindings
-
-    from ctypes import *
-    libtt = CDLL("/home/paul/libtinything/lib/libtinything.so")
-    tt = libtt.NewTinyThing("/home/paul/test.tinything")
-    libtt.AddMetadata(tt, "/home/paul/meta.json")
-    libtt.AddThumbnail(tt, "/home/paul/Firefox_wallpaper.png")
-    libtt.AddToolpath(tt, "/home/paul/meta.json")
 
 
 Here is an example of incrementally reading a toolpath
 
     from ctypes import *
     libtt = CDLL("/home/paul/libtinything/lib/libtinything.so")
-    tt = libtt.NewTinyThing("/home/paul/test.tinything")   
+    tt = libtt.NewTinyThingReader("/home/paul/test.tinything")   
     libtinything.GetToolpathIncr.restype=c_char_p
     libtinything.GetToolpathIncr(tt,10)
     libtinything.GetToolpathIncr(tt,20)
+
+Here is an example of creating a tinything
+
+    from ctypes import *
+    libtt = CDLL("/home/paul/libtinything/lib/libtinything.so")
+    tt = libtt.NewTinyThingWriter("/home/paul/test.tinything")
+    libtt.SetMetadataFile(tt, "/home/paul/meta.txt")
+    libtt.SetThumbnailFile(tt, "/home/paul/Firefox_wallpaper.png")
+    libtt.SetToolpathFile(tt, "/home/paul/meta.txt")
+    libtt.Zip(tt)
