@@ -37,8 +37,8 @@ Here is an example of incrementally reading a toolpath
     libtt = CDLL("/home/paul/libtinything/lib/libtinything.so")
     tt = libtt.NewTinyThingReader("/home/paul/test.tinything")   
     libtinything.GetToolpathIncr.restype=c_char_p
-    libtinything.GetToolpathIncr(tt,10)
-    libtinything.GetToolpathIncr(tt,20)
+    libtinything.GetToolpathIncr(tt,10) # get the first 10 characters
+    libtinything.GetToolpathIncr(tt,20) # get the next 20..
 
 Here is an example of creating a tinything
 
@@ -47,5 +47,5 @@ Here is an example of creating a tinything
     tt = libtt.NewTinyThingWriter("/home/paul/test.tinything")
     libtt.SetMetadataFile(tt, "/home/paul/meta.txt")
     libtt.SetThumbnailFile(tt, "/home/paul/Firefox_wallpaper.png")
-    libtt.SetToolpathFile(tt, "/home/paul/meta.txt")
+    libtt.SetToolpathFile(tt, "/home/paul/toolpath.json")
     libtt.Zip(tt)
