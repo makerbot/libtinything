@@ -14,7 +14,7 @@ To install to local /usr/lib run:
 To cross compile and install to the /usr/lib of a NFS run:
 `scons --embedded --nfs=/path/to/nfs/root`
 
-Run `scons install` to copy the compiled library to the appropriate directory.
+Add ` install` to the end of either scons call to copy the compiled library to the appropriate directory.
 
 Note: zlib is required to be present as a sibling directory to libtinything
 
