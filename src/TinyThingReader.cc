@@ -86,8 +86,6 @@ namespace LibTinyThing {
 
         m_toolpathPos = 0;
 
-        std::cout << "Reset toolpath" << std::endl;
-
         if (m_toolpathFile != NULL) unzClose(m_toolpathFile);
 
         m_toolpathFile = unzOpen(m_filePath.c_str());
@@ -111,20 +109,14 @@ namespace LibTinyThing {
 
         if (m_toolpathFile == NULL) resetToolpath();
 
-        std::cout << "At character " << m_toolpathPos << " of " << m_toolpathSize << std::endl;
-
         int chars_to_read = chars;
         if (m_toolpathPos >= m_toolpathSize) {
-            // end of file
-            std::cout << "At end of file" << std::endl;
+            // at end of file
             return "";
         } else if ((m_toolpathPos + chars) > m_toolpathSize) {
-            // getting to end of file
-            std::cout << "Reached end of file" << std::endl;
+            // reached end of file
             chars_to_read = m_toolpathSize - m_toolpathPos;
         }
-
-        std::cout << "Reading " << chars_to_read << " characters" << std::endl;
 
         m_toolpathPos += chars_to_read;
 

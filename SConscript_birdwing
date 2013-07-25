@@ -4,7 +4,7 @@ env = Environment(ENV = os.environ)
 
 paths = {
     'json-cpp'  : '../json-cpp',
-    'zlib' : '../zlib-1.2.7/'
+    'zlib' : '../zlib-1.2.8/'
     }
 
 BWROOTFS=GetOption('rootfs')
@@ -32,7 +32,7 @@ cpp_path = [
 
 library_paths = [
     paths['json-cpp'] + '/obj',
-    paths['zlib'] 
+    BWROOTFS+'/usr/lib'
     ]
 
 runtime_paths = [

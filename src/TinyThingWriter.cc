@@ -71,8 +71,6 @@ namespace LibTinyThing {
 		if (!zip)
 			return false;
 
-		std::cout << "Opened!" << std::endl;
-
 		zip_fileinfo zi;
 
 		// Set date and time
@@ -112,7 +110,7 @@ namespace LibTinyThing {
 
 		zipWriteInFileInZip(zip, memblock.data(), size);
 
-		zipClose(zip, "MakerBot Tinything file");
+		zipClose(zip, "MakerBot file");
 		return true;
 
 	}

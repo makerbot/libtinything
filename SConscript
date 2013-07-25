@@ -4,7 +4,7 @@ env = Environment(ENV = os.environ)
 
 paths = {
     'json-cpp'  : '../json-cpp/',
-    'zlib' : '../zlib-1.2.7/'
+    'zlib' : '../zlib-1.2.8/'
     }
 
 install_dir = ARGUMENTS.get('install_dir', '/usr/lib') 
