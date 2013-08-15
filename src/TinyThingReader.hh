@@ -31,8 +31,10 @@ namespace LibTinyThing {
 		std::string getThumbnailFileContents();
 		std::string getToolpathFileContents();
 
+		// checks to see if toolpath is present
+		bool hasJsonToolpath();
+
 		// checks to see if all files are present
-		// TODO: implement multiple levels of validity?
 		bool isValid();
 
         // incremental unzipping of toolpath

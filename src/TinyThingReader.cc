@@ -33,6 +33,20 @@ namespace LibTinyThing {
 		return m_toolpathFileContents;
 	}
 
+	bool TinyThingReader::hasJsonToolpath(){
+		unzFile tinyThingFile = unzOpen(m_filePath.c_str());
+
+		bool isValid = (tinyThingFile != NULL &&
+				unzLocateFile(tinyThingFile, TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
+				unzOpenCurrentFile(tinyThingFile) == UNZ_OK);
+
+		if (tinyThingFile != NULL)
+			unzClose(tinyThingFile);
+
+		return isValid;
+	}
+
+
 	bool TinyThingReader::isValid(){
 		unzFile tinyThingFile = unzOpen(m_filePath.c_str());
 
