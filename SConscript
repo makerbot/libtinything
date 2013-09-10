@@ -2,7 +2,7 @@
 
 import os
 
-env = Environment(ENV = os.environ, tools=['default', 'birdwing_install'], toolpath=[Dir('../../../')])
+env = Environment(ENV = os.environ, tools=['default', 'birdwing_install'])
 
 env.BWSetCompilerToGcc()
 
