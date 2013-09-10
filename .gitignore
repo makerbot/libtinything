@@ -1,5 +1,6 @@
-lib/*
+obj/*
 *.tinything
 *~
 .sconsign.dblite
 *.os
+*.swp
