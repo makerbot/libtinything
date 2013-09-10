@@ -1,44 +1,17 @@
+# vim:ai:et:ff=unix:fileencoding=utf-8:sw=4:syntax=python:ts=4:
+
 import os
 
-env = Environment(ENV = os.environ)
+env = Environment(ENV = os.environ, tools=['default', 'birdwing_install'], toolpath=[Dir('../../../')])
 
-paths = {
-    'json-cpp'  : '../json-cpp/',
-    'zlib' : '../zlib-1.2.8/'
-    }
+env.BWDependsOnJsonCpp()
+env.BWDependsOnZlib()
 
-install_dir = ARGUMENTS.get('install_dir', '/usr/lib') 
-
-env['CCFLAGS'] = [
-    '-Wall',
-    '-D__DEBUG'
-    ]
-
-cpp_path = [
-    'src',
-    paths['zlib'],
-    paths['json-cpp'] + '/include'
-    
-]
-
-library_paths = [
-    paths['zlib'],
-    paths['json-cpp'] + '/obj'
-    ]
-
-runtime_paths = [
-    '/usr/lib'
-]
-
-libraries = [
-    'z',
-    'jsoncpp'
-    ]
-
-
+env.Append(CPPPATH = ['include/jsoncpp'])
 source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c')
 
-env['CPPPATH'] = cpp_path
+env.Clean(libjson, '#/obj')
 
-tinything = env.SharedLibrary("lib/tinything", source_files, LIBS=libraries, LIBPATH=library_paths, RPATH=runtime_paths)
-Alias("install", env.Install(install_dir, tinything))
+ltinything = env.SharedLibrary('lib/tinything', source_files)
+env.BWInstalLibarary(ltinything)
+

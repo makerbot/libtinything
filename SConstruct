@@ -1,8 +1,2 @@
-AddOption('--embedded', action='store_true', dest='embedded')
-AddOption('--nfs', dest='rootfs',  type='string', nargs=1, action='store')
 
-if GetOption('embedded'):
-    SConscript('SConscript_birdwing', duplicate=1)
-else:
-    SConscript('SConscript', duplicate=1)
-
+SConscript('SConscript', variant_dir='obj/', duplicate=1)
