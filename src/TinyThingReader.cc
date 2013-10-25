@@ -67,6 +67,7 @@ namespace LibTinyThing {
 				   std::string &output) {
 
 		unzFile tinyThingFile = unzOpen(m_filePath.c_str());
+        bool retval = false;
 
 		if (tinyThingFile != NULL   &&
 			unzLocateFile(tinyThingFile, fileName.c_str(), 0) == UNZ_OK &&
@@ -82,15 +83,16 @@ namespace LibTinyThing {
 				if (unzReadCurrentFile(tinyThingFile,
 						const_cast<char*>(output.c_str()),
 						fileInfo.uncompressed_size)){
-					return true;
+					retval = true;
 				}
 			}
+            unzCloseCurrentFile(tinyThingFile);
 		}
 
 		// Cleanup, if necessary
 		if (tinyThingFile != NULL)
 			unzClose(tinyThingFile);
-		return false;
+		return retval;
 
 	}
 
