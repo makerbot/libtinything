@@ -4,5 +4,5 @@ AddOption('--nfs', dest='rootfs',  type='string', nargs=1, action='store')
 if GetOption('embedded'):
     SConscript('SConscript_birdwing', duplicate=1)
 else:
-    SConscript('SConscript', duplicate=1)
-
+    env = Environment(tools = ['mb_sconstruct'])
+    env.MBSConscript('SConcript')

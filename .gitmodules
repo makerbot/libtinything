@@ -1,0 +1,3 @@
+[submodule "site_scons/site_tools"]
+	path = site_scons/site_tools
+	url = git@github.com:makerbot/mw-scons-tools.git

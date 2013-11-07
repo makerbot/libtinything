@@ -1,13 +1,13 @@
 import os
 
-env = Environment(ENV = os.environ)
+env = Environment(
+  ENV = os.environ,
+  tools=['default', 'mb_install'])
 
 paths = {
     'json-cpp'  : '../json-cpp/',
     'zlib' : '../zlib-1.2.8/'
     }
-
-install_dir = ARGUMENTS.get('install_dir', '/usr/lib') 
 
 env['CCFLAGS'] = [
     '-Wall',
@@ -16,19 +16,21 @@ env['CCFLAGS'] = [
 
 cpp_path = [
     'src',
-    paths['zlib'],
-    paths['json-cpp'] + '/include'
-    
+    paths['zlib']
 ]
+
+env.MBDependsOnJsonCpp()
 
 library_paths = [
-    paths['zlib'],
-    paths['json-cpp'] + '/obj'
+    paths['zlib']
     ]
 
-runtime_paths = [
-    '/usr/lib'
-]
+if env.MBIsWindows():
+  runtime_paths = []
+else:
+  runtime_paths = [
+      '/usr/lib'
+  ]
 
 libraries = [
     'z',
@@ -40,5 +42,6 @@ source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c')
 
 env['CPPPATH'] = cpp_path
 
-tinything = env.SharedLibrary("lib/tinything", source_files, LIBS=libraries, LIBPATH=library_paths, RPATH=runtime_paths)
-Alias("install", env.Install(install_dir, tinything))
+tinything = env.MBSharedLibrary("tinything", source_files, LIBS=libraries, LIBPATH=library_paths, RPATH=runtime_paths)
+
+env.MBInstallLib(tinything, 'tinything')
