@@ -8,7 +8,7 @@
 
 namespace LibTinyThing {
 
-	class TinyThingReader {
+	class TINYTHING_API TinyThingReader {
 	public:
 
 		TinyThingReader(const std::string& filePath) : m_filePath(filePath),
