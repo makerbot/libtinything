@@ -24,8 +24,6 @@ else:
 
 source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c') + Glob('src/zlib/*.c')
 
-print [str(file) for file in source_files]
-
 tinything = env.MBSharedLibrary("tinything", source_files, RPATH=runtime_paths)
 
 env.MBInstallLib(tinything, 'tinything')
