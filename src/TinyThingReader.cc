@@ -1,4 +1,4 @@
-#include "TinyThingReader.hh"
+#include "tinything/TinyThingReader.hh"
 #include "TinyThingWriter.hh"
 #include <ios>
 #include <fstream>
@@ -23,7 +23,7 @@ namespace LibTinyThing {
 		return unzipFile(TinyThingWriter::TOOLPATH_FILENAME, m_toolpathFileContents);
 	}
 
-	std::string TinyThingReader::getMetadataFileContents(){    
+	std::string TinyThingReader::getMetadataFileContents(){
 		return m_metadataFileContents;
 	}
 	std::string TinyThingReader::getThumbnailFileContents(){

@@ -5,4 +5,4 @@ if GetOption('embedded'):
     SConscript('SConscript_birdwing', duplicate=1)
 else:
     env = Environment(tools = ['mb_sconstruct'])
-    env.MBSConscript('SConcript')
+    env.MBSConscript('SConscript')
