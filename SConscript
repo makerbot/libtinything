@@ -11,7 +11,6 @@ env.MBAddIncludePaths('src/miniunzip')
 env.MBAddIncludePaths('src/zlib')
 
 env.MBAddStandardCompilerFlags()
-# env.Append(CPPDEFINES = ["__DEBUG"])
 
 env.MBDependsOnJsonCpp()
 
