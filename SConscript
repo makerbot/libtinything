@@ -29,3 +29,6 @@ print [str(file) for file in source_files]
 tinything = env.MBSharedLibrary("tinything", source_files, RPATH=runtime_paths)
 
 env.MBInstallLib(tinything, 'tinything')
+env.MBInstallHeaders(env.MBGlob('#/include/tinything/*'), 'tinything')
+
+env.MBCreateInstallTarget()
