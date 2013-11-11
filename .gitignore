@@ -4,3 +4,5 @@ lib/*
 .sconsign.dblite
 *.os
 /obj/
+*.vcxproj
+*_version.rc
