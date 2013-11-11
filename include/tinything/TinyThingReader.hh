@@ -2,17 +2,15 @@
 #ifndef TINYTHINGREADER_HH_
 #define TINYTHINGREADER_HH_
 
+#include <memory>
 #include <string>
-#include "tinything/unzip.h"
-#include "tinything/zip.h"
 
 namespace LibTinyThing {
 
 	class TINYTHING_API TinyThingReader {
 	public:
 
-		TinyThingReader(const std::string& filePath) : m_filePath(filePath),
-			m_toolpathFile(NULL), m_toolpathSize(0), m_toolpathPos(0) {}
+        TinyThingReader(const std::string& filePath);
 
 		~TinyThingReader();
 
@@ -42,27 +40,11 @@ namespace LibTinyThing {
         std::string getToolpathIncr(const int chars);
 
 	private:
-
-		bool unzipFile(const std::string& fileName,
-				  	   std::string &output);
-
-		const std::string m_filePath;
-
-		std::string m_toolpathFileContents;
-		std::string m_thumbnailFileContents;
-		std::string m_metadataFileContents;
-
-        // variables to support incremental toolpath unzipping
-        unzFile m_toolpathFile;
-        int m_toolpathSize;
-        int m_toolpathPos;
+        class Private;
+        std::unique_ptr<Private> m_private;
 	};
 
 }
 
 
 #endif /* TINYTHINGREADER_HH_ */
-
-
-
-
