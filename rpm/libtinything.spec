@@ -30,7 +30,7 @@ if [ ! -d %{buildroot}/%{_libdir} ]; then
 fi
 
 %files
-%{_libdir}/*
+%{_libdir}/lib*
 
 
 %package devel
