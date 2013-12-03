@@ -3,6 +3,10 @@ lib/*
 *~
 .sconsign.dblite
 *.os
+*.so
+*.o
 /obj/
 *.vcxproj
 *_version.rc
+
+nbproject
