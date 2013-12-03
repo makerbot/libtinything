@@ -1,11 +1,70 @@
 #include "tinything/TinyThingReader.hh"
 #include "TinyThingWriter.hh"
+#include <string>
 #include <ios>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
 namespace LibTinyThing {
+
+/**
+ * @brief A simple class that makes sure miniunzip handles get closed
+ * when they go out of scope. This base holds an arbitrary handle type
+ * and a function or function object to close it on destruction
+ */
+template <typename VALUE_TYPE, typename CLOSE_FUNC>
+class basic_unz_holder {
+public:
+    typedef VALUE_TYPE value_type;
+    typedef CLOSE_FUNC close_func;
+    typedef basic_unz_holder<value_type, close_func> basic_unz_holder_;
+    explicit basic_unz_holder(
+            const value_type& vt = nullptr, 
+            const close_func& cf = close_func())
+            : m_value(vt), m_closer(cf) {}
+    basic_unz_holder(basic_unz_holder_&& other)
+            : m_value(std::move(other.m_value)), 
+            m_closer(std::move(other.m_closer)) {
+        other.m_value = nullptr;
+    }
+    ~basic_unz_holder() {
+        m_closer(m_value);
+    }
+    basic_unz_holder_& operator =(basic_unz_holder_&& rhs) {
+        m_closer(m_value);
+        m_value = std::move(rhs.m_value);
+        m_closer = std::move(rhs.m_closer);
+        rhs.m_value = nullptr;
+        return *this;
+    }
+    basic_unz_holder(const basic_unz_holder_&) = delete;
+    basic_unz_holder& operator =(const basic_unz_holder_&) = delete;
+    value_type& get() { return m_value; }
+    const value_type& get() const { return m_value; }
+private:
+    value_type m_value;
+    close_func m_closer;
+};
+
+void safelyClose(unzFile f) {
+    if(nullptr != f) {
+        unzClose(f);
+    }
+}
+
+void safelyCloseCurrent(unzFile f) {
+    if(nullptr != f) {
+        unzCloseCurrentFile(f);
+    }
+}
+
+template <typename VALUE_TYPE, typename CLOSE_FUNC>
+basic_unz_holder<VALUE_TYPE, CLOSE_FUNC> make_unz_holder(
+        const VALUE_TYPE& vt, const CLOSE_FUNC& cf) {
+    return basic_unz_holder<VALUE_TYPE, CLOSE_FUNC>(vt, cf);
+}
+
 class TinyThingReader::Private {
  public:
   Private(const std::string& filePath)
@@ -18,31 +77,30 @@ class TinyThingReader::Private {
   bool unzipFile(
       const std::string& fileName,
       std::string &output) {
+      auto tinyThingFileHolder = make_unz_holder(unzOpen(m_filePath.c_str()),
+              &safelyClose);
 
-    unzFile tinyThingFile = unzOpen(m_filePath.c_str());
-
-    if (tinyThingFile != NULL   &&
-        unzLocateFile(tinyThingFile, fileName.c_str(), 0) == UNZ_OK &&
-        unzOpenCurrentFile(tinyThingFile) == UNZ_OK) {
-
+    if (tinyThingFileHolder.get() != NULL   &&
+        unzLocateFile(tinyThingFileHolder.get(), 
+            fileName.c_str(), 0) == UNZ_OK &&
+        unzOpenCurrentFile(tinyThingFileHolder.get()) == UNZ_OK) {
+        auto currentThingHolder = make_unz_holder(tinyThingFileHolder.get(),
+                &safelyCloseCurrent);
       unz_file_info fileInfo;
 
-      if (unzGetCurrentFileInfo(tinyThingFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+      if (unzGetCurrentFileInfo(tinyThingFileHolder.get(), 
+              &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
 
         // Create a buffer large enough to hold the uncompressed file
         output.resize(fileInfo.uncompressed_size);
 
-        if (unzReadCurrentFile(tinyThingFile,
+        if (unzReadCurrentFile(tinyThingFileHolder.get(),
                                const_cast<char*>(output.c_str()),
                                fileInfo.uncompressed_size)){
           return true;
         }
       }
     }
-
-    // Cleanup, if necessary
-    if (tinyThingFile != NULL)
-      unzClose(tinyThingFile);
     return false;
 
   }
@@ -90,30 +148,35 @@ TinyThingReader::TinyThingReader(const std::string& filePath)
 	}
 
 	bool TinyThingReader::hasJsonToolpath(){
-		unzFile tinyThingFile = unzOpen(m_private->m_filePath.c_str());
-
-		bool isValid = (tinyThingFile != NULL &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzOpenCurrentFile(tinyThingFile) == UNZ_OK);
-
-		if (tinyThingFile != NULL)
-			unzClose(tinyThingFile);
-
+		auto tinyThingFileHolder = make_unz_holder(
+                unzOpen(m_private->m_filePath.c_str()), &safelyClose);
+		bool isValid = (tinyThingFileHolder.get() != NULL &&
+				unzLocateFile(tinyThingFileHolder.get(), 
+                TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK);
+        if(isValid) {
+            auto currentFileHolder = make_unz_holder(
+                    tinyThingFileHolder.get(), &safelyCloseCurrent);
+            isValid = unzOpenCurrentFile(tinyThingFileHolder.get()) == UNZ_OK;
+        }
 		return isValid;
 	}
 
 
 	bool TinyThingReader::isValid(){
-		unzFile tinyThingFile = unzOpen(m_private->m_filePath.c_str());
-
-		bool isValid = (tinyThingFile != NULL &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::METADATA_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::THUMBNAIL_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzOpenCurrentFile(tinyThingFile) == UNZ_OK);
-
-		if (tinyThingFile != NULL)
-			unzClose(tinyThingFile);
+        auto tinyThingFileHolder = make_unz_holder(
+                unzOpen(m_private->m_filePath.c_str()), &safelyClose);
+		bool isValid = (tinyThingFileHolder.get() != NULL &&
+				unzLocateFile(tinyThingFileHolder.get(), 
+                TinyThingWriter::METADATA_FILENAME.c_str(), 0) == UNZ_OK &&
+				unzLocateFile(tinyThingFileHolder.get(),
+                TinyThingWriter::THUMBNAIL_FILENAME.c_str(), 0) == UNZ_OK &&
+				unzLocateFile(tinyThingFileHolder.get(),
+                TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK);
+        if(isValid) {
+            auto currentFileHolder = make_unz_holder(
+                    tinyThingFileHolder.get(), &safelyCloseCurrent);
+            isValid = unzOpenCurrentFile(tinyThingFileHolder.get()) == UNZ_OK;
+        }
 
 		return isValid;
 	}
@@ -128,14 +191,17 @@ TinyThingReader::TinyThingReader(const std::string& filePath)
         m_private->m_toolpathFile = unzOpen(m_private->m_filePath.c_str());
 
 		if (m_private->m_toolpathFile != NULL   &&
-			unzLocateFile(m_private->m_toolpathFile, TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
-			unzOpenCurrentFile(m_private->m_toolpathFile) == UNZ_OK) {
-
-			unz_file_info fileInfo;
-
-			if (unzGetCurrentFileInfo(m_private->m_toolpathFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
-                m_private->m_toolpathSize = fileInfo.uncompressed_size;
-                return true;
+			unzLocateFile(m_private->m_toolpathFile, 
+            TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK ){
+            auto currentFileHolder = make_unz_holder(
+                    m_private->m_toolpathFile, &safelyCloseCurrent);
+            if(unzOpenCurrentFile(m_private->m_toolpathFile) == UNZ_OK) {
+                unz_file_info fileInfo;
+                if (unzGetCurrentFileInfo(m_private->m_toolpathFile, 
+                        &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+                    m_private->m_toolpathSize = fileInfo.uncompressed_size;
+                    return true;
+                }
             }
         }
         return false;        
