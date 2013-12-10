@@ -12,7 +12,7 @@ env.BWAddIncludePath('include')
 env.BWAddIncludePath('src/miniunzip')
 env.BWAddIncludePath('src/zlib')
 
-
+env.Append(CPPDEFINES={'TINYTHING_API': ''})
 
 source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c') + Glob('src/zlib/*c')
 
