@@ -50,7 +50,6 @@ const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes){
     return tinything->getToolpathIncr(bytes).c_str();
 }
 
-
 // WRITER FUNCTIONS
 
 extern "C"
@@ -71,8 +70,8 @@ void SetToolpathFile(TinyThingWriter* tinything, const char* filepath){
 }
 
 extern "C"
-void SetThumbnailFile(TinyThingWriter* tinything, const char* filepath){
-	tinything->setThumbnailFile(filepath);
+void SetThumbnailDirectory(TinyThingWriter* tinything, const char* filedir){
+	tinything->setThumbnailDirectory(filedir);
 }
 
 extern "C"
@@ -84,8 +83,5 @@ extern "C"
 bool Zip(TinyThingWriter* tinything){
     return tinything->zip();
 }
-
-
-
 
 }

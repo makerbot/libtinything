@@ -16,17 +16,20 @@ namespace LibTinyThing {
 
 		// these functions unzip the contents of each of these files,
 		// and cache them in memory. they return true if the unzip is
-		// succesful 
+		// succesful
 		bool unzipMetadataFile();
-		bool unzipThumbnailFile();
+		bool unzipSmallThumbnailFile();
+		bool unzipMediumThumbnailFile();
+		bool unzipLargeThumbnailFile();
 		bool unzipToolpathFile();
 
-
-		// these are accessors for the unzipped contents of each of the 
+		// these are accessors for the unzipped contents of each of the
 		// files. they should only be called after each has been
-		// unzipped 
+		// unzipped
 		std::string getMetadataFileContents();
-		std::string getThumbnailFileContents();
+		std::string getSmallThumbnailFileContents();
+		std::string getMediumThumbnailFileContents();
+		std::string getLargeThumbnailFileContents();
 		std::string getToolpathFileContents();
 
 		// checks to see if toolpath is present

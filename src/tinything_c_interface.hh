@@ -30,8 +30,6 @@ bool ResetToolpath(TinyThingReader* tinything);
 extern "C"
 const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes);
 
-
-
 // WRITER FUNCTIONS
 
 extern "C"
@@ -44,7 +42,7 @@ extern "C"
 void SetToolpathFile(TinyThingWriter* tinything, const char* filepath);
 
 extern "C"
-void SetThumbnailFile(TinyThingWriter* tinything, const char* filepath);
+void setThumbnailDirectory(TinyThingWriter* tinything, const char* filedir);
 
 extern "C"
 void SetMetadataFile(TinyThingWriter* tinything, const char* filepath);
@@ -52,7 +50,4 @@ void SetMetadataFile(TinyThingWriter* tinything, const char* filepath);
 extern "C"
 bool Zip(TinyThingWriter* tinything);
 
-
 }
-
-

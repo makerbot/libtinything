@@ -1,125 +1,153 @@
-#include "TinyThingWriter.hh"
 
-#include <ctime>
 #include <ios>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <string>
 
+#include "tinything/TinyThingWriter.hh"
+#include "tinything/TinyThingConstants.hh"
+#include "tinything/unzip.h"
+#include "tinything/zip.h"
+
 namespace LibTinyThing {
 
+class TinyThingWriter::Private {
+public:
+    Private(const std::string &filePath) :
+        m_filePath(filePath) {
+    }
 
-	void TinyThingWriter::setMetadataFile(const std::string& filePath){
-		m_metadataFilePath = filePath;
-	}
+    bool addFile(const std::string& fileName,
+                 const std::string& filePath,
+                 bool compress, bool createZip) {
 
-	void TinyThingWriter::setThumbnailFile(const std::string& filePath){
-		m_thumbnailFilePath = filePath;
-	}
+        std::cout << "INFO: Adding " << filePath << " to "
+            << m_filePath << " as " << fileName << std::endl;
 
-	void TinyThingWriter::setToolpathFile(const std::string& filePath){
-		m_toolpathFilePath = filePath;
-	}
+        int append_status = APPEND_STATUS_ADDINZIP;
+        if (createZip) {
+            append_status = APPEND_STATUS_CREATE;
+        }
 
-	bool TinyThingWriter::zip(){
+        zipFile zip(zipOpen(m_filePath.c_str(), append_status));
+        if (!zip)
+            return false;
 
-		// we need a toolpath file
-		if(m_toolpathFilePath.empty()){
-			std::cout << "ERROR: No toolpath file" << std::endl;
-			return false;
-		}
-		if (!addFile(TOOLPATH_FILENAME, m_toolpathFilePath, true))
-			return false;
+        zip_fileinfo zi;
 
+        // Set date and time
+        const time_t curTime(time(NULL));
+        struct tm localTime;
+        localTime = *localtime(&curTime);
+        zi.tmz_date.tm_sec = localTime.tm_sec;
+        zi.tmz_date.tm_min = localTime.tm_min;
+        zi.tmz_date.tm_hour = localTime.tm_hour;
+        zi.tmz_date.tm_mday = localTime.tm_mday;
+        zi.tmz_date.tm_mon = localTime.tm_mon;
+        zi.tmz_date.tm_year = localTime.tm_year;
 
-		// add metadata if it is set
-		if (!m_metadataFilePath.empty()){
-			if(!addFile(METADATA_FILENAME, m_metadataFilePath, false)){
-				std::cout << "could not add metadata" << std::endl;
-				return false;
-			}
-		} else {
-			std::cout << "skipping metadata, not specified" << std::endl;
-		}
+        zi.dosDate = 0;
+        zi.internal_fa = 0;
+        zi.external_fa = 0;
 
-		// add metadata if it is set
-		if (!m_toolpathFilePath.empty()){
-			if(!addFile(THUMBNAIL_FILENAME, m_thumbnailFilePath, false)){
-				std::cout << "could not add thumbnail" << std::endl;
-				return false;
-			}
-		} else {
-			std::cout << "skipping thumbnail, not specified" << std::endl;
-		}
+        const int compression = compress ? Z_DEFAULT_COMPRESSION : 0;
 
-		return true;
+        zipOpenNewFileInZip(zip, fileName.c_str(), &zi,
+                            NULL, 0, NULL, 0, NULL,
+                            Z_DEFLATED, compression);
 
-	}
+        // TODO(pshaw): dont load entire file into memory
+        std::ifstream file(filePath.c_str(), std::ios::in|std::ios::ate);
+        if (!file.is_open())
+            return false;
 
+        std::ifstream::pos_type size = file.tellg();
 
+        std::vector<char> memblock;
+        memblock.resize(size);
+        file.seekg(0, std::ios::beg);
+        file.read(memblock.data(), size);
+        file.close();
 
-	bool TinyThingWriter::addFile(const std::string& fileName,
-				 const std::string& filePath, bool createZip) {
+        zipWriteInFileInZip(zip, memblock.data(), size);
 
-		std::cout << "Adding " << filePath << " to " << m_filePath << " as " << fileName << std::endl;
+        zipClose(zip, "MakerBot file");
+        return true;
+    }
 
-		int append_status = APPEND_STATUS_ADDINZIP;
-	    if (createZip) {
-	    	append_status = APPEND_STATUS_CREATE;
-	    }
+    bool zip() {
+        // toolpath file is required
+        if(m_toolpathFilePath.empty()){
+            std::cout << "ERROR: No toolpath file" << std::endl;
+            return false;
+        }
+        if (!addFile(Config::kToolpathFilename, m_toolpathFilePath, true, true))
+            return false;
 
-		zipFile zip(zipOpen(m_filePath.c_str(), append_status));
-		if (!zip)
-			return false;
+        // add metadata if it is set
+        if (!m_metadataFilePath.empty()){
+            if(!addFile(Config::kMetadataFilename, m_metadataFilePath, false, false)){
+                std::cout << "ERROR: could not add metadata" << std::endl;
+                return false;
+            }
+        } else {
+            std::cout << "WARNING: skipping metadata, not specified" << std::endl;
+        }
 
-		zip_fileinfo zi;
+        // add metadata if it is set
+        if (!m_thumbnailDirPath.empty()){
+            if(!addFile(Config::kSmallThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kSmallThumbnailFilename,
+                        false, false)){
+                std::cout << "ERROR: could not add small thumbnail" << std::endl;
+                return false;
+            }
+            if(!addFile(Config::kMediumThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kMediumThumbnailFilename,
+                        false, false)){
+                std::cout << "ERROR: could not add medium thumbnail" << std::endl;
+                return false;
+            }
+            if(!addFile(Config::kLargeThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kLargeThumbnailFilename,
+                        false, false)){
+                std::cout << "ERROR: could not add large thumbnail" << std::endl;
+                return false;
+            }
+        } else {
+            std::cout << "WARNING: kipping thumbnails, not specified" << std::endl;
+        }
 
-		// Set date and time
-		const time_t curTime(time(NULL));
-		struct tm localTime;
-		localTime = *localtime(&curTime);
-		zi.tmz_date.tm_sec = localTime.tm_sec;
-		zi.tmz_date.tm_min = localTime.tm_min;
-		zi.tmz_date.tm_hour = localTime.tm_hour;
-		zi.tmz_date.tm_mday = localTime.tm_mday;
-		zi.tmz_date.tm_mon = localTime.tm_mon;
-		zi.tmz_date.tm_year = localTime.tm_year;
+        return true;
+    }
 
-		zi.dosDate = 0;
-		zi.internal_fa = 0;
-		zi.external_fa = 0;
+    const std::string m_filePath;
+    std::string m_metadataFilePath;
+    std::string m_toolpathFilePath;
+    std::string m_thumbnailDirPath;
+};
 
-		zipOpenNewFileInZip(zip, fileName.c_str(), &zi, NULL, 0, NULL, 0, NULL,
-							Z_DEFLATED, Z_DEFAULT_COMPRESSION);
+TinyThingWriter::TinyThingWriter(const std::string& filePath) :
+    m_private(new Private(filePath)) {
+}
 
-		// TODO: dont load entire file into memory
+TinyThingWriter::~TinyThingWriter() {
+}
 
-		std::ifstream file(filePath.c_str(), std::ios::in|std::ios::ate); // std::ios::binary
-		if (!file.is_open())
-			return false;
+void TinyThingWriter::setMetadataFile(const std::string& filePath){
+    m_private->m_metadataFilePath = filePath;
+}
 
-		std::ifstream::pos_type size = file.tellg();
+void TinyThingWriter::setThumbnailDirectory(const std::string& dirPath){
+    m_private->m_thumbnailDirPath = dirPath;
+}
 
-		std::vector<char> memblock;
-		memblock.resize(size);
-		//char* memblock = new char[size];
-		file.seekg(0, std::ios::beg);
-		file.read(memblock.data(), size);
-		file.close();
+void TinyThingWriter::setToolpathFile(const std::string& filePath){
+    m_private->m_toolpathFilePath = filePath;
+}
 
-		//delete[] memblock;
-
-		zipWriteInFileInZip(zip, memblock.data(), size);
-
-		zipClose(zip, "MakerBot file");
-		return true;
-
-	}
-
-
-	const std::string TinyThingWriter::METADATA_FILENAME = "meta.json";
-	const std::string TinyThingWriter::THUMBNAIL_FILENAME = "thumbnail.png";
-	const std::string TinyThingWriter::TOOLPATH_FILENAME = "print.jsontoolpath";
-
+bool TinyThingWriter::zip(){
+    return m_private->zip();
+}
 }
