@@ -1,151 +1,205 @@
-#include "TinyThingReader.hh"
-#include "TinyThingWriter.hh"
+
 #include <ios>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
+#include "tinything/TinyThingReader.hh"
+#include "tinything/TinyThingConstants.hh"
+#include "miniunzip/unzip.h"
+#include "miniunzip/zip.h"
+
 namespace LibTinyThing {
+class TinyThingReader::Private {
+ public:
+  Private(const std::string& filePath)
+      : m_filePath(filePath),
+        m_toolpathFile(NULL),
+        m_toolpathSize(0),
+        m_toolpathPos(0) {
+  }
 
-    TinyThingReader::~TinyThingReader() {
-	    if (m_toolpathFile != NULL) unzClose(m_toolpathFile);
+  bool unzipFile(
+      const std::string& fileName,
+      std::string &output) {
+
+    unzFile tinyThingFile = unzOpen(m_filePath.c_str());
+    bool retval = false;
+
+    if (tinyThingFile != NULL   &&
+        unzLocateFile(tinyThingFile, fileName.c_str(), 0) == UNZ_OK &&
+        unzOpenCurrentFile(tinyThingFile) == UNZ_OK) {
+
+      unz_file_info fileInfo;
+
+      if (unzGetCurrentFileInfo(tinyThingFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+
+        // Create a buffer large enough to hold the uncompressed file
+        output.resize(fileInfo.uncompressed_size);
+
+        if (unzReadCurrentFile(tinyThingFile,
+                               const_cast<char*>(output.c_str()),
+                               fileInfo.uncompressed_size)) {
+          retval = true;
+        }
+      }
     }
 
-	bool TinyThingReader::unzipMetadataFile() {
-		return unzipFile(TinyThingWriter::METADATA_FILENAME, m_metadataFileContents);
-	}
+    // Cleanup, if necessary
+    if (tinyThingFile != NULL)
+      unzClose(tinyThingFile);
+    return retval;
+  }
 
-	bool TinyThingReader::unzipThumbnailFile() {
-		return unzipFile(TinyThingWriter::THUMBNAIL_FILENAME, m_thumbnailFileContents);
-	}
+  const std::string m_filePath;
 
-	bool TinyThingReader::unzipToolpathFile() {
-		return unzipFile(TinyThingWriter::TOOLPATH_FILENAME, m_toolpathFileContents);
-	}
+  std::string m_toolpathFileContents;
+  std::string m_smallThumbnailFileContents;
+  std::string m_mediumThumbnailFileContents;
+  std::string m_largeThumbnailFileContents;
+  std::string m_metadataFileContents;
 
-	std::string TinyThingReader::getMetadataFileContents(){    
-		return m_metadataFileContents;
-	}
-	std::string TinyThingReader::getThumbnailFileContents(){
-		return m_thumbnailFileContents;
-	}
-	std::string TinyThingReader::getToolpathFileContents(){
-		return m_toolpathFileContents;
-	}
+  // variables to support incremental toolpath unzipping
+  unzFile m_toolpathFile;
+  int m_toolpathSize;
+  int m_toolpathPos;
+};
 
-	bool TinyThingReader::hasJsonToolpath(){
-		unzFile tinyThingFile = unzOpen(m_filePath.c_str());
+TinyThingReader::TinyThingReader(const std::string& filePath)
+    : m_private(new Private(filePath)) {
+}
 
-		bool isValid = (tinyThingFile != NULL &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzOpenCurrentFile(tinyThingFile) == UNZ_OK);
+TinyThingReader::~TinyThingReader() {
+    if (m_private->m_toolpathFile != NULL)
+        unzClose(m_private->m_toolpathFile);
+}
 
-		if (tinyThingFile != NULL)
-			unzClose(tinyThingFile);
+bool TinyThingReader::unzipMetadataFile() {
+    return m_private->unzipFile(
+        Config::kMetadataFilename, m_private->m_metadataFileContents);
+}
 
-		return isValid;
-	}
+bool TinyThingReader::unzipSmallThumbnailFile() {
+    return m_private->unzipFile(
+        Config::kSmallThumbnailFilename, m_private->m_smallThumbnailFileContents);
+}
 
+bool TinyThingReader::unzipMediumThumbnailFile() {
+    return m_private->unzipFile(
+        Config::kMediumThumbnailFilename, m_private->m_mediumThumbnailFileContents);
+}
 
-	bool TinyThingReader::isValid(){
-		unzFile tinyThingFile = unzOpen(m_filePath.c_str());
+bool TinyThingReader::unzipLargeThumbnailFile() {
+    return m_private->unzipFile(
+        Config::kLargeThumbnailFilename, m_private->m_largeThumbnailFileContents);
+}
 
-		bool isValid = (tinyThingFile != NULL &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::METADATA_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::THUMBNAIL_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzLocateFile(tinyThingFile, TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
-				unzOpenCurrentFile(tinyThingFile) == UNZ_OK);
+bool TinyThingReader::unzipToolpathFile() {
+    return m_private->unzipFile(
+        Config::kToolpathFilename, m_private->m_toolpathFileContents);
+}
 
-		if (tinyThingFile != NULL)
-			unzClose(tinyThingFile);
+std::string TinyThingReader::getMetadataFileContents(){
+    return m_private->m_metadataFileContents;
+}
 
-		return isValid;
-	}
+std::string TinyThingReader::getSmallThumbnailFileContents(){
+    return m_private->m_smallThumbnailFileContents;
+}
 
+std::string TinyThingReader::getMediumThumbnailFileContents(){
+    return m_private->m_mediumThumbnailFileContents;
+}
 
-	bool TinyThingReader::unzipFile(const std::string& fileName,
-				   std::string &output) {
+std::string TinyThingReader::getLargeThumbnailFileContents(){
+    return m_private->m_largeThumbnailFileContents;
+}
 
-		unzFile tinyThingFile = unzOpen(m_filePath.c_str());
-        bool retval = false;
+std::string TinyThingReader::getToolpathFileContents(){
+    return m_private->m_toolpathFileContents;
+}
 
-		if (tinyThingFile != NULL   &&
-			unzLocateFile(tinyThingFile, fileName.c_str(), 0) == UNZ_OK &&
-			unzOpenCurrentFile(tinyThingFile) == UNZ_OK) {
+bool TinyThingReader::hasJsonToolpath(){
+    unzFile tinyThingFile = unzOpen(m_private->m_filePath.c_str());
 
-			unz_file_info fileInfo;
+    bool isValid = (
+        tinyThingFile != NULL &&
+        unzLocateFile(tinyThingFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK &&
+        unzOpenCurrentFile(tinyThingFile) == UNZ_OK);
 
-			if (unzGetCurrentFileInfo(tinyThingFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+    if (tinyThingFile != NULL)
+        unzClose(tinyThingFile);
 
-				// Create a buffer large enough to hold the uncompressed file
-				output.resize(fileInfo.uncompressed_size);
+    return isValid;
+}
 
-				if (unzReadCurrentFile(tinyThingFile,
-						const_cast<char*>(output.c_str()),
-						fileInfo.uncompressed_size)){
-					retval = true;
-				}
-			}
-            unzCloseCurrentFile(tinyThingFile);
-		}
+bool TinyThingReader::isValid(){
+    unzFile tinyThingFile = unzOpen(m_private->m_filePath.c_str());
 
-		// Cleanup, if necessary
-		if (tinyThingFile != NULL)
-			unzClose(tinyThingFile);
-		return retval;
+    bool isValid = (
+        tinyThingFile != NULL &&
+        unzLocateFile(tinyThingFile, Config::kMetadataFilename.c_str(), 0) == UNZ_OK &&
+        unzLocateFile(tinyThingFile, Config::kSmallThumbnailFilename.c_str(), 0) == UNZ_OK &&
+        unzLocateFile(tinyThingFile, Config::kMediumThumbnailFilename.c_str(), 0) == UNZ_OK &&
+        unzLocateFile(tinyThingFile, Config::kSmallThumbnailFilename.c_str(), 0) == UNZ_OK &&
+        unzLocateFile(tinyThingFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK &&
+        unzOpenCurrentFile(tinyThingFile) == UNZ_OK);
 
-	}
+    if (tinyThingFile != NULL)
+        unzClose(tinyThingFile);
 
+    return isValid;
+}
 
-    // returns true if succesful
-    bool TinyThingReader::resetToolpath(){
+// returns true if succesful
+bool TinyThingReader::resetToolpath(){
 
-        m_toolpathPos = 0;
+    m_private->m_toolpathPos = 0;
 
-        if (m_toolpathFile != NULL) unzClose(m_toolpathFile);
+    if (m_private->m_toolpathFile != NULL)
+        unzClose(m_private->m_toolpathFile);
 
-        m_toolpathFile = unzOpen(m_filePath.c_str());
+    m_private->m_toolpathFile = unzOpen(m_private->m_filePath.c_str());
 
-		if (m_toolpathFile != NULL   &&
-			unzLocateFile(m_toolpathFile, TinyThingWriter::TOOLPATH_FILENAME.c_str(), 0) == UNZ_OK &&
-			unzOpenCurrentFile(m_toolpathFile) == UNZ_OK) {
+    if (m_private->m_toolpathFile != NULL &&
+        unzLocateFile(m_private->m_toolpathFile,
+            Config::kToolpathFilename.c_str(), 0) == UNZ_OK &&
+        unzOpenCurrentFile(m_private->m_toolpathFile) == UNZ_OK) {
 
-			unz_file_info fileInfo;
+        unz_file_info fileInfo;
 
-			if (unzGetCurrentFileInfo(m_toolpathFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
-                m_toolpathSize = fileInfo.uncompressed_size;
-                return true;
-            }
+        if (unzGetCurrentFileInfo(m_private->m_toolpathFile, &fileInfo,
+                                  NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+            m_private->m_toolpathSize = fileInfo.uncompressed_size;
+            return true;
         }
-        return false;        
+    }
+    return false;
+}
+
+// if length of return string is < bytes, you have reached end of file
+std::string TinyThingReader::getToolpathIncr(const int chars) {
+
+    if (m_private->m_toolpathFile == NULL)
+        resetToolpath();
+
+    int chars_to_read = chars;
+    if (m_private->m_toolpathPos >= m_private->m_toolpathSize) {
+        // at end of file
+        return "";
+    } else if ((m_private->m_toolpathPos + chars) > m_private->m_toolpathSize) {
+        // reached end of file
+        chars_to_read = m_private->m_toolpathSize - m_private->m_toolpathPos;
     }
 
-    // if length of return string is < bytes, you have reached end of file
-    std::string TinyThingReader::getToolpathIncr(const int chars) {
+    m_private->m_toolpathPos += chars_to_read;
 
-        if (m_toolpathFile == NULL) resetToolpath();
+    std::string output;
+    output.resize(chars_to_read);
 
-        int chars_to_read = chars;
-        if (m_toolpathPos >= m_toolpathSize) {
-            // at end of file
-            return "";
-        } else if ((m_toolpathPos + chars) > m_toolpathSize) {
-            // reached end of file
-            chars_to_read = m_toolpathSize - m_toolpathPos;
-        }
-
-        m_toolpathPos += chars_to_read;
-
-        std::string output;
-		output.resize(chars_to_read);
-
-		unzReadCurrentFile(m_toolpathFile,
-			const_cast<char*>(output.c_str()),
-			chars_to_read);
-        return output;
-	}
-
-
-
-
+    unzReadCurrentFile(m_private->m_toolpathFile,
+        const_cast<char*>(output.c_str()),
+        chars_to_read);
+    return output;
+}
 }

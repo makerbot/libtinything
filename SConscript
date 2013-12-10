@@ -7,9 +7,14 @@ env = Environment(ENV = os.environ, tools=['default', 'birdwing_install'])
 env.BWSetCompilerToGcc()
 
 env.BWDependsOnJsonCpp()
-env.BWDependsOnZlib()
 
-source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c')
+env.BWAddIncludePath('include')
+env.BWAddIncludePath('src/miniunzip')
+env.BWAddIncludePath('src/zlib')
+
+
+
+source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c') + Glob('src/zlib/*c')
 
 ltinything = env.SharedLibrary('tinything', source_files)
 env.Clean(ltinything, '#/obj')
