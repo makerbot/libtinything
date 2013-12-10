@@ -6,8 +6,8 @@
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
-#include "tinything/unzip.h"
-#include "tinything/zip.h"
+#include "miniunzip/unzip.h"
+#include "miniunzip/zip.h"
 
 namespace LibTinyThing {
 class TinyThingReader::Private {

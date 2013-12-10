@@ -1,4 +1,7 @@
-#include "tinything_c_interface.hh"
+
+#include "tinything/tinything_c_interface.hh"
+#include "tinything/TinyThingWriter.hh"
+#include "tinything/TinyThingReader.hh"
 
 namespace LibTinyThing {
 

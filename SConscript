@@ -5,8 +5,6 @@ env = Environment(
   tools=['default', 'mb_install'])
 
 env.MBAddIncludePaths('include')
-env.MBAddIncludePaths('include/tinything')
-env.MBAddIncludePaths('src')
 env.MBAddIncludePaths('src/miniunzip')
 env.MBAddIncludePaths('src/zlib')
 

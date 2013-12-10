@@ -5,8 +5,6 @@
 #include <memory>
 #include <string>
 
-#include "tinything/zip.h"
-
 namespace LibTinyThing {
 
 	class TINYTHING_API TinyThingWriter {
