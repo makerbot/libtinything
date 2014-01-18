@@ -117,7 +117,7 @@ public:
                 return false;
             }
         } else {
-            std::cout << "WARNING: kipping thumbnails, not specified" << std::endl;
+            std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }
 
         return true;
