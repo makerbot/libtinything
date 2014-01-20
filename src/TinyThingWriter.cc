@@ -16,7 +16,7 @@ namespace LibTinyThing {
 class TinyThingWriter::Private {
 public:
     Private(const std::string &filePath) :
-        m_filePath(filePath) {
+        m_zipFilePath(filePath) {
     }
 
     bool addFile(const std::string& fileName,
@@ -24,14 +24,14 @@ public:
                  bool compress, bool createZip) {
 
         std::cout << "INFO: Adding " << filePath << " to "
-            << m_filePath << " as " << fileName << std::endl;
+            << m_zipFilePath << " as " << fileName << std::endl;
 
         int append_status = APPEND_STATUS_ADDINZIP;
         if (createZip) {
             append_status = APPEND_STATUS_CREATE;
         }
 
-        zipFile zip(zipOpen(m_filePath.c_str(), append_status));
+        zipFile zip(zipOpen(m_zipFilePath.c_str(), append_status));
         if (!zip)
             return false;
 
@@ -59,7 +59,8 @@ public:
                             Z_DEFLATED, compression);
 
         // TODO(pshaw): dont load entire file into memory
-        std::ifstream file(filePath.c_str(), std::ios::in|std::ios::ate);
+        std::ifstream file(filePath.c_str(), 
+            std::ios::in | std::ios::ate | std::ios::binary);
         if (!file.is_open())
             return false;
 
@@ -123,7 +124,7 @@ public:
         return true;
     }
 
-    const std::string m_filePath;
+    const std::string m_zipFilePath;
     std::string m_metadataFilePath;
     std::string m_toolpathFilePath;
     std::string m_thumbnailDirPath;
