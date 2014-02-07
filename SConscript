@@ -27,3 +27,10 @@ env.MBInstallLib(tinything, 'tinything')
 env.MBInstallHeaders(env.MBGlob('#/include/tinything/*'), 'tinything')
 
 env.MBCreateInstallTarget()
+
+program_env = env.Clone()
+program_env.MBDependsOnTinything()
+writer_program = program_env.MBProgram(
+  target='makerbot_tinything_writer',
+  source=['src/cli/writer.cc'])
+program_env.MBInstallBin(writer_program)
