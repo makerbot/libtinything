@@ -33,4 +33,5 @@ program_env.MBDependsOnTinything()
 writer_program = program_env.MBProgram(
   target='makerbot_tinything_writer',
   source=['src/cli/writer.cc'])
+program_env.Depends(writer_program, libthing)
 program_env.MBInstallBin(writer_program)
