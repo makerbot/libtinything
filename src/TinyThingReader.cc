@@ -61,8 +61,8 @@ class TinyThingReader::Private {
 
   // variables to support incremental toolpath unzipping
   unzFile m_toolpathFile;
-  int m_toolpathSize;
-  int m_toolpathPos;
+  unsigned int m_toolpathSize;
+  unsigned int m_toolpathPos;
 };
 
 TinyThingReader::TinyThingReader(const std::string& filePath)
