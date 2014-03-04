@@ -1,3 +1,9 @@
+libtinything (3.0.0) precise; urgency=low
+
+  * 3.0.0 release
+
+ -- MakerBot Industries dev team <dev@makerbot.com>  Tue, 04 Mar 2014 18:23:28 -0500
+
 libtinything (0.0.0) precise; urgency=low
 
   * Creating changelog starting point
