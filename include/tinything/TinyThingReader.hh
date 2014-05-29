@@ -40,7 +40,7 @@ namespace LibTinyThing {
 
         // incremental unzipping of toolpath
         bool resetToolpath();
-        std::string getToolpathIncr(const int chars);
+        int getToolpathIncr(const int chars, std::string* output);
 
 	private:
         class Private;

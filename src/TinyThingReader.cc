@@ -178,7 +178,9 @@ bool TinyThingReader::resetToolpath(){
 }
 
 // if length of return string is < bytes, you have reached end of file
-std::string TinyThingReader::getToolpathIncr(const int chars) {
+// returns the error code returned by unzReadCurrentFile. the read chars
+// are placed into the string output
+int TinyThingReader::getToolpathIncr(const int chars, std::string* output) {
 
     if (m_private->m_toolpathFile == NULL)
         resetToolpath();
@@ -186,7 +188,8 @@ std::string TinyThingReader::getToolpathIncr(const int chars) {
     int chars_to_read = chars;
     if (m_private->m_toolpathPos >= m_private->m_toolpathSize) {
         // at end of file
-        return "";
+        *output = "";
+        return 0;
     } else if ((m_private->m_toolpathPos + chars) > m_private->m_toolpathSize) {
         // reached end of file
         chars_to_read = m_private->m_toolpathSize - m_private->m_toolpathPos;
@@ -194,12 +197,10 @@ std::string TinyThingReader::getToolpathIncr(const int chars) {
 
     m_private->m_toolpathPos += chars_to_read;
 
-    std::string output;
-    output.resize(chars_to_read);
+    output->resize(chars_to_read);
 
-    unzReadCurrentFile(m_private->m_toolpathFile,
-        const_cast<char*>(output.c_str()),
+    return unzReadCurrentFile(m_private->m_toolpathFile,
+        const_cast<char*>(output->c_str()),
         chars_to_read);
-    return output;
 }
 }

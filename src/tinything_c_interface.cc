@@ -49,8 +49,10 @@ bool ResetToolpath(TinyThingReader* tinything){
 }
 
 extern "C"
-const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes){
-    return tinything->getToolpathIncr(bytes).c_str();
+const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes) {
+    std::string output;
+    tinything->getToolpathIncr(bytes, &output);
+    return output.c_str();
 }
 
 // WRITER FUNCTIONS
