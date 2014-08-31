@@ -3,7 +3,7 @@
 import os
 
 env = Environment(
-    ENV=os.environ, tools=['default', 'birdwing_install'],
+    ENV=os.environ, tools=['default', 'birdwing_install', 'birdwing_build'],
     toolpath=['#/../bw-scons-tools'],
 )
 
