@@ -47,10 +47,6 @@ set_target_properties( libtinything_lib PROPERTIES
     OUTPUT_NAME libtinything
     LINKER_LANGUAGE CXX
     PREFIX "" )
-# Install instructions for this target
-install( TARGETS libtinything_lib
-    RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/build/bin
-    LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/build/lib
-    ARCHIVE DESTINATION ${PROJECT_SOURCE_DIR}/build/lib )
+
 
 

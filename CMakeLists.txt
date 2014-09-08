@@ -28,8 +28,8 @@ if(LIBTINYTHING_LIB_BUILD_SHARED)
 else()
   set(LIBTINYTHING_LIB_TYPE STATIC)
 endif()
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/bin)
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build/lib)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../build/bin)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/../build/lib)
 
 
 add_definitions("\"-DTINYTHING_API=__attribute__ ((visibility (\\\"default\\\")))\"")
@@ -37,7 +37,9 @@ add_definitions("\"-DJSON_API=__attribute__ ((visibility (\\\"default\\\")))\"")
 
 include_directories(../json-cpp/include)
 include_directories(../MBCoreUtils/include)
-include_directories(include)
+include_directories(../libtinything/include)
+include_directories(../libthing-surprise/include)
+
 
 add_subdirectory(src)
 
