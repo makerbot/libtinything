@@ -1,52 +1,43 @@
-set(zlibDir zlib/)
-set(zlibSourcs
-    ${zlibDir}adler32.c
-    ${zlibDir}compress.c
-    ${zlibDir}crc32.c
-    ${zlibDir}crc32.h
-    ${zlibDir}deflate.c
-    ${zlibDir}deflate.h
-    ${zlibDir}inffast.c
-    ${zlibDir}inffast.h
-    ${zlibDir}inflate.c
-    ${zlibDir}inflate.h
-    ${zlibDir}inftrees.c
-    ${zlibDir}inftrees.h
-    ${zlibDir}trees.h
-    ${zlibDir}trees.c
-    ${zlibDir}zconf.h
-    ${zlibDir}zconf.in.h
-    ${zlibDir}zlib.h
-    ${zlibDir}zuitl.c
-    ${zlibDir}zutil.h)
-
-set(miniunzipDir miniunzip/)
-set(miniunzipsSources
-    ${miniunzipDir}crypt.h
-    ${miniunzipDir}ioapi.c
-    ${miniunzipDir}ioapi.h
-    ${miniunzipDir}unzip.c
-    ${miniunzipDir}unzip.h
-    ${miniunzipDir}zip.c
-    ${miniunzipDir}zip.h)
-
-set(cliDir cli/)
-set(cliSources
-    ${cliDir}writer.cc)
-
-add_library( libtinything_lib ${LIBTINYTHING_LIB_TYPE}
+set(headers
+    zlib/crc32.h
+    zlib/deflate.h
+    zlib/inffast.h
+    zlib/inflate.h
+    zlib/inftrees.h
+    zlib/zconf.h
+    zlib/zconf.in.h
+    zlib/zlib.h
+    zlib/trees.h
+    zlib/zutil.h
+    
+    miniunzip/crypt.h
+    miniunzip/ioapi.h
+    miniunzip/unzip.h
+    miniunzip/zip.h)
+set(sources
     tinything_c_interface.cc
     TinyThingConstants.cc
     TinyThingReader.cc
     TinyThingWriter.cc
-    ${zlibSources}
-    ${cliSources}
-    ${miniunzipsSources} )
+        
+    zlib/adler32.c
+    zlib/compress.c
+    zlib/crc32.c
+    zlib/deflate.c
+    zlib/inffast.c
+    zlib/inflate.c
+    zlib/inftrees.c
+    zlib/trees.c
+    zlib/zutil.c
+   
+    miniunzip/ioapi.c
+    miniunzip/unzip.c
+    miniunzip/zip.c
+    cli/writer.cc)
 
-set_target_properties( libtinything_lib PROPERTIES
-    OUTPUT_NAME libtinything
-    LINKER_LANGUAGE CXX
-    PREFIX "" )
+add_library(tinything ${LIB_TYPE} ${sources} ${headers})
+set_target_properties( tinything PROPERTIES
+    LINKER_LANGUAGE CXX)
 
 
 
