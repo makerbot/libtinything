@@ -8,7 +8,7 @@ class TinyThingWriter;
 // READER FUNCTIONS
 
 extern "C" {
-TINYTHING_API TinyThingReader* NewTinyThingReader(const char* filepath);
+TINYTHING_API TinyThingReader* NewTinyThingReader(const char* filepath, int fd = -1);
 
 TINYTHING_API int DestroyTinyThingReader(TinyThingReader* tinything);
 

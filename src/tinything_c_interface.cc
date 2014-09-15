@@ -8,8 +8,8 @@ namespace LibTinyThing {
 // READER FUNCTIONS
 
 extern "C"
-TinyThingReader* NewTinyThingReader(const char* filepath){
-    TinyThingReader* tinything = new TinyThingReader(filepath);
+TinyThingReader* NewTinyThingReader(const char* filepath, int fd){
+    TinyThingReader* tinything = new TinyThingReader(filepath, fd);
     return tinything;
 }
 

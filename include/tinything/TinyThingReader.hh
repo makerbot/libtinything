@@ -10,8 +10,8 @@ namespace LibTinyThing {
 	class TINYTHING_API TinyThingReader {
 	public:
 
-        TinyThingReader(const std::string& filePath);
-
+		// passing in a fd will use an already opened file handle
+        TinyThingReader(const std::string& filePath, int fd = -1);
 		~TinyThingReader();
 
 		// these functions unzip the contents of each of these files,
@@ -39,6 +39,9 @@ namespace LibTinyThing {
 		bool isValid();
 
         // incremental unzipping of toolpath
+        // unzipping any other part of the file
+        // or checking if it is valid will reset
+        // the incremental pointer
         bool resetToolpath();
         std::string getToolpathIncr(const int chars);
 
