@@ -58,12 +58,12 @@ class TinyThingReader::Private {
   bool resetToolpath() {
     m_toolpathPos = 0;
     unz_file_info fileInfo;
-    if (hasJsonToolpath() &&
-        unzLocateFile(m_zipFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK &&
-        unzGetCurrentFileInfo(m_zipFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+    bool locateFile = (unzLocateFile(m_zipFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK);
+    bool getInfo = (unzGetCurrentFileInfo(m_zipFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK);
+    bool openCurrent = (unzOpenCurrentFile(m_zipFile) == UNZ_OK);
+    if (locateFile && getInfo && openCurrent) {
       m_toolpathSize = fileInfo.uncompressed_size;
       m_incremental = true;
-      std::cout << "size: " << m_toolpathSize << std::endl;
       return true;
     } else {
       return false;
@@ -72,16 +72,19 @@ class TinyThingReader::Private {
 
   std::string getToolpathIncr(const int chars) {
     if (!m_incremental) {
-      resetToolpath();
+      if(!resetToolpath()) {
+        // Oops, we have an error
+        return "";
+      }
     }
         
     int chars_to_read = chars;
     if (m_toolpathPos >= m_toolpathSize) {
-        // at end of file
-        return "";
+      // at end of file
+      return "";
     } else if ((m_toolpathPos + chars) > m_toolpathSize) {
-        // reached end of file
-        chars_to_read = m_toolpathSize - m_toolpathPos;
+      // reached end of file
+      chars_to_read = m_toolpathSize - m_toolpathPos;
     }
     m_toolpathPos += chars_to_read;
 
@@ -90,6 +93,7 @@ class TinyThingReader::Private {
     unzReadCurrentFile(m_zipFile,
         const_cast<char*>(output.c_str()),
         chars_to_read);
+
     return output;
   }
 
