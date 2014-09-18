@@ -3,7 +3,7 @@ project(libtinything)
 
 add_CXX_compiler_flags()
 
-set_shared(false)
+set_shared(true)
 
 add_api(TINYTHING)
 add_api(JSON)
