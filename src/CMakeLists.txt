@@ -38,6 +38,9 @@ set(sources
 add_library(tinything ${LIB_TYPE} ${sources} ${headers})
 set_target_properties( tinything PROPERTIES
     LINKER_LANGUAGE CXX)
+    
+target_link_libraries(tinything
+    jsoncpp)
 
 
 
