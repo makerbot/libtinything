@@ -3,15 +3,12 @@ project(libtinything)
 
 add_CXX_compiler_flags()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    #set_shared(false)
-    if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "AMD64")
-        install_headers($ENV{MB_THIRD_PARTY}/yajl-2.1.0/yajl-64/include/)
-    else()
-        install_headers($ENV{MB_THIRD_PARTY}/yajl-2.1.0/yajl-32/include/)
-    endif()
+    install_headers($ENV{MB_THIRD_PARTY}/yajl-2.1.0/yajl-${bitness}/include/)
+
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     install_headers(/usr/local/yajl/include/)
 endif()
+
 set_shared(true)
 add_api(TINYTHING)
 add_import_api(JSON)
@@ -19,10 +16,6 @@ install_headers(include/)
 
 
 include_directories(${INCLUDE_OUTPUT_PATH})
-#include_directories(../json-cpp/include)
-#include_directories(../MBCoreUtils/include)
-#include_directories(../libtinything/include)
-#include_directories(../libthing-surprise/include)
 
 include_directories(src/zlib)
 include_directories(src/miniunzip)
