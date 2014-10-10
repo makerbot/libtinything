@@ -1,7 +1,7 @@
 message("configureing tinything")
 project(libtinything)
 
-add_CXX_compiler_flags()
+add_compiler_flags()
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     install_headers($ENV{MB_THIRD_PARTY}/yajl-2.1.0/yajl-${bitness}/include/)
 
@@ -20,4 +20,3 @@ include_directories(${INCLUDE_OUTPUT_PATH})
 include_directories(src/zlib)
 include_directories(src/miniunzip)
 add_subdirectory(src)
-
