@@ -2,7 +2,8 @@ import os
 
 env = Environment(
   ENV = os.environ,
-  tools=['default', 'mb_install'])
+  tools=['default', 'mb_install'],
+  toolpath=['#/../mw-scons-tools'])
 
 env.MBAddIncludePaths('include')
 env.MBAddIncludePaths('src/miniunzip')
