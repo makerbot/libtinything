@@ -2,9 +2,11 @@
 
 import os
 
+platform_args = {} if os.environ.get('BW_NATIVE_BUILD') else {'platform': 'posix'}
+
 env = Environment(
     ENV=os.environ, tools=['default', 'birdwing_install', 'birdwing_build'],
-    toolpath=['#/../bw-scons-tools'],
+    toolpath=['#/../bw-scons-tools'], **platform_args
 )
 
 env.BWSetCompilerToGcc()
