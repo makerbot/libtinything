@@ -35,9 +35,23 @@ set(sources
     miniunzip/zip.c
     cli/writer.cc)
 
-add_library(tinything ${LIB_TYPE} ${sources} ${headers})
-set_target_properties(tinything PROPERTIES
-    LINKER_LANGUAGE CXX)
+add_compiler_flags()
+
+add_api(TINYTHING_API)
+use_api(JSON_API)
+
+
+install(
+    DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
+    DESTINATION "${HEADER_INSTALL_DESTINATION}")
+
+add_library(tinything SHARED ${sources} ${headers})
 
 target_link_libraries(tinything
-    jsoncpp)
+    JsonCpp::jsoncpp)
+
+install_config(
+    NAME TinyThing
+    TARGET tinything
+    API TINYTHING_API)
+
