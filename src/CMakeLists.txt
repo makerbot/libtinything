@@ -38,8 +38,6 @@ set(sources
 add_compiler_flags()
 
 add_api(TINYTHING_API)
-use_api(JSON_API)
-
 
 install(
     DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
