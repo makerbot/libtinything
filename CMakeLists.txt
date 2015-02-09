@@ -30,4 +30,4 @@ add_subdirectory(src)
 
 install_docs(
     FILES "${PROJECT_SOURCE_DIR}/README.md"
-    PREFIX )
+    PREFIX tinything)
