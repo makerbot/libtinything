@@ -27,3 +27,7 @@ include_directories(src/zlib)
 include_directories(src/miniunzip)
 
 add_subdirectory(src)
+
+install_docs(
+    FILES "${PROJECT_SOURCE_DIR}/README.md"
+    PREFIX )
