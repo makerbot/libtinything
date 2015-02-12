@@ -7,3 +7,7 @@ lib/*
 *.vcxproj
 *_version.rc
 *.swp
+
+# default cmake build folders
+_build
+_build64
