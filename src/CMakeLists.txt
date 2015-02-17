@@ -50,5 +50,5 @@ target_link_libraries(tinything
 
 install_config(
     NAME TinyThing
-    TARGET tinythingWs)
+    TARGET tinything)
 
