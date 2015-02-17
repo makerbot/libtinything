@@ -37,7 +37,7 @@ set(sources
 
 add_compiler_flags()
 
-add_api(TINYTHING_API)
+#add_api(TINYTHING_API)
 
 install(
     DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
