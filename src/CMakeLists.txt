@@ -60,7 +60,7 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/include"
     "${PROJECT_SOURCE_DIR}/src/zlib"
     "${PROJECT_SOURCE_DIR}/src/miniunzip"
-    "${yajl_include_dir}")
+    ${yajl_include_dir})
 
 install(
     DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
