@@ -7,17 +7,14 @@ namespace LibTinyThing {
     const std::string Config::kMetadataFilename = "meta.json";
     const std::string Config::kToolpathFilename = "print.jsontoolpath";
 
-    const std::string Config::kExtraLargeThumbnailFilename = "thumbnail_800x600.png";
 	const std::string Config::kLargeThumbnailFilename = "thumbnail_320x200.png";
 	const std::string Config::kMediumThumbnailFilename = "thumbnail_110x80.png";
 	const std::string Config::kSmallThumbnailFilename = "thumbnail_55x40.png";
 
-	const int Config::kExtraLargeThumbnailWidth = 800;
 	const int Config::kLargeThumbnailWidth = 320;
 	const int Config::kMediumThumbnailWidth = 110;
 	const int Config::kSmallThumbnailWidth = 55;
 
-	const int Config::kExtraLargeThumbnailHeight = 600;
 	const int Config::kLargeThumbnailHeight = 200;
 	const int Config::kMediumThumbnailHeight = 80;
 	const int Config::kSmallThumbnailHeight = 40;
