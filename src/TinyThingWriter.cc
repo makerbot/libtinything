@@ -117,6 +117,12 @@ public:
                 std::cout << "ERROR: could not add large thumbnail" << std::endl;
                 return false;
             }
+            if(!addFile(Config::kExtraLargeThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kExtraLargeThumbnailFilename,
+                        false, false)){
+                std::cout << "ERROR: could not add extra large thumbnail" << std::endl;
+                return false;
+            }
         } else {
             std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }
