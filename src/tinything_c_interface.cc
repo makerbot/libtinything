@@ -20,37 +20,15 @@ int DestroyTinyThingReader(TinyThingReader* tinything){
 }
 
 extern "C"
-bool UnzipToolpath(TinyThingReader* tinything){
-	bool success = tinything->unzipToolpathFile();
-	return success;
-}
-
-extern "C"
 bool UnzipMetadata(TinyThingReader* tinything){
 	bool success = tinything->unzipMetadataFile();
 	return success;
 }
 
 extern "C"
-const char* GetToolpath(TinyThingReader* tinything){
-    std::string toolpath = tinything->getToolpathFileContents();
-    return toolpath.c_str();
-}
-
-extern "C"
-const char* GetMetadata(TinyThingReader* tinything){
-    std::string metdata = tinything->getMetadataFileContents();
-    return metdata.c_str();
-}
-
-extern "C"
-bool ResetToolpath(TinyThingReader* tinything){
-    return tinything->resetToolpath();
-}
-
-extern "C"
-const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes){
-    return tinything->getToolpathIncr(bytes).c_str();
+int DoesMetadataMatch(const TinyThingReader* tinything,
+                      const VerificationData* data) {
+    return tinything->doesMetadataFileMatchConfig(*data);
 }
 
 // WRITER FUNCTIONS
