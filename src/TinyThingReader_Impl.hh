@@ -14,7 +14,11 @@ class TinyThingReader::Private {
     static bool parseFile(const std::string& contents, Json::Value* output);
 
     Error verifyMetadata(const VerificationData& data) const;
-    Error getMetadata(Metadata* out) const;
+    Error getCppOnlyMetadata(Metadata* out) const;
+
+    template <class MetadataType>
+    Error getMetadata(MetadataType* out) const;
+    
     const std::string m_filePath;
     
     std::string m_toolpathFileContents;

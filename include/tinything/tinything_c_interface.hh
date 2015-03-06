@@ -3,7 +3,7 @@ namespace LibTinyThing {
 class TinyThingReader;
 class TinyThingWriter;
 struct VerificationData;
-struct Metadata;
+struct CInterfaceMetadata;
 
 // READER FUNCTIONS
 
@@ -16,6 +16,9 @@ TINYTHING_API bool UnzipMetadata(TinyThingReader* tinything);
 
 TINYTHING_API int DoesMetadataMatch(const TinyThingReader* tinything,
                                     const VerificationData* data);
+
+TINYTHING_API int GetMetadata(const TinyThingReader* tinything,
+                              CInterfaceMetadata* out);
 
 // WRITER FUNCTIONS
 

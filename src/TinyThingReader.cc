@@ -144,7 +144,8 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
     return Error::kOK;
 }
 
-TinyThingReader::Error TinyThingReader::Private::getMetadata(Metadata* out) const {
+template<class MetadataType>
+TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) const {
     switch(m_metafileVersion.major) {
     case -1:{
         return TinyThingReader::Error::kNotYetUnzipped;
@@ -157,6 +158,25 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(Metadata* out) cons
         out->duration_s = m_metadataParsed["duration_s"].asFloat();
         out->extruder_temperature = m_metadataParsed["toolhead_0_temperature"].asInt();
         out->chamber_temperature = 10;//something or other anyway
+        out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+    }break;
+    case 1:{
+        out->extrusion_mass_g = m_metadataParsed["extrusion_mass_g"].asFloat();
+        out->extrusion_distance_mm = m_metadataParsed["extrusion_distance_mm"].asFloat();
+        out->extruder_temperature = m_metadataParsed["temperature"].asInt();
+        out->chamber_temperature = 10; //or something
+        out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+    }break;
+}
+    return Error::kOK;
+}
+
+TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* out) const {
+    switch(m_metafileVersion.major) {
+    case -1:{
+        return TinyThingReader::Error::kNotYetUnzipped;
+    } break;
+    case 0:{
         out->shells = m_metadataParsed["printer_settings"]["shells"].asInt();
         out->layer_height = m_metadataParsed["printer_settings"]["layer_height"].asFloat();
         out->infill_density = m_metadataParsed["printer_settings"]["infill"].asFloat();
@@ -167,10 +187,6 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(Metadata* out) cons
         out->slicer_name = m_metadataParsed["printer_settings"]["slicer"].asString();
     }break;
     case 1:{
-        out->extrusion_mass_g = m_metadataParsed["extrusion_mass_g"].asFloat();
-        out->extrusion_distance_mm = m_metadataParsed["extrusion_distance_mm"].asFloat();
-        out->extruder_temperature = m_metadataParsed["temperature"].asInt();
-        out->chamber_temperature = 10; //or something
         out->shells = m_metadataParsed["miracle_config"]["numberOfShells"].asInt();
         out->layer_height = m_metadataParsed["miracle_config"]["layerHeight"].asFloat();
         out->infill_density = m_metadataParsed["miracle_config"]["infillDensity"].asFloat();
@@ -183,6 +199,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(Metadata* out) cons
 }
     return Error::kOK;
 }
+
 
 TinyThingReader::TinyThingReader(const std::string& filePath, int fd)
     : m_private(new Private(filePath, fd)) {
@@ -233,7 +250,13 @@ bool TinyThingReader::unzipToolpathFile() {
 }
 
 TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {
-    return m_private->getMetadata(out);
+    const Error error = m_private->getMetadata<Metadata>(out);
+    if(error != kOK) {return error;}
+    return m_private->getCppOnlyMetadata(out);
+}
+
+TinyThingReader::Error TinyThingReader::getMetadata(CInterfaceMetadata* out) const {
+    return m_private->getMetadata<CInterfaceMetadata>(out);
 }
 
 void TinyThingReader::getSmallThumbnailFileContents(std::string* contents) const {

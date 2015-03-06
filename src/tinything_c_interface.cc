@@ -31,6 +31,12 @@ int DoesMetadataMatch(const TinyThingReader* tinything,
     return tinything->doesMetadataFileMatchConfig(*data);
 }
 
+extern "C"
+int GetMetadata(const TinyThingReader* tinything,
+                CInterfaceMetadata* out) {
+    return tinything->getMetadata(out);
+}
+
 // WRITER FUNCTIONS
 
 extern "C"

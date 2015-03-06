@@ -24,6 +24,7 @@ namespace LibTinyThing {
         bool uses_support;
         float duration_s;
         float max_flow_rate;
+        uint32_t thing_id;
         std::string material;
         std::string slicer_name;
     };
@@ -34,6 +35,18 @@ namespace LibTinyThing {
         const bwcoreutils::YonkersTool& tool;
         uint8_t pid;
     };
+
+    // Struct containing only that data that doesn't absolutely suck
+    // to export through a C interface
+    struct TINYTHING_API CInterfaceMetadata {
+        float extrusion_mass_g;
+        float extrusion_distance_mm;
+        int extruder_temperature;
+        int chamber_temperature;
+        uint32_t thing_id;
+        float duration_s;
+    };
+    
     class TINYTHING_API TinyThingReader {
     public:
         enum Error {
@@ -75,6 +88,7 @@ namespace LibTinyThing {
         // a config (defined above)
         Error doesMetadataFileMatchConfig(const VerificationData& config) const;
         Error getMetadata(Metadata* out) const;
+        Error getMetadata(CInterfaceMetadata* out) const;
 
         // incremental unzipping of toolpath
         // unzipping any other part of the file
