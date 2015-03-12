@@ -6,7 +6,7 @@
 #include <string>
 
 namespace bwcoreutils {
-    class YonkersTool;
+    enum class TOOL;
 }
 
 namespace LibTinyThing {
@@ -32,7 +32,7 @@ namespace LibTinyThing {
     // the TinyThing has been sliced for a given printer
     
     struct TINYTHING_API VerificationData {
-        const bwcoreutils::YonkersTool& tool;
+        bwcoreutils::TOOL tool_id;
         uint8_t pid;
     };
 
