@@ -79,10 +79,10 @@ namespace LibTinyThing {
         void getToolpathFileContents(std::string* contents) const;
 
         // checks to see if toolpath is present
-        bool hasJsonToolpath();
+        bool hasJsonToolpath() const;
 
         // checks to see if all files are present
-        bool isValid();
+        bool isValid() const;
 
         // check to see if the metadata file is acceptable given
         // a config (defined above)

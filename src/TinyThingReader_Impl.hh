@@ -6,8 +6,8 @@ class TinyThingReader::Private {
  public:
     Private(const std::string& filePath, int fd);
     ~Private();
-    bool hasJsonToolpath();
-    bool isValid();
+    bool hasJsonToolpath() const;
+    bool isValid() const;
     bool resetToolpath();
     std::string getToolpathIncr(const int chars);
     bool unzipFile(const std::string& fileName, std::string &output) const;

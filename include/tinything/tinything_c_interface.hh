@@ -20,6 +20,8 @@ TINYTHING_API int DoesMetadataMatch(const TinyThingReader* tinything,
 TINYTHING_API int GetMetadata(const TinyThingReader* tinything,
                               CInterfaceMetadata* out);
 
+TINYTHING_API bool IsValid(const TinyThingReader* tinything);
+
 // WRITER FUNCTIONS
 
 TINYTHING_API TinyThingWriter* NewTinyThingWriter(const char* filepath);

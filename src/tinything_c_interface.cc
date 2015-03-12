@@ -37,6 +37,11 @@ int GetMetadata(const TinyThingReader* tinything,
     return tinything->getMetadata(out);
 }
 
+extern "C"
+bool IsValid(const TinyThingReader* tinything) {
+    return tinything->isValid();
+}
+
 // WRITER FUNCTIONS
 
 extern "C"

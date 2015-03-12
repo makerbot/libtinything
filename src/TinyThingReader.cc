@@ -31,15 +31,13 @@ TinyThingReader::Private::~Private() {
     }
 }
 
-bool TinyThingReader::Private::hasJsonToolpath() {
-    m_incremental = false;
+bool TinyThingReader::Private::hasJsonToolpath() const {
     return (m_zipFile != NULL &&
             unzLocateFile(m_zipFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK &&
             unzOpenCurrentFile(m_zipFile) == UNZ_OK);
 }
 
-bool TinyThingReader::Private::isValid() {
-    m_incremental = false;
+bool TinyThingReader::Private::isValid() const {
     return (
         m_zipFile != NULL &&
         unzLocateFile(m_zipFile, Config::kMetadataFilename.c_str(), 0) == UNZ_OK &&
@@ -124,7 +122,9 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         // We have not yet parsed the metadata file, don't even try to use the JSON
         return kNotYetUnzipped;
     }
+
     if(m_metafileVersion.major == 0) {
+        
         // This slice is old enough to not be versioned, we'll use good old fashioned
         // hope to ensure it's correct
         return Error::kOK;
@@ -244,9 +244,14 @@ bool TinyThingReader::unzipLargeThumbnailFile() {
 
 bool TinyThingReader::unzipToolpathFile() {
     m_private->m_incremental = false;
-    return m_private->unzipFile(
-        Config::kToolpathFilename, 
-        m_private->m_toolpathFileContents);
+    const bool ok = m_private->unzipFile(
+                         Config::kToolpathFilename, 
+                         m_private->m_toolpathFileContents);
+    if(!ok) {
+        return ok;
+    } else {
+        return m_private->resetToolpath();
+    }
 }
 
 TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {
@@ -275,11 +280,11 @@ void TinyThingReader::getToolpathFileContents(std::string* contents) const {
     *contents = m_private->m_toolpathFileContents;
 }
 
-bool TinyThingReader::hasJsonToolpath(){
+bool TinyThingReader::hasJsonToolpath() const{
     return m_private->hasJsonToolpath();
 }
 
-bool TinyThingReader::isValid(){
+bool TinyThingReader::isValid() const{
     return m_private->isValid();
 }
 
