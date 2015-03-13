@@ -157,14 +157,17 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             + m_metadataParsed["extrusion_mass_b_grams"].asFloat();
         out->duration_s = m_metadataParsed["duration_s"].asFloat();
         out->extruder_temperature = m_metadataParsed["toolhead_0_temperature"].asInt();
-        out->chamber_temperature = 10;//something or other anyway
+        out->chamber_temperature = 10; //or something
         out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
     }break;
     case 1:{
         out->extrusion_mass_g = m_metadataParsed["extrusion_mass_g"].asFloat();
         out->extrusion_distance_mm = m_metadataParsed["extrusion_distance_mm"].asFloat();
-        out->extruder_temperature = m_metadataParsed["temperature"].asInt();
-        out->chamber_temperature = 10; //or something
+        out->duration_s = m_metadataParsed["duration_s"].asFloat();
+        out->extruder_temperature = m_metadataParsed["extruder_temperature"].asInt();
+        out->chamber_temperature = m_metadataParsed.get("chamber_temperature",
+                                                        Json::Value(0U)).asUInt();
+
         out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
     }break;
 }
@@ -193,17 +196,16 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         out->uses_raft = m_metadataParsed["miracle_config"]["doRaft"].asBool();
         out->uses_support = m_metadataParsed["miracle_config"]["doSupport"].asBool();
         out->max_flow_rate = m_metadataParsed["max_flow_rate"].asFloat();
-        out->material = m_metadataParsed["materials"][0].asString();
-        out->slicer_name = m_metadataParsed["slicer"].asString();
+        out->material = m_metadataParsed["miracle_config"]["materials"][0].asString();
+        out->slicer_name = m_metadataParsed["miracle_config"]["slicer"].asString();
     }break;
-}
+    }
     return Error::kOK;
 }
 
 
 TinyThingReader::TinyThingReader(const std::string& filePath, int fd)
-    : m_private(new Private(filePath, fd)) {
-}
+    : m_private(new Private(filePath, fd)) {}
 
 TinyThingReader::~TinyThingReader() {
 }
