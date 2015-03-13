@@ -132,7 +132,8 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         return kVersionMismatch;
     } else {
         if(bwcoreutils::YonkersTool::type_from_type_name(m_metadataParsed["tool_type"].asString())
-           != bwcoreutils::YonkersTool(data.tool_id).type()) {
+           != bwcoreutils::YonkersTool(data.tool_id).type()
+           && !m_metadataParsed["is_custom"].asBool()) {
             return Error::kToolMismatch;
         }
         const std::string type = m_metadataParsed["machine_config"]["bot_type"].asString();
