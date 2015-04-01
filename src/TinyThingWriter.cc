@@ -23,8 +23,8 @@ public:
                  const std::string& filePath,
                  bool compress, bool createZip) {
 
-        std::cout << "INFO: Adding " << filePath << " to "
-            << m_zipFilePath << " as " << fileName << std::endl;
+        // std::cout << "INFO: Adding " << filePath << " to "
+        //     << m_zipFilePath << " as " << fileName << std::endl;
 
         int append_status = APPEND_STATUS_ADDINZIP;
         if (createZip) {
@@ -118,7 +118,7 @@ public:
                 return false;
             }
         } else {
-            std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
+            // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }
 
         return true;
