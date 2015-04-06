@@ -160,6 +160,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         out->extruder_temperature = m_metadataParsed["toolhead_0_temperature"].asInt();
         out->chamber_temperature = 10; //or something
         out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+        out->uses_raft = m_metadataParsed["printer_settings"].get("raft", false).asBool();
     }break;
     case 1:{
         out->extrusion_mass_g = m_metadataParsed["extrusion_mass_g"].asFloat();
@@ -170,6 +171,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
                                                         Json::Value(0U)).asUInt();
 
         out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+        out->uses_raft = m_metadataParsed["miracle_config"].get("doRaft", false).asBool();
     }break;
 }
     return Error::kOK;
@@ -184,7 +186,6 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         out->shells = m_metadataParsed["printer_settings"]["shells"].asInt();
         out->layer_height = m_metadataParsed["printer_settings"]["layer_height"].asFloat();
         out->infill_density = m_metadataParsed["printer_settings"]["infill"].asFloat();
-        out->uses_raft = m_metadataParsed["printer_settings"]["raft"].asBool();
         out->uses_support = m_metadataParsed["printer_settings"]["support"].asBool();
         out->max_flow_rate = 0.f; // Not included in this version
         out->material = m_metadataParsed["printer_settings"]["materials"][0].asString();
@@ -194,7 +195,6 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         out->shells = m_metadataParsed["miracle_config"]["numberOfShells"].asInt();
         out->layer_height = m_metadataParsed["miracle_config"]["layerHeight"].asFloat();
         out->infill_density = m_metadataParsed["miracle_config"]["infillDensity"].asFloat();
-        out->uses_raft = m_metadataParsed["miracle_config"]["doRaft"].asBool();
         out->uses_support = m_metadataParsed["miracle_config"]["doSupport"].asBool();
         out->max_flow_rate = m_metadataParsed["max_flow_rate"].asFloat();
         out->material = m_metadataParsed["miracle_config"]["materials"][0].asString();

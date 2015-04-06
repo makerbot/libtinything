@@ -20,11 +20,11 @@ namespace LibTinyThing {
         int shells;
         float layer_height;
         float infill_density;
-        bool uses_raft;
         bool uses_support;
         float duration_s;
         float max_flow_rate;
         uint32_t thing_id;
+        bool uses_raft;
         std::string material;
         std::string slicer_name;
     };
@@ -45,6 +45,7 @@ namespace LibTinyThing {
         int chamber_temperature;
         uint32_t thing_id;
         float duration_s;
+        bool uses_raft;
     };
     
     class TINYTHING_API TinyThingReader {

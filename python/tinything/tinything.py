@@ -21,7 +21,8 @@ class MetadataStruct(ctypes.LittleEndianStructure):
         ("extruder_temperature", ctypes.c_int),
         ("chamber_temperature", ctypes.c_int),
         ("thing_id", ctypes.c_int),
-        ("duration_s", ctypes.c_float)
+        ("duration_s", ctypes.c_float),
+        ("uses_raft", ctypes.c_bool)
     )
 
 class TinyThing:
