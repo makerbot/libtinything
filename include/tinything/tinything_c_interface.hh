@@ -1,9 +1,9 @@
-#include <string>
-
 namespace LibTinyThing {
 
 class TinyThingReader;
 class TinyThingWriter;
+struct VerificationData;
+struct CInterfaceMetadata;
 
 // READER FUNCTIONS
 
@@ -12,17 +12,15 @@ TINYTHING_API TinyThingReader* NewTinyThingReader(const char* filepath, int fd);
 
 TINYTHING_API int DestroyTinyThingReader(TinyThingReader* tinything);
 
-TINYTHING_API bool UnzipToolpath(TinyThingReader* tinything);
-
 TINYTHING_API bool UnzipMetadata(TinyThingReader* tinything);
 
-TINYTHING_API const char* GetToolpath(TinyThingReader* tinything);
+TINYTHING_API int DoesMetadataMatch(const TinyThingReader* tinything,
+                                    const VerificationData* data);
 
-TINYTHING_API const char* GetMetadata(TinyThingReader* tinything);
+TINYTHING_API int GetMetadata(const TinyThingReader* tinything,
+                              CInterfaceMetadata* out);
 
-TINYTHING_API bool ResetToolpath(TinyThingReader* tinything);
-
-TINYTHING_API const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes);
+TINYTHING_API bool IsValid(const TinyThingReader* tinything);
 
 // WRITER FUNCTIONS
 

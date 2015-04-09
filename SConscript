@@ -11,6 +11,10 @@ env.BWSetCompilerToGcc()
 
 env.BWDependsOnJsonCpp()
 
+env.BWDependsOnBWCodegenSharedCPP()
+
+env.BWPyInstallPkg('../python/tinything')
+
 env.BWAddIncludePath('include')
 env.BWAddIncludePath('src/miniunzip')
 env.BWAddIncludePath('src/zlib')
