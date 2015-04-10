@@ -131,8 +131,9 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
     } else if(m_metafileVersion.major > 1) {
         return kVersionMismatch;
     } else {
-        if(bwcoreutils::YonkersTool::type_from_type_name(m_metadataParsed["tool_type"].asString())
-           != bwcoreutils::YonkersTool(data.tool_id).type()
+        if(!bwcoreutils::YonkersTool::toolpaths_equivalent(
+               bwcoreutils::YonkersTool::type_from_type_name(m_metadataParsed["tool_type"].asString()),
+               bwcoreutils::YonkersTool(data.tool_id).type())
            && !m_metadataParsed["is_custom"].asBool()) {
             return Error::kToolMismatch;
         }
