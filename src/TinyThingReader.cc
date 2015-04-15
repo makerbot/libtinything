@@ -159,7 +159,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             + m_metadataParsed["extrusion_mass_b_grams"].asFloat();
         out->duration_s = m_metadataParsed["duration_s"].asFloat();
         out->extruder_temperature = m_metadataParsed["toolhead_0_temperature"].asInt();
-        out->chamber_temperature = 10; //or something
+        out->chamber_temperature = m_metadataParsed.get("chamber_temperature", 0).asInt();
         out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
         out->uses_raft = m_metadataParsed["printer_settings"].get("raft", false).asBool();
     }break;
