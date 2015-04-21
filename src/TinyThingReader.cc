@@ -198,7 +198,7 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         out->infill_density = m_metadataParsed["miracle_config"]["infillDensity"].asFloat();
         out->uses_support = m_metadataParsed["miracle_config"]["doSupport"].asBool();
         out->max_flow_rate = m_metadataParsed["max_flow_rate"].asFloat();
-        out->material = m_metadataParsed["miracle_config"]["materials"][0].asString();
+        out->material = m_metadataParsed["material"].asString();
         out->slicer_name = m_metadataParsed["miracle_config"]["slicer"].asString();
     }break;
     }
