@@ -28,6 +28,11 @@ source_files = [
 
 tinything = env.MBSharedLibrary("tinything", source_files, RPATH=runtime_paths)
 
+tinything_install = [
+    env.MBInstallLib(tinything, 'tinything'),
+    env.MBInstallHeaders(env.MBGlob('#/include/tinything/*'), 'tinything'),
+]
+
 # Stupid hack to get tinything doing the same thing as the other
 # cmake repos until it gets converted to cmake
 if env.MBIsMac():
@@ -38,9 +43,7 @@ if env.MBIsMac():
         'install_name_tool -id @rpath/libtinything.dylib $TARGET'
     )
     env.Append(MB_INSTALL_TARGETS=libtinything)
-
-env.MBInstallLib(tinything, 'tinything')
-env.MBInstallHeaders(env.MBGlob('#/include/tinything/*'), 'tinything')
+    tinything_install.append(libtinything)
 
 env.MBCreateInstallTarget()
 
@@ -49,5 +52,5 @@ program_env.MBDependsOnTinything()
 writer_program = program_env.MBProgram(
     target='makerbot_tinything_writer',
     source=['src/cli/writer.cc'])
-program_env.Depends(writer_program, tinything)
+program_env.Depends(writer_program, tinything_install)
 program_env.MBInstallBin(writer_program)
