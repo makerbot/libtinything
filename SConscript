@@ -24,7 +24,7 @@ source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c') + Glob('src/zlib/*.
 
 tinything = env.MBSharedLibrary("tinything", source_files, RPATH=runtime_paths)
 
-tiny_thing_install = [
+tinything_install = [
     env.MBInstallLib(tinything, 'tinything'),
     env.MBInstallHeaders(env.MBGlob('#/include/tinything/*'), 'tinything'),
 ]
