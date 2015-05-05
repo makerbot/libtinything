@@ -29,6 +29,11 @@ env.MBInstallHeaders(env.MBGlob('#/include/tinything/*'), 'tinything')
 
 env.MBCreateInstallTarget()
 
+# This isn't used anywhere, and isn't even getting installed because
+# MBInstallBin is being invoked after MBCreateInstallTarget.  It does
+# not compile for mac when doing an install build due to some weird
+# mw-scons-tools issue, so I am disabling it until this uses cmake.
+"""
 program_env = env.Clone()
 program_env.MBDependsOnTinything()
 writer_program = program_env.MBProgram(
@@ -36,3 +41,4 @@ writer_program = program_env.MBProgram(
   source=['src/cli/writer.cc'])
 program_env.Depends(writer_program, tinything)
 program_env.MBInstallBin(writer_program)
+"""
