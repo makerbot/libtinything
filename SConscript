@@ -33,18 +33,6 @@ tinything_install = [
     env.MBInstallHeaders(env.MBGlob('#/include/tinything/*'), 'tinything'),
 ]
 
-# Stupid hack to get tinything doing the same thing as the other
-# cmake repos until it gets converted to cmake
-if env.MBIsMac():
-    libtinything = env.Command(
-        os.path.join(env['MB_LIB_DIR'], 'libtinything.dylib'),
-        'libtinything.dylib',
-        'cp $SOURCE $TARGET && '
-        'install_name_tool -id @rpath/libtinything.dylib $TARGET'
-    )
-    env.Append(MB_INSTALL_TARGETS=libtinything)
-    tinything_install.append(libtinything)
-
 env.MBCreateInstallTarget()
 
 program_env = env.Clone()
