@@ -1,4 +1,4 @@
-#include "tool_mappings.hh"
+#include <bwcoreutils/tool_mappings.hh>
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
