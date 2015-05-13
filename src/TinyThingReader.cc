@@ -122,25 +122,31 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         // We have not yet parsed the metadata file, don't even try to use the JSON
         return kNotYetUnzipped;
     }
-
     if(m_metafileVersion.major == 0) {
-        
         // This slice is old enough to not be versioned, we'll use good old fashioned
         // hope to ensure it's correct
         return Error::kOK;
     } else if(m_metafileVersion.major > 1) {
         return kVersionMismatch;
     } else {
-        if(!bwcoreutils::YonkersTool::toolpaths_equivalent(
-               bwcoreutils::YonkersTool::type_from_type_name(m_metadataParsed["tool_type"].asString()),
-               bwcoreutils::YonkersTool(data.tool_id).type())
-           && !m_metadataParsed["is_custom"].asBool()) {
-            return Error::kToolMismatch;
-        }
-        const std::string type = m_metadataParsed["machine_config"]["bot_type"].asString();
+        // Check bot type first, since this is guaranteed to exist even if
+        // the print was sliced with a custom profile
+        const std::string type = m_metadataParsed["bot_type"].asString();
         const size_t pid_idx = type.rfind('_')+1;
         if(std::stoi(type.substr(pid_idx)) != data.pid) {
             return Error::kBotTypeMismatch;
+        }
+        // Now check the tool, which is allowed to be a JSON null
+        if(!m_metadataParsed["tool_type"].isNull()) {
+            const std::string name = m_metadataParsed["tool_type"].asString();
+            const bwcoreutils::TYPE meta_tool
+                = bwcoreutils::YonkersTool::type_from_type_name(name);
+            const bwcoreutils::TYPE current_tool
+                = bwcoreutils::YonkersTool(data.tool_id).type();
+            if(!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
+                                                               current_tool)) {
+                return Error::kToolMismatch;
+            }
         }
     }
     return Error::kOK;
