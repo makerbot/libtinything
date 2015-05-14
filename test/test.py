@@ -27,7 +27,7 @@ class TestTinyThing(unittest.TestCase):
         tt = self._create_tinything("test.makerbot")
         tt.unzip_metadata()
         metadata = tt.get_metadata()
-        self.assertEqual(metadata["uuid"].decode(), "56386a26-bacb-49d6-bd77-5f4ce7d72563")
+        self.assertEqual(metadata["uuid"], "56386a26-bacb-49d6-bd77-5f4ce7d72563")
         self.assertEqual(metadata["extruder_temperature"], 215)
 
 if __name__ == "__main__":
