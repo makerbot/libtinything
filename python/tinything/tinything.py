@@ -5,7 +5,8 @@ errors = {
     'not_yet_unzipped': 1,
     'tool_mismatch': 2,
     'bot_type_mismatch': 3,
-    'version_mismatch': 4
+    'version_mismatch': 4,
+    'max_string_length_exceeded': 5
 }
 
 class VerificationStruct(ctypes.LittleEndianStructure):
@@ -22,13 +23,16 @@ class MetadataStruct(ctypes.LittleEndianStructure):
         ("chamber_temperature", ctypes.c_int),
         ("thing_id", ctypes.c_int),
         ("duration_s", ctypes.c_float),
-        ("uses_raft", ctypes.c_bool)
+        ("uses_raft", ctypes.c_bool),
+        ("uuid", ctypes.c_char * 100)
     )
 
 class TinyThing:
-    path = '/usr/lib/libtinything.so'
-    def __init__(self, zipfile_path:str, fd:int=0):
-        self._libtinything = ctypes.CDLL(self.path)
+    """
+    @param lib_path: optional parameter for custom library path
+    """
+    def __init__(self, zipfile_path:str, fd:int=0, lib_path:str='/usr/lib/libtinything.so'):
+        self._libtinything = ctypes.CDLL(lib_path)
         if None is not zipfile_path:
             c_path = ctypes.c_char_p(bytes(zipfile_path.encode('UTF-8')))
         else:

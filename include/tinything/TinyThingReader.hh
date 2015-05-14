@@ -25,6 +25,7 @@ namespace LibTinyThing {
         float max_flow_rate;
         uint32_t thing_id;
         bool uses_raft;
+        char uuid[100];
         std::string material;
         std::string slicer_name;
     };
@@ -46,6 +47,7 @@ namespace LibTinyThing {
         uint32_t thing_id;
         float duration_s;
         bool uses_raft;
+        char uuid[100];
     };
     
     class TINYTHING_API TinyThingReader {
@@ -55,7 +57,8 @@ namespace LibTinyThing {
             kNotYetUnzipped=1,
             kToolMismatch=2,
             kBotTypeMismatch=3,
-            kVersionMismatch=4
+            kVersionMismatch=4,
+            kMaxStringLengthExceeded=5
         };
         
         // passing in a fd will use an already opened file handle
