@@ -181,7 +181,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
     // common output
     out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
     const std::string uuid = m_metadataParsed.get("uuid", "").asString();
-    if (uuid.size() > sizeof(out->uuid)) {
+    if (uuid.size() > UUID_MAX_LENGTH) {
         return Error::kMaxStringLengthExceeded;
     }
     uuid.copy(out->uuid, uuid.size());
