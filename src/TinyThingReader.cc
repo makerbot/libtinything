@@ -130,15 +130,20 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         return kVersionMismatch;
     } else {
         // Check bot type first, since this is guaranteed to exist even if
-        // the print was sliced with a custom profile
-        const std::string type = m_metadataParsed["bot_type"].asString();
+        // the print was sliced with a custom profile. Default: a value we
+        // will never use as a PID.
+        const std::string type
+            = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
         if(std::stoi(type.substr(pid_idx)) != data.pid) {
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which is allowed to be a JSON null
+        // Default: a null
         if(!m_metadataParsed["tool_type"].isNull()) {
-            const std::string name = m_metadataParsed["tool_type"].asString();
+            const std::string name
+                = m_metadataParsed.get("tool_type",
+                                       Json::Value()).asString();
             const bwcoreutils::TYPE meta_tool
                 = bwcoreutils::YonkersTool::type_from_type_name(name);
             const bwcoreutils::TYPE current_tool
@@ -159,23 +164,35 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         return TinyThingReader::Error::kNotYetUnzipped;
     } break;
     case 0:{
-        out->extrusion_mass_g = m_metadataParsed["extrusion_mass_a_grams"].asFloat()
-            + m_metadataParsed["extrusion_mass_b_grams"].asFloat();
-        out->extrusion_distance_mm = m_metadataParsed["extrusion_distance_a_mm"].asFloat()
-            + m_metadataParsed["extrusion_mass_b_grams"].asFloat();
-        out->duration_s = m_metadataParsed["duration_s"].asFloat();
-        out->extruder_temperature = m_metadataParsed["toolhead_0_temperature"].asInt();
-        out->chamber_temperature = m_metadataParsed.get("chamber_temperature", 0).asInt();
-        out->uses_raft = m_metadataParsed["printer_settings"].get("raft", false).asBool();
+        out->extrusion_mass_g
+            = m_metadataParsed.get("extrusion_mass_a_grams", 0.f).asFloat()
+            + m_metadataParsed.get("extrusion_mass_b_grams", 0.f).asFloat();
+        out->extrusion_distance_mm
+            = m_metadataParsed.get("extrusion_distance_a_mm", 0.f).asFloat()
+            + m_metadataParsed.get("extrusion_distance_b_mm", 0.f).asFloat();
+        out->duration_s = m_metadataParsed.get("duration_s", 0.f).asFloat();
+        out->extruder_temperature
+            = m_metadataParsed.get("toolhead_0_temperature", 0).asInt();
+        out->chamber_temperature
+            = m_metadataParsed.get("chamber_temperature", 0).asInt();
+        out->uses_raft
+            = m_metadataParsed["printer_settings"].get("raft", false).asBool();
     } break;
     case 1:{
-        out->extrusion_mass_g = m_metadataParsed["extrusion_mass_g"].asFloat();
-        out->extrusion_distance_mm = m_metadataParsed["extrusion_distance_mm"].asFloat();
-        out->duration_s = m_metadataParsed["duration_s"].asFloat();
-        out->extruder_temperature = m_metadataParsed["extruder_temperature"].asInt();
-        out->chamber_temperature = m_metadataParsed.get("chamber_temperature",
-                                                        Json::Value(0U)).asUInt();
-        out->uses_raft = m_metadataParsed["miracle_config"].get("doRaft", false).asBool();
+        out->extrusion_mass_g
+            = m_metadataParsed.get("extrusion_mass_g", 0.f).asFloat();
+        out->extrusion_distance_mm
+            = m_metadataParsed.get("extrusion_distance_mm", 0.f).asFloat();
+        out->duration_s
+            = m_metadataParsed.get("duration_s", 0.f).asFloat();
+        out->extruder_temperature
+            = m_metadataParsed.get("extruder_temperature", 0.f).asInt();
+        out->chamber_temperature
+            = m_metadataParsed.get("chamber_temperature",
+                                   Json::Value(0U)).asUInt();
+        out->uses_raft
+            = m_metadataParsed.get("miracle_config", Json::Value())
+            .get("doRaft", false).asBool();
     } break;
     }
     // common output
@@ -195,22 +212,30 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         return TinyThingReader::Error::kNotYetUnzipped;
     } break;
     case 0:{
-        out->shells = m_metadataParsed["printer_settings"]["shells"].asInt();
-        out->layer_height = m_metadataParsed["printer_settings"]["layer_height"].asFloat();
-        out->infill_density = m_metadataParsed["printer_settings"]["infill"].asFloat();
-        out->uses_support = m_metadataParsed["printer_settings"]["support"].asBool();
+        const Json::Value printer_settings
+            = m_metadataParsed.get("printer_settings", Json::Value());
+        out->shells = printer_settings.get("shells", (int)0).asInt();
+        out->layer_height = printer_settings.get("layer_height", 0.f).asFloat();
+        out->infill_density = printer_settings.get("infill", 0.f).asFloat();
+        out->uses_support = printer_settings.get("support", false).asBool();
         out->max_flow_rate = 0.f; // Not included in this version
-        out->material = m_metadataParsed["printer_settings"]["materials"][0].asString();
-        out->slicer_name = m_metadataParsed["printer_settings"]["slicer"].asString();
+        out->material
+            = printer_settings.get("materials", Json::Value())
+            .get(Json::ArrayIndex(0), "UNKNOWN").asString();
+        out->slicer_name = printer_settings.get("slicer", "UNKNOWN").asString();
     }break;
     case 1:{
-        out->shells = m_metadataParsed["miracle_config"]["numberOfShells"].asInt();
-        out->layer_height = m_metadataParsed["miracle_config"]["layerHeight"].asFloat();
-        out->infill_density = m_metadataParsed["miracle_config"]["infillDensity"].asFloat();
-        out->uses_support = m_metadataParsed["miracle_config"]["doSupport"].asBool();
-        out->max_flow_rate = m_metadataParsed["max_flow_rate"].asFloat();
-        out->material = m_metadataParsed["material"].asString();
-        out->slicer_name = m_metadataParsed["miracle_config"]["slicer"].asString();
+        const Json::Value miracle_config
+            = m_metadataParsed.get("miracle_config", Json::Value());
+        out->shells = miracle_config.get("numberOfShells", (int)0).asInt();
+        out->layer_height = miracle_config.get("layerHeight", 0.f).asFloat();
+        out->infill_density
+            = miracle_config.get("infillDensity", 0.f).asFloat();
+        out->uses_support = miracle_config.get("doSupport", false).asBool();
+        out->max_flow_rate
+            = m_metadataParsed.get("max_flow_rate", 0.f).asFloat();
+        out->material = m_metadataParsed.get("material", "UNKNOWN").asString();
+        out->slicer_name = miracle_config.get("slicer", "UNKNOWN").asString();
     }break;
     }
     return Error::kOK;
@@ -233,7 +258,7 @@ bool TinyThingReader::unzipMetadataFile() {
                          &(m_private->m_metadataParsed));
   m_private->m_metafileVersion
     = SemVer(m_private->m_metadataParsed.get("version",
-                                                 Json::Value("0.0.0"))
+                                             Json::Value("0.0.0"))
              .asString());
 
   return extracted;
