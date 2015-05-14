@@ -10,6 +10,13 @@ namespace bwcoreutils {
 }
 
 namespace LibTinyThing {
+    // I feel really badly for anyone who makes the uuid
+    // longer than 100 chars and has to troubleshoot why print history
+    // isn't working. 
+    // The good news is if you've found this, you've probably
+    // found what you were looking for. 
+    static const unsigned int UUID_MAX_LENGTH = 100;
+
     // Struct that contains the contents of a metadata file in
     // a version-independent way
     struct TINYTHING_API Metadata {
@@ -25,6 +32,7 @@ namespace LibTinyThing {
         float max_flow_rate;
         uint32_t thing_id;
         bool uses_raft;
+        char uuid[UUID_MAX_LENGTH];
         std::string material;
         std::string slicer_name;
     };
@@ -46,6 +54,7 @@ namespace LibTinyThing {
         uint32_t thing_id;
         float duration_s;
         bool uses_raft;
+        char uuid[UUID_MAX_LENGTH];
     };
     
     class TINYTHING_API TinyThingReader {
@@ -55,7 +64,8 @@ namespace LibTinyThing {
             kNotYetUnzipped=1,
             kToolMismatch=2,
             kBotTypeMismatch=3,
-            kVersionMismatch=4
+            kVersionMismatch=4,
+            kMaxStringLengthExceeded=5
         };
         
         // passing in a fd will use an already opened file handle

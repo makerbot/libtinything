@@ -166,9 +166,8 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         out->duration_s = m_metadataParsed["duration_s"].asFloat();
         out->extruder_temperature = m_metadataParsed["toolhead_0_temperature"].asInt();
         out->chamber_temperature = m_metadataParsed.get("chamber_temperature", 0).asInt();
-        out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
         out->uses_raft = m_metadataParsed["printer_settings"].get("raft", false).asBool();
-    }break;
+    } break;
     case 1:{
         out->extrusion_mass_g = m_metadataParsed["extrusion_mass_g"].asFloat();
         out->extrusion_distance_mm = m_metadataParsed["extrusion_distance_mm"].asFloat();
@@ -176,11 +175,17 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         out->extruder_temperature = m_metadataParsed["extruder_temperature"].asInt();
         out->chamber_temperature = m_metadataParsed.get("chamber_temperature",
                                                         Json::Value(0U)).asUInt();
-
-        out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
         out->uses_raft = m_metadataParsed["miracle_config"].get("doRaft", false).asBool();
-    }break;
-}
+    } break;
+    }
+    // common output
+    out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+    const std::string uuid = m_metadataParsed.get("uuid", "").asString();
+    if (uuid.size() > UUID_MAX_LENGTH) {
+        return Error::kMaxStringLengthExceeded;
+    }
+    uuid.copy(out->uuid, uuid.size());
+    //out->uuid[uuid.size()] = '\0';
     return Error::kOK;
 }
 
