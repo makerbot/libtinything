@@ -49,14 +49,16 @@ class TinyThing:
         struct_types = (ctypes.Structure, ctypes.LittleEndianStructure, ctypes.BigEndianStructure)
         for (name, _ctype) in c_struct._fields_:
             field = getattr(c_struct, name)
-            if isinstance(field, float):
-                field=int(field)
             if isinstance(field, struct_types):
                 _dict[name] = self._struct_to_dict(field)
+            elif isinstance(field, float):
+                # Why are we casting all floats to ints?
+                _dict[name] = int(field)
+            elif isinstance(field, bytes):
+                _dict[name] = field.decode("ascii")
             else:
                 _dict[name] = field
         return _dict
-
 
     def does_metadata_match(self, tool, pid):
         c_struct = VerificationStruct(tool, pid)
