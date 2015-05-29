@@ -1,5 +1,7 @@
-obj/*
+.build-cross/
+.build-host/
 *.tinything
+python/tinything/__pycache__/
 *~
 .sconsign.dblite
 *.os
