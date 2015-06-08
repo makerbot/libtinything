@@ -7,8 +7,7 @@ env = Environment(
     toolpath=['#/../bw-scons-tools'],
 )
 
-env.BWSetCompilerToGcc()
-
+env.BWSetCompilerToGCC()
 env.BWDependsOnJsonCpp()
 
 env.BWDependsOnBWCodegenSharedCPP()
@@ -21,9 +20,14 @@ env.BWAddIncludePath('src/zlib')
 
 env.Append(CPPDEFINES={'TINYTHING_API': ''})
 
-source_files =  Glob('src/*.cc') + Glob('src/miniunzip/*.c') + Glob('src/zlib/*c')
+source_files =  Glob('src/zlib/*.c') + \
+                Glob('src/miniunzip/*.c') + \
+                Glob('src/*.cc')
 
 ltinything = env.SharedLibrary('tinything', source_files)
-env.Clean(ltinything, '#/obj')
-env.BWInstallLibrary(ltinything)
-
+env.Alias('tinything', ltinything)
+if env.BWShouldCrossBuild():
+    install_lib = env.BWInstallLibrary(ltinything)
+    env.Alias('install', install_lib)
+elif not env.BWShouldHostBuild():
+    print("No compile target specified!")
