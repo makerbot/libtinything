@@ -252,7 +252,6 @@ TinyThingReader::TinyThingReader(const std::string& filePath, int fd)
     : m_private(new Private(filePath, fd)) {}
 
 TinyThingReader::~TinyThingReader() {
-    delete m_private;
 }
 
 bool TinyThingReader::unzipMetadataFile() {
