@@ -37,6 +37,12 @@ bool TinyThingReader::Private::hasJsonToolpath() const {
             unzOpenCurrentFile(m_zipFile) == UNZ_OK);
 }
 
+bool TinyThingReader::Private::hasMetadata() const {
+    return (m_zipFile != NULL &&
+            unzLocateFile(m_zipFile, Config::kMetadataFilename.c_str(), 0) == UNZ_OK &&
+            unzOpenCurrentFile(m_zipFile) == UNZ_OK);
+}
+
 bool TinyThingReader::Private::isValid() const {
     return (
         m_zipFile != NULL &&
@@ -246,6 +252,7 @@ TinyThingReader::TinyThingReader(const std::string& filePath, int fd)
     : m_private(new Private(filePath, fd)) {}
 
 TinyThingReader::~TinyThingReader() {
+    delete m_private;
 }
 
 bool TinyThingReader::unzipMetadataFile() {
@@ -322,6 +329,11 @@ void TinyThingReader::getToolpathFileContents(std::string* contents) const {
 
 bool TinyThingReader::hasJsonToolpath() const{
     return m_private->hasJsonToolpath();
+}
+
+
+bool TinyThingReader::hasMetadata() const {
+    return m_private->hasMetadata();
 }
 
 bool TinyThingReader::isValid() const{
