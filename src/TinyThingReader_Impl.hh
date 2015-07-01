@@ -7,6 +7,7 @@ class TinyThingReader::Private {
     Private(const std::string& filePath, int fd);
     ~Private();
     bool hasJsonToolpath() const;
+    bool hasMetadata() const;
     bool isValid() const;
     bool resetToolpath();
     std::string getToolpathIncr(const int chars);

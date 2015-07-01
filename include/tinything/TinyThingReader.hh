@@ -95,6 +95,12 @@ namespace LibTinyThing {
         // checks to see if all files are present
         bool isValid() const;
 
+        // checks to see if specifically metadata is present - this is
+        // a hack required by DRM prints, where the metadata is downloaded
+        // independently and stuck in a zipfile, which is then opened by
+        // printerpanel like it was a full .makerbot.
+        bool hasMetadata() const;
+
         // check to see if the metadata file is acceptable given
         // a config (defined above)
         Error doesMetadataFileMatchConfig(const VerificationData& config) const;
