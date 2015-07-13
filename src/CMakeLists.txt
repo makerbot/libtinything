@@ -65,9 +65,11 @@ target_compile_definitions(tinything PUBLIC ZEXPORT= ZEXTERN=)
 
 target_link_libraries(tinything JsonCpp::jsoncpp)
 
-generate_and_install_config(
-    NAME TinyThing
-    TARGET tinything)
+export_and_install_targets(TARGETS tinything)
+
+add_subdirectory(cli)
+
+generate_and_install_config(NAME TinyThing)
 
 install(
     DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
