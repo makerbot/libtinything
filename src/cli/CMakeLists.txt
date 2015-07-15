@@ -1,7 +1,7 @@
 
 # Build the cli
-add_executable(tinything_writer writer.cc)
+add_executable(dot_makerbot_writer writer.cc)
 
-target_link_libraries(tinything_writer tinything)
+target_link_libraries(dot_makerbot_writer tinything)
 
-export_and_install_targets(TARGETS tinything_writer NAMESPACE TinyThing)
+export_and_install_targets(TARGETS dot_makerbot_writer NAMESPACE TinyThing)
