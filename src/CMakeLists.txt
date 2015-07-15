@@ -56,7 +56,7 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/src/miniunzip"
     ${yajl_include_dir})
 
-add_library(tinything SHARED ${sources} ${headers})
+add_library(tinything ${sources} ${headers})
 
 export_api(tinything TINYTHING_API)
 
