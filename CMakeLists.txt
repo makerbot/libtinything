@@ -1,9 +1,9 @@
 
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.1)
 
 project(libtinything C CXX)
 
-find_package(MBCMakeTools REQUIRED)
+find_package(MBCMakeTools REQUIRED NO_POLICY_SCOPE)
 
 add_subdirectory(src)
 
