@@ -2,7 +2,7 @@
 # Build the cli
 add_executable(dot_makerbot_writer writer.cc)
 
-use_stanadard_flags(dot_makerbot_writer)
+use_standard_flags(dot_makerbot_writer)
 
 target_link_libraries(dot_makerbot_writer tinything)
 
