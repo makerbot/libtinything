@@ -10,6 +10,22 @@
 
 using namespace LibTinyThing;
 
+Metadata::Metadata() : extrusion_mass_g(0.),
+                       extrusion_distance_mm(0),
+                       extruder_temperature(0),
+                       chamber_temperature(0),
+                       shells(0),
+                       layer_height(0),
+                       infill_density(0),
+                       uses_support(false),
+                       duration_s(0),
+                       max_flow_rate(0),
+                       thing_id(0),
+                       uses_raft(false),
+                       uuid({'-'}),
+                       material("UNKNOWN"),
+                       slicer_name("UNKNOWN") {}
+
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
     : m_filePath(filePath),
       m_zipFile(NULL),

@@ -20,6 +20,7 @@ namespace LibTinyThing {
     // Struct that contains the contents of a metadata file in
     // a version-independent way
     struct TINYTHING_API Metadata {
+        Metadata();
         float extrusion_mass_g;
         float extrusion_distance_mm;
         int extruder_temperature;
