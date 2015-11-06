@@ -157,7 +157,7 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         const std::string type
             = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
-        if(std::stoi(type.substr(pid_idx)) != data.pid) {
+        if(std::stoi(type.substr(pid_idx), 16) != data.pid) {
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which is allowed to be a JSON null
