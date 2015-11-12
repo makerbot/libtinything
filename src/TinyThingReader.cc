@@ -132,7 +132,9 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         // This slice is old enough to not be versioned, we'll use good old fashioned
         // hope to ensure it's correct
         return Error::kOK;
-    } else if(m_metafileVersion.major > 1) {
+        // Metafile version 2 indicates that the jsontoolpath may contain
+        // comments intended to help toolpathviz, per SLIC-356
+    } else if(m_metafileVersion.major > 2) {
         return kVersionMismatch;
     } else {
         // Check bot type first, since this is guaranteed to exist even if
