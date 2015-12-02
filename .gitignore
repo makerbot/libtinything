@@ -1,9 +1,10 @@
 lib/*
 *.tinything
 *~
-.sconsign.dblite
 *.os
-/obj/
-*.vcxproj
-*_version.rc
 *.swp
+
+# default cmake build folders
+_build
+_build64
+_build_debug
