@@ -24,7 +24,9 @@ Metadata::Metadata() : extrusion_mass_g(0.),
                        uses_raft(false),
                        uuid({'-'}),
                        material("UNKNOWN"),
-                       slicer_name("UNKNOWN") {}
+                       slicer_name("UNKNOWN"),
+                       tool_type(bwcoreutils::TYPE::UNKNOWN_TYPE),
+                       bot_pid(9999) {}
 
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
     : m_filePath(filePath),
@@ -199,6 +201,8 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             = m_metadataParsed.get("chamber_temperature", 0).asInt();
         out->uses_raft
             = m_metadataParsed["printer_settings"].get("raft", false).asBool();
+        out->tool_type = bwcoreutils::TYPE::UNKNOWN_TYPE;
+        out->bot_pid = 9999;
     } break;
     case 1:{
         out->extrusion_mass_g
@@ -215,6 +219,19 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         out->uses_raft
             = m_metadataParsed.get("miracle_config", Json::Value())
             .get("doRaft", false).asBool();
+        if (!m_metadataParsed["tool_type"].isNull()) {
+            out->tool_type
+                = bwcoreutils::YonkersTool
+                ::type_from_type_name(m_metadataParsed.get("tool_type",
+                                                           "unknown")
+                                      .asString());
+        } else {
+            out->tool_type = bwcoreutils::TYPE::UNKNOWN_TYPE;
+        }
+        const std::string type
+            = m_metadataParsed.get("bot_type", "_9999").asString();
+        const size_t pid_idx = type.rfind('_')+1;
+        out->bot_pid = std::stoi(type.substr(pid_idx), nullptr, 16);
     } break;
     }
     // common output

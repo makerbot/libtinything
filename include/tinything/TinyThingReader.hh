@@ -7,6 +7,7 @@
 
 namespace bwcoreutils {
     enum class TOOL;
+    enum class TYPE;
 }
 
 namespace LibTinyThing {
@@ -36,6 +37,8 @@ namespace LibTinyThing {
         char uuid[UUID_MAX_LENGTH];
         std::string material;
         std::string slicer_name;
+        bwcoreutils::TYPE tool_type;
+        unsigned int bot_pid;
     };
     // Struct containing all information required to verify whether
     // the TinyThing has been sliced for a given printer
@@ -56,6 +59,8 @@ namespace LibTinyThing {
         float duration_s;
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
+        bwcoreutils::TYPE tool_type;
+        unsigned int bot_pid;
     };
     
     class TINYTHING_API TinyThingReader {
