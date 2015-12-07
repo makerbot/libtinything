@@ -7,6 +7,7 @@
 
 namespace bwcoreutils {
     enum class TOOL;
+    enum class TYPE;
 }
 
 namespace LibTinyThing {
@@ -20,6 +21,7 @@ namespace LibTinyThing {
     // Struct that contains the contents of a metadata file in
     // a version-independent way
     struct TINYTHING_API Metadata {
+        Metadata();
         float extrusion_mass_g;
         float extrusion_distance_mm;
         int extruder_temperature;
@@ -35,6 +37,8 @@ namespace LibTinyThing {
         char uuid[UUID_MAX_LENGTH];
         std::string material;
         std::string slicer_name;
+        bwcoreutils::TYPE tool_type;
+        unsigned int bot_pid;
     };
     // Struct containing all information required to verify whether
     // the TinyThing has been sliced for a given printer
@@ -55,6 +59,8 @@ namespace LibTinyThing {
         float duration_s;
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
+        bwcoreutils::TYPE tool_type;
+        unsigned int bot_pid;
     };
     
     class TINYTHING_API TinyThingReader {
