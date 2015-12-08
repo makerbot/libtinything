@@ -24,7 +24,9 @@ class MetadataStruct(ctypes.LittleEndianStructure):
         ("thing_id", ctypes.c_int),
         ("duration_s", ctypes.c_float),
         ("uses_raft", ctypes.c_bool),
-        ("uuid", ctypes.c_char * 100)
+        ("uuid", ctypes.c_char * 100),
+        ("tool_type", ctypes.c_int),
+        ("bot_pid", ctypes.c_uint)
     )
 
 class TinyThing:
