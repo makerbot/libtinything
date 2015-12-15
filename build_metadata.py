@@ -7,12 +7,14 @@ else:
     dependencies = [
         artifactory_utils.ArtifactSelector(
             project="Toolchain-Release",
-            revision="develop",
+            revision="master",
+            version="3.9.*",
             debug=False,
             stable_required=True),
         artifactory_utils.ArtifactSelector(
             project="json-cpp",
-            revision="develop",
+            revision="master",
+            version="3.8.*",
             debug=False,
             stable_required=True)
     ]
