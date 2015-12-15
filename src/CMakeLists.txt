@@ -48,8 +48,6 @@ set(sources
     miniunzip/zip.c
     cli/writer.cc)
 
-add_compiler_flags()
-
 include_directories(
     "${PROJECT_SOURCE_DIR}/include"
     "${PROJECT_SOURCE_DIR}/src/zlib"
@@ -57,7 +55,7 @@ include_directories(
     ${yajl_include_dir})
 
 add_library(tinything ${sources} ${headers})
-
+use_standard_flags(tinything)
 export_api(tinything TINYTHING_API)
 
 # Prevent zlib from doing its usual API stuff
