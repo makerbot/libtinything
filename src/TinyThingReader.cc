@@ -361,6 +361,10 @@ void TinyThingReader::getToolpathFileContents(std::string* contents) const {
     *contents = m_private->m_toolpathFileContents;
 }
 
+std::string TinyThingReader::getToolpathFileContents() const {
+    return m_private->m_toolpathFileContents;
+}
+
 bool TinyThingReader::hasJsonToolpath() const{
     return m_private->hasJsonToolpath();
 }
@@ -377,6 +381,10 @@ bool TinyThingReader::isValid() const{
 // returns true if succesful
 bool TinyThingReader::resetToolpath(){
     return m_private->resetToolpath();
+}
+
+std::string TinyThingReader::getMetadataFileContents() const {
+    return m_private->m_metadataFileContents;
 }
 
 // if length of return string is < bytes, you have reached end of file
