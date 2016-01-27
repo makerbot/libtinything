@@ -8,8 +8,8 @@ namespace LibTinyThing {
 // READER FUNCTIONS
 
 extern "C"
-TinyThingReader* NewTinyThingReader(const char* filepath){
-    TinyThingReader* tinything = new TinyThingReader(filepath);
+TinyThingReader* NewTinyThingReader(const char* filepath, int fd){
+    TinyThingReader* tinything = new TinyThingReader(filepath, fd);
     return tinything;
 }
 
@@ -20,37 +20,26 @@ int DestroyTinyThingReader(TinyThingReader* tinything){
 }
 
 extern "C"
-bool UnzipToolpath(TinyThingReader* tinything){
-	bool success = tinything->unzipToolpathFile();
-	return success;
-}
-
-extern "C"
 bool UnzipMetadata(TinyThingReader* tinything){
 	bool success = tinything->unzipMetadataFile();
 	return success;
 }
 
 extern "C"
-const char* GetToolpath(TinyThingReader* tinything){
-    std::string toolpath = tinything->getToolpathFileContents();
-    return toolpath.c_str();
+int DoesMetadataMatch(const TinyThingReader* tinything,
+                      const VerificationData* data) {
+    return tinything->doesMetadataFileMatchConfig(*data);
 }
 
 extern "C"
-const char* GetMetadata(TinyThingReader* tinything){
-    std::string metdata = tinything->getMetadataFileContents();
-    return metdata.c_str();
+int GetMetadata(const TinyThingReader* tinything,
+                CInterfaceMetadata* out) {
+    return tinything->getMetadata(out);
 }
 
 extern "C"
-bool ResetToolpath(TinyThingReader* tinything){
-    return tinything->resetToolpath();
-}
-
-extern "C"
-const char* GetToolpathIncr(TinyThingReader* tinything, const int bytes){
-    return tinything->getToolpathIncr(bytes).c_str();
+bool IsValid(const TinyThingReader* tinything) {
+    return tinything->isValid();
 }
 
 // WRITER FUNCTIONS

@@ -86,6 +86,8 @@
 #   include <errno.h>
 #endif
 
+/* Included here for lseek, only needed by birdwing */
+#include <unistd.h>
 
 #ifndef local
 #  define local static
@@ -798,6 +800,49 @@ extern unzFile ZEXPORT unzOpen (const char *path)
 extern unzFile ZEXPORT unzOpen64 (const void *path)
 {
     return unzOpenInternal(path, NULL, 1);
+}
+
+static voidpf ZCALLBACK fd_open_func (voidpf opaque, const void* filename, int mode)
+{
+    int *fd;
+    fd = (int*)opaque;
+
+    /* Because we are pretending that we are opening this file anew, we
+       have to make sure that we are at the beginning of the file. */
+    lseek(*fd, 0, SEEK_SET);
+
+    /* We ignore mode because we only support reading here.  We also leave
+       off the "b" because fdopen documentation says to. */
+    return fdopen(*fd, "r");
+}
+
+static int ZCALLBACK fd_close_func (voidpf opaque, voidpf stream)
+{
+    return 0;
+}
+
+extern unzFile ZEXPORT unzOpenFD (const char *path, int fd)
+{
+    zlib_filefunc64_32_def z_filefunc_def;
+
+    /* The standard setup copied from unzOpenInternal */
+    z_filefunc_def.zseek32_file = NULL;
+    z_filefunc_def.ztell32_file = NULL;
+    fill_fopen64_filefunc(&z_filefunc_def.zfile_func64);
+
+    /* Override the function used to open the file
+       (This function only gets invoked inside of unzOpenInternal,
+       and only the open function uses opaque, so the fd reference
+       should be safe here.) */
+    z_filefunc_def.zfile_func64.opaque = &fd;
+    z_filefunc_def.zfile_func64.zopen64_file = fd_open_func;
+
+    /* Also override the close function with a no-op (the caller
+       is responsible for closing the file desciptor after
+       calling unzClose. */
+    z_filefunc_def.zfile_func64.zclose_file = fd_close_func;
+
+    return unzOpenInternal(path, &z_filefunc_def, 0);
 }
 
 /*
