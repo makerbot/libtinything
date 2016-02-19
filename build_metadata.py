@@ -16,5 +16,11 @@ else:
             revision="master",
             version="3.8.*",
             debug=False,
+            stable_required=True),
+        artifactory_utils.ArtifactSelector(
+            project="MBCoreUtils",
+            revision="master",
+            version="3.9.*",
+            debug=False,
             stable_required=True)
     ]
