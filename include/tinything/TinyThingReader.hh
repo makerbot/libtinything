@@ -49,11 +49,6 @@ namespace LibTinyThing {
 		std::string m_toolpathFileContents;
 		std::string m_thumbnailFileContents;
 		std::string m_metadataFileContents;
-
-        // variables to support incremental toolpath unzipping
-        unzFile m_toolpathFile;
-        int m_toolpathSize;
-        int m_toolpathPos;
 	};
 
 }
