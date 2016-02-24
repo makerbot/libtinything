@@ -86,8 +86,14 @@
 #   include <errno.h>
 #endif
 
+
+#if defined(WIN32) || defined(_WIN32) || defined(WINDOWS) || defined(_WINDOWS)
+#define LSEEK_IF_LINUX(fd, pos, flags)
+#else
 /* Included here for lseek, only needed by birdwing */
 #include <unistd.h>
+#define LSEEK_IF_LINUX(fd, pos, flags) lseek(fd, pos, flags)
+#endif
 
 #ifndef local
 #  define local static
@@ -809,7 +815,7 @@ static voidpf ZCALLBACK fd_open_func (voidpf opaque, const void* filename, int m
 
     /* Because we are pretending that we are opening this file anew, we
        have to make sure that we are at the beginning of the file. */
-    lseek(*fd, 0, SEEK_SET);
+    LSEEK_IF_LINUX(*fd, 0, SEEK_SET);
 
     /* We ignore mode because we only support reading here.  We also leave
        off the "b" because fdopen documentation says to. */

@@ -140,7 +140,7 @@ bool TinyThingReader::Private::parseFile(const std::string& contents, Json::Valu
     return reader.parse(contents, *output);
 }
 
-TinyThingReader::TinyThingReader::Error
+TinyThingReader::Error
 TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
     if(m_metadataFileContents.empty()) {
         // We have not yet parsed the metadata file, don't even try to use the JSON
@@ -392,7 +392,7 @@ std::string TinyThingReader::getToolpathIncr(const int chars) {
     return m_private->getToolpathIncr(chars);
 }
 
-TinyThingReader::TinyThingReader::Error
+TinyThingReader::Error
 TinyThingReader::doesMetadataFileMatchConfig(const VerificationData& config) const {
     return m_private->verifyMetadata(config);
 }
