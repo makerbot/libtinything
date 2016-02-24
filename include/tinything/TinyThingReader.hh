@@ -3,8 +3,6 @@
 #define TINYTHINGREADER_HH_
 
 #include <string>
-#include "tinything/unzip.h"
-#include "tinything/zip.h"
 
 namespace LibTinyThing {
 
