@@ -1,131 +1,68 @@
+
 #ifndef TINYTHINGREADER_HH_
 #define TINYTHINGREADER_HH_
 
-#include <memory>
 #include <string>
-
-namespace bwcoreutils {
-    enum class TOOL;
-    enum class TYPE;
-}
+#include "tinything/unzip.h"
+#include "tinything/zip.h"
 
 namespace LibTinyThing {
-    // I feel really badly for anyone who makes the uuid
-    // longer than 100 chars and has to troubleshoot why print history
-    // isn't working. 
-    // The good news is if you've found this, you've probably
-    // found what you were looking for. 
-    static const unsigned int UUID_MAX_LENGTH = 100;
 
-    // Struct that contains the contents of a metadata file in
-    // a version-independent way
-    struct TINYTHING_API Metadata {
-        Metadata();
-        float extrusion_mass_g;
-        float extrusion_distance_mm;
-        int extruder_temperature;
-        int chamber_temperature;
-        int shells;
-        float layer_height;
-        float infill_density;
-        bool uses_support;
-        float duration_s;
-        float max_flow_rate;
-        uint32_t thing_id;
-        bool uses_raft;
-        char uuid[UUID_MAX_LENGTH];
-        std::string material;
-        std::string slicer_name;
-        bwcoreutils::TYPE tool_type;
-        unsigned int bot_pid;
-    };
-    // Struct containing all information required to verify whether
-    // the TinyThing has been sliced for a given printer
-    
-    struct TINYTHING_API VerificationData {
-        bwcoreutils::TOOL tool_id;
-        uint8_t pid;
-    };
+	class TinyThingReader {
+	public:
 
-    // Struct containing only that data that doesn't absolutely suck
-    // to export through a C interface
-    struct TINYTHING_API CInterfaceMetadata {
-        float extrusion_mass_g;
-        float extrusion_distance_mm;
-        int extruder_temperature;
-        int chamber_temperature;
-        uint32_t thing_id;
-        float duration_s;
-        bool uses_raft;
-        char uuid[UUID_MAX_LENGTH];
-        bwcoreutils::TYPE tool_type;
-        unsigned int bot_pid;
-    };
-    
-    class TINYTHING_API TinyThingReader {
-    public:
-        enum Error {
-            kOK=0,
-            kNotYetUnzipped=1,
-            kToolMismatch=2,
-            kBotTypeMismatch=3,
-            kVersionMismatch=4,
-            kMaxStringLengthExceeded=5
-        };
-        
-        // passing in a fd will use an already opened file handle
-        TinyThingReader(const std::string& filePath, int fd = -1);
-        ~TinyThingReader();
+		TinyThingReader(const std::string& filePath) : m_filePath(filePath),
+			m_toolpathFile(NULL), m_toolpathSize(0), m_toolpathPos(0) {}
 
-        // these functions unzip the contents of each of these files,
-        // and cache them in memory. they return true if the unzip is
-        // succesful
-        bool unzipMetadataFile();
-        bool unzipSmallThumbnailFile();
-        bool unzipMediumThumbnailFile();
-        bool unzipLargeThumbnailFile();
-        bool unzipToolpathFile();
+		~TinyThingReader();
 
-        // these are accessors for the unzipped contents of each of the
-        // files. they should only be called after each has been
-        // unzipped.
-        void getSmallThumbnailFileContents(std::string* contents) const;
-        void getMediumThumbnailFileContents(std::string* contents) const;
-        void getLargeThumbnailFileContents(std::string* contents) const;
-        void getToolpathFileContents(std::string* contents) const;
-        std::string getToolpathFileContents() const;
-        // checks to see if toolpath is present
-        bool hasJsonToolpath() const;
+		// these functions unzip the contents of each of these files,
+		// and cache them in memory. they return true if the unzip is
+		// succesful 
+		bool unzipMetadataFile();
+		bool unzipThumbnailFile();
+		bool unzipToolpathFile();
 
-        // checks to see if all files are present
-        bool isValid() const;
 
-        // checks to see if specifically metadata is present - this is
-        // a hack required by DRM prints, where the metadata is downloaded
-        // independently and stuck in a zipfile, which is then opened by
-        // printerpanel like it was a full .makerbot.
-        bool hasMetadata() const;
+		// these are accessors for the unzipped contents of each of the 
+		// files. they should only be called after each has been
+		// unzipped 
+		std::string getMetadataFileContents();
+		std::string getThumbnailFileContents();
+		std::string getToolpathFileContents();
 
-        // check to see if the metadata file is acceptable given
-        // a config (defined above)
-        Error doesMetadataFileMatchConfig(const VerificationData& config) const;
-        Error getMetadata(Metadata* out) const;
-        Error getMetadata(CInterfaceMetadata* out) const;
-        // Hacky method to support MBD doing its own metadata parsing for some
-        // reason
-        std::string getMetadataFileContents() const;
+		// checks to see if toolpath is present
+		bool hasJsonToolpath();
+
+		// checks to see if all files are present
+		bool isValid();
+
         // incremental unzipping of toolpath
-        // unzipping any other part of the file
-        // or checking if it is valid will reset
-        // the incremental pointer
         bool resetToolpath();
         std::string getToolpathIncr(const int chars);
 
-    private:
-        class Private;
-        std::unique_ptr<Private> m_private;
-    };
+	private:
+
+		bool unzipFile(const std::string& fileName,
+				  	   std::string &output);
+
+		const std::string m_filePath;
+
+		std::string m_toolpathFileContents;
+		std::string m_thumbnailFileContents;
+		std::string m_metadataFileContents;
+
+        // variables to support incremental toolpath unzipping
+        unzFile m_toolpathFile;
+        int m_toolpathSize;
+        int m_toolpathPos;
+	};
 
 }
 
+
 #endif /* TINYTHINGREADER_HH_ */
+
+
+
+
