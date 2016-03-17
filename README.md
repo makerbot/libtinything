@@ -1,25 +1,19 @@
 libtinything
 ============
 
-functions to create, modify and validate tinything (to be named) files
+Functions to create, read and validate .makerbot files
 
-Building
-========
+The spec for .makerbot files is here: https://github.com/makerbot/Birdwing-toolchain/blob/master/docs/architecture/tiny_thing.md
 
-The libtinything sconsript currently allows it to be built on a local ubuntu system or cross compiled for the birdwing board.
+Tinything?
+==========
 
-To install to local /usr/lib run:
-`scons `
-
-To cross compile and install to the /usr/lib of a NFS run:
-`scons --embedded --nfs=/path/to/nfs/root`
-
-Add ` install` to the end of either scons call to copy the compiled library to the appropriate directory.
-
-Note: zlib is required to be present as a sibling directory to libtinything
+This was our internal name for what are now called .makerbot files
 
 Python Bindings
 ===============
+
+Libtinything comes with python bindings! Here are some potentially out of date examples.
 
 Here is an example of extracting a jsontoolpath using the python bindings using 
 PYTHON3.3
@@ -41,12 +35,12 @@ Here is an example of incrementally reading a toolpath
     chars = libtt.GetToolpathIncr(tt, ctypes.c_int(10)) # get the first 10 characters
     chars = libtt.GetToolpathIncr(tt, ctypes.c_int(20)) # get the next 20..
 
-Here is an example of creating a tinything
+Here is an example of creating a tinything with python 2.7
 
     import ctypes
-    libtt = ctypes.CDLL("/home/paul/libtinything/lib/libtinything.so")
-    tt = libtt.NewTinyThingWriter(ctypes.c_char_p(bytes("/home/paul/test.tinything", 'UTF-8')))
-    tt.SetMetadataFile(tt, ctypes.c_char_p(bytes("/home/paul/meta.txt", 'UTF-8')))
-    tt.SetThumbnailFile(tt, ctypes.c_char_p(bytes("/home/paul/Firefox_wallpaper.png", 'UTF-8')))
-    tt.SetToolpathFile(tt, ctypes.c_char_p(bytes("/home/paul/toolpath.json", 'UTF-8')))
-    tt.Zip(tt)
+    libtt = ctypes.CDLL("/home/paul/libtinything/obj/libtinything.so")
+    tt = libtt.NewTinyThingWriter(ctypes.c_char_p("/home/paul/test.tinything"))
+    libtt.SetMetadataFile(tt, ctypes.c_char_p("/home/paul/metadata.txt"))
+    libtt.SetToolpathFile(tt, ctypes.c_char_p("/home/paul/toolpath.txt"))
+    libtt.SetThumbnailDirectory(tt, ctypes.c_char_p("/home/paul/makerbots/thumbnails"))
+    libtt.Zip(tt)

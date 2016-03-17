@@ -30,7 +30,7 @@ TINYTHING_API int DestroyTinyThingWriter(TinyThingWriter* tinything);
 
 TINYTHING_API void SetToolpathFile(TinyThingWriter* tinything, const char* filepath);
 
-TINYTHING_API void setThumbnailDirectory(TinyThingWriter* tinything, const char* filedir);
+TINYTHING_API void SetThumbnailDirectory(TinyThingWriter* tinything, const char* filedir);
 
 TINYTHING_API void SetMetadataFile(TinyThingWriter* tinything, const char* filepath);
 

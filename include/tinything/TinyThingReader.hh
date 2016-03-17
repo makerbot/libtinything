@@ -1,4 +1,3 @@
-
 #ifndef TINYTHINGREADER_HH_
 #define TINYTHINGREADER_HH_
 
@@ -94,7 +93,7 @@ namespace LibTinyThing {
         void getMediumThumbnailFileContents(std::string* contents) const;
         void getLargeThumbnailFileContents(std::string* contents) const;
         void getToolpathFileContents(std::string* contents) const;
-
+        std::string getToolpathFileContents() const;
         // checks to see if toolpath is present
         bool hasJsonToolpath() const;
 
@@ -112,7 +111,9 @@ namespace LibTinyThing {
         Error doesMetadataFileMatchConfig(const VerificationData& config) const;
         Error getMetadata(Metadata* out) const;
         Error getMetadata(CInterfaceMetadata* out) const;
-
+        // Hacky method to support MBD doing its own metadata parsing for some
+        // reason
+        std::string getMetadataFileContents() const;
         // incremental unzipping of toolpath
         // unzipping any other part of the file
         // or checking if it is valid will reset
@@ -126,6 +127,5 @@ namespace LibTinyThing {
     };
 
 }
-
 
 #endif /* TINYTHINGREADER_HH_ */

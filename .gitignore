@@ -3,6 +3,10 @@
 *.tinything
 python/tinything/__pycache__/
 *~
-.sconsign.dblite
 *.os
 *.swp
+
+# default cmake build folders
+_build
+_build64
+_build_debug
