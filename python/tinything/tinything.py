@@ -34,7 +34,8 @@ class MetadataStruct(ctypes.LittleEndianStructure):
         ("bounding_box_y_min", ctypes.c_float),
         ("bounding_box_y_max", ctypes.c_float),
         ("bounding_box_z_min", ctypes.c_float),
-        ("bounding_box_z_max", ctypes.c_float)
+        ("bounding_box_z_max", ctypes.c_float),
+        ("file_size", ctypes.c_uint32)
     )
 
 class TinyThing:

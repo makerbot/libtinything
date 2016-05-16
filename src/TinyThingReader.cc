@@ -8,6 +8,8 @@
 #include "TinyThingReader_Impl.hh"
 #include "semver.hh"
 
+#include <sys/stat.h>
+
 using namespace LibTinyThing;
 
 Metadata::Metadata() : extrusion_mass_g(0.),
@@ -30,6 +32,7 @@ Metadata::Metadata() : extrusion_mass_g(0.),
 
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
     : m_filePath(filePath),
+      m_via_fd(fd > 0),
       m_zipFile(NULL),
       m_incremental(false),
       m_toolpathSize(0),
@@ -275,11 +278,22 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
     }
     // common output
     out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+    if (!m_via_fd) {
+        struct stat stat_buffer;
+        // I'm going to ignore the return value here because if we've gotten to
+        // this point we damn well have a viable file
+        stat(m_filePath.c_str(), &stat_buffer);
+        out->file_size = stat_buffer.st_size;
+    } else {
+        // File size is meaningless for drm prints because we stream them
+        out->file_size = 0;
+    }
     const std::string uuid = m_metadataParsed.get("uuid", "").asString();
     if (uuid.size() > UUID_MAX_LENGTH) {
         return Error::kMaxStringLengthExceeded;
     }
     uuid.copy(out->uuid, uuid.size());
+
     //out->uuid[uuid.size()] = '\0';
     return Error::kOK;
 }

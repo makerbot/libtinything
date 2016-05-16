@@ -46,6 +46,7 @@ namespace LibTinyThing {
         float bounding_box_y_max;
         float bounding_box_z_min;
         float bounding_box_z_max;
+        uint32_t file_size;
     };
     // Struct containing all information required to verify whether
     // the TinyThing has been sliced for a given printer
@@ -75,6 +76,7 @@ namespace LibTinyThing {
         float bounding_box_y_max;
         float bounding_box_z_min;
         float bounding_box_z_max;
+        uint32_t file_size;
     };
     
     class TINYTHING_API TinyThingReader {
