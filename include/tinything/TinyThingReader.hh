@@ -111,6 +111,13 @@ namespace LibTinyThing {
         Error doesMetadataFileMatchConfig(const VerificationData& config) const;
         Error getMetadata(Metadata* out) const;
         Error getMetadata(CInterfaceMetadata* out) const;
+        // Methods to get the slice profile, as a cstring (will be in the value
+        // pointed to by the out arg). This pointer is a pointer to a buffer
+        // held by the TinyThingReader object; it is no longer valid if this
+        // instance dies. it is likely a good idea to copy it out to somewhere
+        // under the caller's control as soon as possible.
+        Error getSliceProfile(const char** profile) const;
+
         // Hacky method to support MBD doing its own metadata parsing for some
         // reason
         std::string getMetadataFileContents() const;

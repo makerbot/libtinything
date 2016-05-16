@@ -81,6 +81,14 @@ class TinyThing:
         else:
             return self._struct_to_dict(data)
 
+    def get_slice_profile(self):
+        prof_pointer = ctypes.POINTER(ctypes.c_char)()
+        error = self._libtinything.GetSliceProfile(self.reader,
+                                                   ctypes.byref(prof_pointer))
+        prof_dict = json.loads(bytes(ctypes.string_at(prof_pointer))\
+                               .decode('UTF-8'))
+        return prof_dict
+
     def __del__(self):
         self._libtinything.DestroyTinyThingReader(self.reader)
 
