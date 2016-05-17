@@ -16,6 +16,8 @@ namespace LibTinyThing {
     // The good news is if you've found this, you've probably
     // found what you were looking for. 
     static const unsigned int UUID_MAX_LENGTH = 100;
+    // this would be a pretty dang wordy material
+    static const unsigned int MATERIAL_MAX_LENGTH = 50;
 
     // Struct that contains the contents of a metadata file in
     // a version-independent way
@@ -34,10 +36,17 @@ namespace LibTinyThing {
         uint32_t thing_id;
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
-        std::string material;
+        char material[MATERIAL_MAX_LENGTH];
         std::string slicer_name;
         bwcoreutils::TYPE tool_type;
         unsigned int bot_pid;
+        float bounding_box_x_min;
+        float bounding_box_x_max;
+        float bounding_box_y_min;
+        float bounding_box_y_max;
+        float bounding_box_z_min;
+        float bounding_box_z_max;
+        uint32_t file_size;
     };
     // Struct containing all information required to verify whether
     // the TinyThing has been sliced for a given printer
@@ -58,8 +67,16 @@ namespace LibTinyThing {
         float duration_s;
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
+        char material[MATERIAL_MAX_LENGTH];
         bwcoreutils::TYPE tool_type;
         unsigned int bot_pid;
+        float bounding_box_x_min;
+        float bounding_box_x_max;
+        float bounding_box_y_min;
+        float bounding_box_y_max;
+        float bounding_box_z_min;
+        float bounding_box_z_max;
+        uint32_t file_size;
     };
     
     class TINYTHING_API TinyThingReader {
@@ -111,6 +128,13 @@ namespace LibTinyThing {
         Error doesMetadataFileMatchConfig(const VerificationData& config) const;
         Error getMetadata(Metadata* out) const;
         Error getMetadata(CInterfaceMetadata* out) const;
+        // Methods to get the slice profile, as a cstring (will be in the value
+        // pointed to by the out arg). This pointer is a pointer to a buffer
+        // held by the TinyThingReader object; it is no longer valid if this
+        // instance dies. it is likely a good idea to copy it out to somewhere
+        // under the caller's control as soon as possible.
+        Error getSliceProfile(const char** profile) const;
+
         // Hacky method to support MBD doing its own metadata parsing for some
         // reason
         std::string getMetadataFileContents() const;

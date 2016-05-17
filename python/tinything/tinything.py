@@ -1,4 +1,5 @@
 import ctypes
+import json
 
 errors = {
     'ok': 0,
@@ -25,8 +26,16 @@ class MetadataStruct(ctypes.LittleEndianStructure):
         ("duration_s", ctypes.c_float),
         ("uses_raft", ctypes.c_bool),
         ("uuid", ctypes.c_char * 100),
+        ("material", ctypes.c_char*50),
         ("tool_type", ctypes.c_int),
-        ("bot_pid", ctypes.c_uint)
+        ("bot_pid", ctypes.c_uint),
+        ("bounding_box_x_min", ctypes.c_float),
+        ("bounding_box_x_max", ctypes.c_float),
+        ("bounding_box_y_min", ctypes.c_float),
+        ("bounding_box_y_max", ctypes.c_float),
+        ("bounding_box_z_min", ctypes.c_float),
+        ("bounding_box_z_max", ctypes.c_float),
+        ("file_size", ctypes.c_uint32)
     )
 
 class TinyThing:
@@ -80,6 +89,14 @@ class TinyThing:
             raise NotYetUnzippedException('meta.json')
         else:
             return self._struct_to_dict(data)
+
+    def get_slice_profile(self):
+        prof_pointer = ctypes.POINTER(ctypes.c_char)()
+        error = self._libtinything.GetSliceProfile(self.reader,
+                                                   ctypes.byref(prof_pointer))
+        prof_dict = json.loads(bytes(ctypes.string_at(prof_pointer))\
+                               .decode('UTF-8'))
+        return prof_dict
 
     def __del__(self):
         self._libtinything.DestroyTinyThingReader(self.reader)

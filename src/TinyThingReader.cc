@@ -8,6 +8,8 @@
 #include "TinyThingReader_Impl.hh"
 #include "semver.hh"
 
+#include <sys/stat.h>
+
 using namespace LibTinyThing;
 
 Metadata::Metadata() : extrusion_mass_g(0.),
@@ -23,13 +25,14 @@ Metadata::Metadata() : extrusion_mass_g(0.),
                        thing_id(0),
                        uses_raft(false),
                        uuid(),
-                       material("UNKNOWN"),
+                       material(),
                        slicer_name("UNKNOWN"),
                        tool_type(bwcoreutils::TYPE::UNKNOWN_TYPE),
                        bot_pid(9999) {}
 
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
     : m_filePath(filePath),
+      m_via_fd(fd > 0),
       m_zipFile(NULL),
       m_incremental(false),
       m_toolpathSize(0),
@@ -205,6 +208,13 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             = m_metadataParsed["printer_settings"].get("raft", false).asBool();
         out->tool_type = bwcoreutils::TYPE::UNKNOWN_TYPE;
         out->bot_pid = 9999;
+        const std::string material = m_metadataParsed["printer_settings"]
+            .get("materials", Json::Value(Json::ValueType::arrayValue))
+            .get(Json::ArrayIndex(0), "UNKNOWN").asString();
+        if (material.size() > MATERIAL_MAX_LENGTH) {
+            return Error::kMaxStringLengthExceeded;
+        }
+        material.copy(out->material, material.size());
     } break;
     case 1:{
         out->extrusion_mass_g
@@ -221,6 +231,12 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         out->uses_raft
             = m_metadataParsed.get("miracle_config", Json::Value())
             .get("doRaft", false).asBool();
+        const std::string material
+            = m_metadataParsed.get("material", "UNKNOWN").asString();
+        if (material.size() > MATERIAL_MAX_LENGTH) {
+            return Error::kMaxStringLengthExceeded;
+        }
+        material.copy(out->material, material.size());
         if (!m_metadataParsed["tool_type"].isNull()) {
             out->tool_type
                 = bwcoreutils::YonkersTool
@@ -234,15 +250,50 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
         out->bot_pid = std::stoi(type.substr(pid_idx), nullptr, 16);
+        switch (m_metafileVersion.minor) {
+        case 0:
+            break;
+        case 1:
+            out->bounding_box_x_min
+                = m_metadataParsed.get("bounding_box_x_min",
+                                       Json::Value(0.f)).asFloat();
+            out->bounding_box_x_max
+                = m_metadataParsed.get("bounding_box_x_max",
+                                       Json::Value(0.f)).asFloat();
+            out->bounding_box_y_min
+                = m_metadataParsed.get("bounding_box_y_min",
+                                       Json::Value(0.f)).asFloat();
+            out->bounding_box_y_max
+                = m_metadataParsed.get("bounding_box_y_max",
+                                       Json::Value(0.f)).asFloat();
+            out->bounding_box_z_min
+                = m_metadataParsed.get("bounding_box_z_min",
+                                       Json::Value(0.f)).asFloat();
+            out->bounding_box_z_max
+                = m_metadataParsed.get("bounding_box_z_max",
+                                       Json::Value(0.f)).asFloat();
+            break;
+        }
     } break;
     }
     // common output
     out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+    if (!m_via_fd) {
+        struct stat stat_buffer;
+        // I'm going to ignore the return value here because if we've gotten to
+        // this point we damn well have a viable file
+        stat(m_filePath.c_str(), &stat_buffer);
+        out->file_size = stat_buffer.st_size;
+    } else {
+        // File size is meaningless for drm prints because we stream them
+        out->file_size = 0;
+    }
     const std::string uuid = m_metadataParsed.get("uuid", "").asString();
     if (uuid.size() > UUID_MAX_LENGTH) {
         return Error::kMaxStringLengthExceeded;
     }
     uuid.copy(out->uuid, uuid.size());
+
     //out->uuid[uuid.size()] = '\0';
     return Error::kOK;
 }
@@ -260,9 +311,6 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         out->infill_density = printer_settings.get("infill", 0.f).asFloat();
         out->uses_support = printer_settings.get("support", false).asBool();
         out->max_flow_rate = 0.f; // Not included in this version
-        out->material
-            = printer_settings.get("materials", Json::Value())
-            .get(Json::ArrayIndex(0), "UNKNOWN").asString();
         out->slicer_name = printer_settings.get("slicer", "UNKNOWN").asString();
     }break;
     case 1:{
@@ -275,11 +323,20 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         out->uses_support = miracle_config.get("doSupport", false).asBool();
         out->max_flow_rate
             = m_metadataParsed.get("max_flow_rate", 0.f).asFloat();
-        out->material = m_metadataParsed.get("material", "UNKNOWN").asString();
         out->slicer_name = miracle_config.get("slicer", "UNKNOWN").asString();
     }break;
     }
     return Error::kOK;
+}
+
+TinyThingReader::Error
+TinyThingReader::Private::getSliceProfile(const char** out) const {
+    if (m_sliceProfileContents.empty()) {
+        *out = nullptr;
+        return TinyThingReader::kNotYetUnzipped;
+    }
+    *out = m_sliceProfileContents.c_str();
+    return TinyThingReader::kOK;
 }
 
 
@@ -301,7 +358,12 @@ bool TinyThingReader::unzipMetadataFile() {
     = SemVer(m_private->m_metadataParsed.get("version",
                                              Json::Value("0.0.0"))
              .asString());
-
+  if (extracted) {
+      auto fw = Json::FastWriter();
+      m_private->m_sliceProfileContents
+          = fw.write(m_private->m_metadataParsed.get("miracle_config",
+                                                     Json::Value(Json::ValueType::objectValue)));
+  }
   return extracted;
 }
 
@@ -333,6 +395,10 @@ bool TinyThingReader::unzipToolpathFile() {
     } else {
         return m_private->resetToolpath();
     }
+}
+
+TinyThingReader::Error TinyThingReader::getSliceProfile(const char** out) const {
+    return m_private->getSliceProfile(out);
 }
 
 TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {

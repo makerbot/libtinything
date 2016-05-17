@@ -38,6 +38,12 @@ int GetMetadata(const TinyThingReader* tinything,
 }
 
 extern "C"
+int GetSliceProfile(const TinyThingReader* tinything,
+                    const char** out) {
+    return tinything->getSliceProfile(out);
+}
+
+extern "C"
 bool IsValid(const TinyThingReader* tinything) {
     return tinything->isValid();
 }
