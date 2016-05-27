@@ -188,11 +188,9 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
 
 template<class MetadataType>
 TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) const {
-    switch(m_metafileVersion.major) {
-    case -1:{
+    if (m_metafileVersion.major == -1) {
         return TinyThingReader::Error::kNotYetUnzipped;
-    } break;
-    case 0:{
+    } else if (m_metafileVersion == SemVer(0, 0, 0)) {
         out->extrusion_mass_g
             = m_metadataParsed.get("extrusion_mass_a_grams", 0.f).asFloat()
             + m_metadataParsed.get("extrusion_mass_b_grams", 0.f).asFloat();
@@ -215,8 +213,8 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             return Error::kMaxStringLengthExceeded;
         }
         material.copy(out->material, material.size());
-    } break;
-    case 1:{
+    } else {
+        // All metafiles from version 1.0.0 on have this data
         out->extrusion_mass_g
             = m_metadataParsed.get("extrusion_mass_g", 0.f).asFloat();
         out->extrusion_distance_mm
@@ -250,10 +248,8 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
         out->bot_pid = std::stoi(type.substr(pid_idx), nullptr, 16);
-        switch (m_metafileVersion.minor) {
-        case 0:
-            break;
-        case 1:
+
+        if (m_metafileVersion > SemVer(1, 0, 0)) {
             out->bounding_box_x_min
                 = m_metadataParsed.get("bounding_box_x_min",
                                        Json::Value(0.f)).asFloat();
@@ -272,10 +268,9 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             out->bounding_box_z_max
                 = m_metadataParsed.get("bounding_box_z_max",
                                        Json::Value(0.f)).asFloat();
-            break;
         }
-    } break;
     }
+
     // common output
     out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
     if (!m_via_fd) {
@@ -294,7 +289,6 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
     }
     uuid.copy(out->uuid, uuid.size());
 
-    //out->uuid[uuid.size()] = '\0';
     return Error::kOK;
 }
 
