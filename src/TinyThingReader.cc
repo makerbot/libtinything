@@ -91,30 +91,35 @@ bool TinyThingReader::Private::resetToolpath() {
 }
 
 std::string TinyThingReader::Private::getToolpathIncr(const int chars) {
+    std::vector<char> buff;
+    buff.resize(chars, '\0');
+    const int num_read = getToolpathIncr(buff.data(), chars);
+    return std::string(buff.data(), num_read);
+}
+
+int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
     if (!m_incremental) {
         if(!resetToolpath()) {
             // Oops, we have an error
-            return "";
+            return 0;
         }
     }
         
     int chars_to_read = chars;
     if (m_toolpathPos >= m_toolpathSize) {
       // at end of file
-      return "";
+      return 0;
     } else if ((m_toolpathPos + chars) > m_toolpathSize) {
       // reached end of file
       chars_to_read = m_toolpathSize - m_toolpathPos;
     }
     m_toolpathPos += chars_to_read;
 
-    std::string output;
-    output.resize(chars_to_read);
     unzReadCurrentFile(m_zipFile,
-        const_cast<char*>(output.c_str()),
+        buff,
         chars_to_read);
 
-    return output;
+    chars_to_read;
 }
 
 bool TinyThingReader::Private::unzipFile(const std::string& fileName, std::string &output) const{
@@ -456,6 +461,10 @@ std::string TinyThingReader::getMetadataFileContents() const {
 // if length of return string is < bytes, you have reached end of file
 std::string TinyThingReader::getToolpathIncr(const int chars) {
     return m_private->getToolpathIncr(chars);
+}
+
+int TinyThingReader::getToolpathIncr(char* buff, const int chars) {
+    return m_private->getToolpathIncr(buff, chars);
 }
 
 TinyThingReader::Error
