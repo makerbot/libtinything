@@ -91,10 +91,12 @@ bool TinyThingReader::Private::resetToolpath() {
 }
 
 std::string TinyThingReader::Private::getToolpathIncr(const int chars) {
-    std::vector<char> buff;
-    buff.resize(chars, '\0');
-    const int num_read = getToolpathIncr(buff.data(), chars);
-    return std::string(buff.data(), num_read);
+    std::string buff;
+    buff.resize(chars, ' ');
+    char* buff_ptr = &buff.front();
+    const int num_read = getToolpathIncr(buff_ptr, chars);
+    buff.resize(num_read);
+    return buff;
 }
 
 int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
