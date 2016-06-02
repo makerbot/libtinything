@@ -119,7 +119,7 @@ int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
         buff,
         chars_to_read);
 
-    chars_to_read;
+    return chars_to_read;
 }
 
 bool TinyThingReader::Private::unzipFile(const std::string& fileName, std::string &output) const{
