@@ -91,8 +91,12 @@ bool TinyThingReader::Private::resetToolpath() {
 }
 
 std::string TinyThingReader::Private::getToolpathIncr(const int chars) {
-    // Make a string to hold the data and fill it with whitespace
-    std::string buff(size_t(chars), ' ');
+    // Make a string to hold the data
+    std::string buff;
+    // Resize it to hold enough chars
+    buff.resize(chars);
+    // Get a mutable pointer to the chars. This accomplishes the same thing
+    // as const_casting c_str(), but cleaner.
     char* buff_ptr = &buff.front();
     // Read into the string
     const int num_read = getToolpathIncr(buff_ptr, chars);
