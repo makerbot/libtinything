@@ -180,6 +180,12 @@ extern unzFile ZEXPORT unzOpen64 OF((const void *path));
        does not describe the reality
 */
 
+extern unzFile ZEXPORT unzOpenFD OF((const char *path, int fd));
+/*
+  Return an open zip file from an alrady opened file descriptor.  The caller
+  must still close the returned "file" when finished, but the file descriptor
+  will remain open.
+ */
 
 extern unzFile ZEXPORT unzOpen2 OF((const char *path,
                                     zlib_filefunc_def* pzlib_filefunc_def));
