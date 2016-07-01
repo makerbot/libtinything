@@ -7,7 +7,4 @@ SConscript('SConscript',
            variant_dir='.build-'+env.BWGetVariantDirSuffix(),
            duplicate=1)
 
-if env.BWShouldCrossBuild():
-    env.Default('install')
-elif env.BWShouldHostBuild():
-    env.Default('tinything')
+env.Default('install')
