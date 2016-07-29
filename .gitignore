@@ -10,3 +10,5 @@ python/tinything/__pycache__/
 _build
 _build64
 _build_debug
+_build_host
+_build_cross

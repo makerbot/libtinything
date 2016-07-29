@@ -11,6 +11,7 @@ class TinyThingReader::Private {
     bool isValid() const;
     bool resetToolpath();
     std::string getToolpathIncr(const int chars);
+    int getToolpathIncr(char* buff, int chars);
     bool unzipFile(const std::string& fileName, std::string &output) const;
     static bool parseFile(const std::string& contents, Json::Value* output);
 

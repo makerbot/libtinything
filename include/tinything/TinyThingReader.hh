@@ -144,6 +144,11 @@ namespace LibTinyThing {
         // the incremental pointer
         bool resetToolpath();
         std::string getToolpathIncr(const int chars);
+        // just like getToolpathIncr, but put the data into buff
+        // read at most chars number of bytes
+        // return actual number of characters read
+        // in case of error, return 0 and do not bodify buff
+        int getToolpathIncr(char* buff, int chars);
 
     private:
         class Private;
