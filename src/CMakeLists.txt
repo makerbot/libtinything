@@ -1,12 +1,6 @@
 
-if(DEFINED BIRDWING AND DEFINED MB_CROSS)
-    find_package(JsonCpp REQUIRED
-        NO_DEFAULT_PATH
-        PATHS
-            ${CMAKE_INSTALL_PREFIX}/cross_cmake)
-else()
-    find_package(JsonCpp REQUIRED)
-endif()
+find_package(JsonCpp REQUIRED)
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     # ensure the slash direction
     string(
@@ -75,12 +69,10 @@ add_subdirectory(cli)
 
 generate_and_install_config(NAME TinyThing)
 
-get_header_prefix_root(install_root)
-
 install(
     DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
-    DESTINATION "${install_root}${HEADER_INSTALL_DIR}")
+    DESTINATION "${HEADER_INSTALL_DIR}")
 
 install(
     DIRECTORY ${yajl_include_dir}
-    DESTINATION "${install_root}${HEADER_INSTALL_DIR}")
+    DESTINATION "${HEADER_INSTALL_DIR}")

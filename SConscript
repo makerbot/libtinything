@@ -20,14 +20,13 @@ env.BWAddIncludePath('src/zlib')
 
 env.Append(CPPDEFINES={'TINYTHING_API': ''})
 
-source_files =  Glob('src/zlib/*.c') + \
-                Glob('src/miniunzip/*.c') + \
-                Glob('src/*.cc')
+source_files = [
+    Glob('src/zlib/*.c'),
+    Glob('src/miniunzip/*.c'),
+    Glob('src/*.cc'),
+]
 
 ltinything = env.SharedLibrary('tinything', source_files)
 env.Alias('tinything', ltinything)
-if env.BWShouldCrossBuild():
-    install_lib = env.BWInstallLibrary(ltinything)
-    env.Alias('install', install_lib)
-elif not env.BWShouldHostBuild():
-    print("No compile target specified!")
+install_lib = env.BWInstallLibrary(ltinything)
+env.Alias('install', install_lib)
