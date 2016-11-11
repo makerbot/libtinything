@@ -4,11 +4,8 @@
 python/tinything/__pycache__/
 *~
 *.os
-*.swp
+
+/hook_settings.pyc
 
 # default cmake build folders
-_build
-_build64
-_build_debug
-_build_host
-_build_cross
+/_build*/
