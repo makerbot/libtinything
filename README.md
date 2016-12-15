@@ -1,46 +1,37 @@
-libtinything
-============
+LibTinyThing: C++ library with Python bindings for reading and writing .makerbot/.tinything files
 
-Functions to create, read and validate .makerbot files
+# Why tinything
+Don't worry about it
 
-The spec for .makerbot files is here: https://github.com/makerbot/Birdwing-toolchain/blob/master/docs/architecture/tiny_thing.md
+# Makerbot File Spec
+.makerbot files are the files that are sent to birdwing bots. They are a zip file with a json toolpath (see separate spec), metadata, and thumbnails.
 
-Tinything?
-==========
+## Versioning
+.makerbot files have a version number, which is contained in the meta.json file. This version number follows [semantic versioning](http://semver.org/).
+Version 1.0.0 is the first version with this version number. Any meta.json file that does not have a "version" key is by definition a version 0.0.3 file.
+Version 2.0.0 allows for comment commands in JsonToolPath files.
+Version 3.0.0 moves to a multi-extruder-by-default scheme for the meta file. Any key in the metafile that can be different on a per-extruder basis should always be a list, with a number of entries equivalent to the number of extruders on the machine - NOT the number of extruders used in a print.
 
-This was our internal name for what are now called .makerbot files
+## JsonToolpath File
+filename: "print.jsontoolpath"
 
-Python Bindings
-===============
+Describes the toolpath. See [the spec](jsontoolpath.md) in this directory for more information regarding this file.  This file can be reduced to a gcode file.
 
-Libtinything comes with python bindings! Here are some potentially out of date examples.
+The jsontoolpath file is output by Miracle Grue.
 
-Here is an example of extracting a jsontoolpath using the python bindings using 
-PYTHON3.3
+## Thumbnails
+.makerbot files contain 3 thumbnails:
 
-    import ctypes
-    libtt = ctypes.CDLL("/home/paul/libtinything/lib/libtinything.so")
-    tt = libtt.NewTinyThingReader(ctypes.c_char_p(bytes("/home/paul/test.tinything", 'UTF-8')))
-    libtt.UnzipToolpath(tt) # 1 = success, 0 = failed
-    libtt.GetToolpath.restype=c_char_p
-    libtt.GetToolpath(tinything)
+    thumbnail_55x40.png 
+    thumbnail_110x80.png 
+    thumbnail_320x200.png 
 
+The thumbnails will be displayed in the Bot LCD UI and will also be used in Makerware in any "tinything" file lists
 
-Here is an example of incrementally reading a toolpath
+Thumbnails can be any image files matching these dimensions. MakerWare currently can generate .stl and .thing renders as thumbnail images.
 
-    import ctypes
-    libtt = ctypes.CDLL("/home/paul/libtinything/lib/libtinything.so")
-    tt = libtt.NewTinyThingReader(ctypes.c_char_p(bytes("/home/paul/test.tinything", 'UTF-8')))
-    libtt.GetToolpathIncr.restype=c_char_p
-    chars = libtt.GetToolpathIncr(tt, ctypes.c_int(10)) # get the first 10 characters
-    chars = libtt.GetToolpathIncr(tt, ctypes.c_int(20)) # get the next 20..
+## Meta Data
+filename: meta.json
 
-Here is an example of creating a tinything with python 2.7
+Contains meta information about the file. See [the spec](metafile.md) in this directory for more information about this file.
 
-    import ctypes
-    libtt = ctypes.CDLL("/home/paul/libtinything/obj/libtinything.so")
-    tt = libtt.NewTinyThingWriter(ctypes.c_char_p("/home/paul/test.tinything"))
-    libtt.SetMetadataFile(tt, ctypes.c_char_p("/home/paul/metadata.txt"))
-    libtt.SetToolpathFile(tt, ctypes.c_char_p("/home/paul/toolpath.txt"))
-    libtt.SetThumbnailDirectory(tt, ctypes.c_char_p("/home/paul/makerbots/thumbnails"))
-    libtt.Zip(tt)
