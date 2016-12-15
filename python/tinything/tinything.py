@@ -12,31 +12,44 @@ errors = {
 
 class VerificationStruct(ctypes.LittleEndianStructure):
     _fields_ = (
-        ("tool", ctypes.c_int),
+        ("tool_count", ctypes.c_uint8),
+        ("tool", ctypes.c_int*2),
         ("pid", ctypes.c_uint8)
     )
 
+def good_str(ctypes_buf):
+    return bytes(ctypes_buf).decode('ascii').rstrip('\x00')
+
 class MetadataStruct(ctypes.LittleEndianStructure):
-    _fields_ = (
-        ("extrusion_mass_g", ctypes.c_float),
-        ("extrusion_distance_mm", ctypes.c_float),
-        ("extruder_temperature", ctypes.c_int),
-        ("chamber_temperature", ctypes.c_int),
-        ("thing_id", ctypes.c_int),
-        ("duration_s", ctypes.c_float),
-        ("uses_raft", ctypes.c_bool),
-        ("uuid", ctypes.c_char * 100),
-        ("material", ctypes.c_char*50),
-        ("tool_type", ctypes.c_int),
-        ("bot_pid", ctypes.c_uint),
-        ("bounding_box_x_min", ctypes.c_float),
-        ("bounding_box_x_max", ctypes.c_float),
-        ("bounding_box_y_min", ctypes.c_float),
-        ("bounding_box_y_max", ctypes.c_float),
-        ("bounding_box_z_min", ctypes.c_float),
-        ("bounding_box_z_max", ctypes.c_float),
-        ("file_size", ctypes.c_uint32)
-    )
+    
+    fields = [
+        ("extruder_count", ctypes.c_int, int),
+        ("extrusion_distance_mm", ctypes.c_float*2, lambda l: [float (f) for f in l]),
+        ("extruder_temperature", ctypes.c_int*2, lambda l: [int(i) for i in l]),
+        ("extrusion_mass_g", ctypes.c_float*2, lambda l: [float(f) for f in l]),
+        ("chamber_temperature", ctypes.c_int, int),
+        ("thing_id", ctypes.c_int, int),
+        ("duration_s", ctypes.c_float, float),
+        ("uses_raft", ctypes.c_bool, bool),
+        ("uuid", ctypes.c_char * 100, good_str),
+        ("material", (ctypes.c_char*50)*2, lambda l: [good_str(s) for s in l]),
+        ("tool_type", ctypes.c_int*2, lambda l: [int(i) for i in l]),
+        ("bot_pid", ctypes.c_uint, int),
+        ("bounding_box_x_min", ctypes.c_float, float),
+        ("bounding_box_x_max", ctypes.c_float, float),
+        ("bounding_box_y_min", ctypes.c_float, float),
+        ("bounding_box_y_max", ctypes.c_float, float),
+        ("bounding_box_z_min", ctypes.c_float, float),
+        ("bounding_box_z_max", ctypes.c_float, float),
+        ("file_size", ctypes.c_uint32, int)
+    ]
+    _fields_ = [(f[0], f[1]) for f in fields]
+
+    def to_dict(self):
+        res = {}
+        for (name, _, caster) in self.fields:
+            res[name] = caster(getattr(self, name))
+        return res
 
 class TinyThing:
     """
@@ -51,28 +64,11 @@ class TinyThing:
         c_fd = ctypes.c_int(fd)
         self.reader = self._libtinything.NewTinyThingReader(c_path, c_fd)
 
-    def _struct_to_dict(self, c_struct):
-        """
-        Marshalls a structure into a python dict.  Will recurse if a field
-        is found to be a nested Structure.
-        """
-        _dict = {}
-        struct_types = (ctypes.Structure, ctypes.LittleEndianStructure, ctypes.BigEndianStructure)
-        for (name, _ctype) in c_struct._fields_:
-            field = getattr(c_struct, name)
-            if isinstance(field, struct_types):
-                _dict[name] = self._struct_to_dict(field)
-            elif isinstance(field, float):
-                # Why are we casting all floats to ints?
-                _dict[name] = int(field)
-            elif isinstance(field, bytes):
-                _dict[name] = field.decode("ascii")
-            else:
-                _dict[name] = field
-        return _dict
-
-    def does_metadata_match(self, tool, pid):
-        c_struct = VerificationStruct(tool, pid)
+    def does_metadata_match(self, tools, pid):
+        c_struct = VerificationStruct()
+        c_struct.tool_count = len(tools)
+        c_struct.pid = pid
+        c_struct.tools = (ctypes.c_int*2)(*tools)
         error = self._libtinything.DoesMetadataMatch(self.reader, ctypes.byref(c_struct))
         if error == errors['not_yet_unzipped']:
             raise NotYetUnzippedException('meta.json')
@@ -88,7 +84,7 @@ class TinyThing:
         if error == errors['not_yet_unzipped']:
             raise NotYetUnzippedException('meta.json')
         else:
-            return self._struct_to_dict(data)
+            return data.to_dict()
 
     def get_slice_profile(self):
         prof_pointer = ctypes.POINTER(ctypes.c_char)()

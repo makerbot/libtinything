@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace bwcoreutils {
     enum class TOOL;
@@ -23,22 +24,23 @@ namespace LibTinyThing {
     // a version-independent way
     struct TINYTHING_API Metadata {
         Metadata();
-        float extrusion_mass_g;
-        float extrusion_distance_mm;
-        int extruder_temperature;
+        int extruder_count;
+        float extrusion_mass_g[2];
+        float extrusion_distance_mm[2];
+        int extruder_temperature[2];
         int chamber_temperature;
         int shells;
         float layer_height;
         float infill_density;
         bool uses_support;
         float duration_s;
-        float max_flow_rate;
+        float max_flow_rate[2];
         uint32_t thing_id;
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
-        char material[MATERIAL_MAX_LENGTH];
+        char material[2][MATERIAL_MAX_LENGTH];
         std::string slicer_name;
-        bwcoreutils::TYPE tool_type;
+        bwcoreutils::TYPE tool_type[2];
         unsigned int bot_pid;
         float bounding_box_x_min;
         float bounding_box_x_max;
@@ -52,23 +54,25 @@ namespace LibTinyThing {
     // the TinyThing has been sliced for a given printer
     
     struct TINYTHING_API VerificationData {
-        bwcoreutils::TOOL tool_id;
+        uint8_t tool_count;
+        bwcoreutils::TOOL tool_id[2];
         uint8_t pid;
     };
 
     // Struct containing only that data that doesn't absolutely suck
     // to export through a C interface
     struct TINYTHING_API CInterfaceMetadata {
-        float extrusion_mass_g;
-        float extrusion_distance_mm;
-        int extruder_temperature;
+        int extruder_count;
+        float extrusion_distance_mm[2];
+        int extruder_temperature[2];
+        float extrusion_mass_g[2];
         int chamber_temperature;
         uint32_t thing_id;
         float duration_s;
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
-        char material[MATERIAL_MAX_LENGTH];
-        bwcoreutils::TYPE tool_type;
+        char material[2][MATERIAL_MAX_LENGTH];
+        bwcoreutils::TYPE tool_type[2];
         unsigned int bot_pid;
         float bounding_box_x_min;
         float bounding_box_x_max;

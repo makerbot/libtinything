@@ -10,24 +10,30 @@
 
 #include <sys/stat.h>
 
+#include <iostream>
+
 using namespace LibTinyThing;
 
-Metadata::Metadata() : extrusion_mass_g(0.),
-                       extrusion_distance_mm(0),
-                       extruder_temperature(0),
+#define ENSURE_ARRAY(obj, array_key, index, def)\
+  obj.get(array_key, Json::arrayValue).get(index, def)
+  
+
+Metadata::Metadata() : extrusion_mass_g{0.f, 0.f},
+                       extrusion_distance_mm{0,0},
+                       extruder_temperature{0,0},
                        chamber_temperature(0),
                        shells(0),
                        layer_height(0),
                        infill_density(0),
                        uses_support(false),
                        duration_s(0),
-                       max_flow_rate(0),
+                       max_flow_rate{0, 0},
                        thing_id(0),
                        uses_raft(false),
                        uuid(),
-                       material(),
+                       material{"UNKNOWN","UNKNOWN"},
                        slicer_name("UNKNOWN"),
-                       tool_type(bwcoreutils::TYPE::UNKNOWN_TYPE),
+                       tool_type{bwcoreutils::TYPE::UNKNOWN_TYPE, bwcoreutils::TYPE::UNKNOWN_TYPE},
                        bot_pid(9999) {}
 
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
@@ -168,9 +174,7 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         return Error::kOK;
         // Metafile version 2 indicates that the jsontoolpath may contain
         // comments intended to help toolpathviz, per SLIC-356
-    } else if(m_metafileVersion.major > 2) {
-        return kVersionMismatch;
-    } else {
+    } else if(m_metafileVersion.major <= 2) {
         // Check bot type first, since this is guaranteed to exist even if
         // the print was sliced with a custom profile. Default: a value we
         // will never use as a PID.
@@ -178,6 +182,7 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
             = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
         if(std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
+          std::cout << "fuck; piss" << std::endl;
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which is allowed to be a JSON null
@@ -189,12 +194,46 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
             const bwcoreutils::TYPE meta_tool
                 = bwcoreutils::YonkersTool::type_from_type_name(name);
             const bwcoreutils::TYPE current_tool
-                = bwcoreutils::YonkersTool(data.tool_id).type();
+                = bwcoreutils::YonkersTool(data.tool_id[0]).type();
             if(!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
                                                                current_tool)) {
                 return Error::kToolMismatch;
             }
         }
+    } else if (m_metafileVersion.major == 3) {
+      const std::string type
+            = m_metadataParsed.get("bot_type", "_9999").asString();
+        const size_t pid_idx = type.rfind('_')+1;
+        if(std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
+          std::cout << "how the fuck did i get here: my type " << (int)data.pid
+                    << " their type "
+                    << std::stoi(type.substr(pid_idx), nullptr, 16) << std::endl;
+            return Error::kBotTypeMismatch;
+        }
+        // Now check the tool, which must be a list of the right length, but may
+        // contain NULL
+        if(m_metadataParsed["tool_type"].size() != data.tool_count) {
+            return Error::kToolMismatch;
+        } else {
+            for (size_t i=0; i<data.tool_count; i++) {
+                if (m_metadataParsed["tool_type"][Json::ArrayIndex(i)].isNull()) {
+                    continue;
+                }
+                const std::string name
+                    = m_metadataParsed["tool_type"][Json::ArrayIndex(i)]
+                  .asString();
+                const bwcoreutils::TYPE meta_tool
+                    = bwcoreutils::YonkersTool::type_from_type_name(name);
+                const bwcoreutils::TYPE current_tool
+                    = bwcoreutils::YonkersTool(data.tool_id[i]).type();
+                if(!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
+                                                               current_tool)) {
+                    return Error::kToolMismatch;
+            }
+          }
+        }
+    } else {
+        return Error::kVersionMismatch;
     }
     return Error::kOK;
 }
@@ -204,20 +243,24 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
     if (m_metafileVersion.major == -1) {
         return TinyThingReader::Error::kNotYetUnzipped;
     } else if (m_metafileVersion == SemVer(0, 0, 0)) {
-        out->extrusion_mass_g
+        out->extrusion_mass_g[0]
             = m_metadataParsed.get("extrusion_mass_a_grams", 0.f).asFloat()
             + m_metadataParsed.get("extrusion_mass_b_grams", 0.f).asFloat();
-        out->extrusion_distance_mm
+        out->extrusion_mass_g[1] = 0;
+        out->extrusion_distance_mm[0]
             = m_metadataParsed.get("extrusion_distance_a_mm", 0.f).asFloat()
             + m_metadataParsed.get("extrusion_distance_b_mm", 0.f).asFloat();
+        out->extrusion_distance_mm[1] = 0;
         out->duration_s = m_metadataParsed.get("duration_s", 0.f).asFloat();
-        out->extruder_temperature
+        out->extruder_temperature[0]
             = m_metadataParsed.get("toolhead_0_temperature", 0).asInt();
+        out->extruder_temperature[1] = 0;
         out->chamber_temperature
             = m_metadataParsed.get("chamber_temperature", 0).asInt();
         out->uses_raft
             = m_metadataParsed["printer_settings"].get("raft", false).asBool();
-        out->tool_type = bwcoreutils::TYPE::UNKNOWN_TYPE;
+        out->tool_type[0] = bwcoreutils::TYPE::UNKNOWN_TYPE;
+        out->tool_type[1] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         out->bot_pid = 9999;
         const std::string material = m_metadataParsed["printer_settings"]
             .get("materials", Json::Value(Json::ValueType::arrayValue))
@@ -225,38 +268,77 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         if (material.size() > MATERIAL_MAX_LENGTH) {
             return Error::kMaxStringLengthExceeded;
         }
-        material.copy(out->material, material.size());
+        material.copy(out->material[0], material.size());
+        out->material[1][0] = 0;
+        out->extruder_count = 1;
     } else {
-        // All metafiles from version 1.0.0 on have this data
-        out->extrusion_mass_g
-            = m_metadataParsed.get("extrusion_mass_g", 0.f).asFloat();
-        out->extrusion_distance_mm
-            = m_metadataParsed.get("extrusion_distance_mm", 0.f).asFloat();
+      // All metafiles from version 1.0.0 on have this data
+        if (m_metafileVersion.major <= 2) {
+            out->extrusion_mass_g[0]
+                = m_metadataParsed.get("extrusion_mass_g", 0.f).asFloat();
+            out->extrusion_mass_g[1] = 0;
+            out->extrusion_distance_mm[0]
+                = m_metadataParsed.get("extrusion_distance_mm", 0.f).asFloat();
+            out->extrusion_distance_mm[1] = 0;
+            out->extruder_temperature[0]
+                = m_metadataParsed.get("extruder_temperature", 0.f).asInt();
+            out->extruder_temperature[1] = 0;
+            out->extruder_count = 1;
+            const std::string material
+              = m_metadataParsed.get("material", "UNKNOWN").asString();
+            if (material.size() > MATERIAL_MAX_LENGTH) {
+              return Error::kMaxStringLengthExceeded;
+            }
+            material.copy(out->material[0], material.size());
+            out->material[1][0] = 0;
+            if (!m_metadataParsed["tool_type"].isNull()) {
+              out->tool_type[0]
+                = bwcoreutils::YonkersTool
+                ::type_from_type_name(m_metadataParsed.get("tool_type",
+                                                           "unknown")
+                                      .asString());
+            } else {
+              out->tool_type[0] = bwcoreutils::TYPE::UNKNOWN_TYPE;
+            }
+            out->tool_type[1] = bwcoreutils::TYPE::UNKNOWN_TYPE;
+        } else if (m_metafileVersion.major == 3) {
+            out->extruder_count
+                = std::max(2, (int)m_metadataParsed["extruder_temperature"].size());
+            for (size_t i=0;
+                 i<std::max(2, out->extruder_count);
+                 i++) {
+                out->extrusion_mass_g[i]
+                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_mass_g",
+                                   i, 0.f).asFloat();
+                out->extrusion_distance_mm[i]
+                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_distance_mm",
+                                   i, 0.f).asFloat();
+                out->extruder_temperature[i]
+                    = ENSURE_ARRAY(m_metadataParsed, "extruder_temperature",
+                                   i, 0).asInt();
+                const std::string material
+                    = ENSURE_ARRAY(m_metadataParsed, "material",
+                                   i, "").asString();
+                if (material.size() > MATERIAL_MAX_LENGTH) {
+                    return Error::kMaxStringLengthExceeded;
+                }
+                material.copy(out->material[i], material.size());
+                out->tool_type[i]
+                    = bwcoreutils::YonkersTool
+                    ::type_from_type_name(ENSURE_ARRAY(m_metadataParsed,
+                                                       "tool_type",
+                                                       i, "unknown")
+                                          .asString());
+            }
+        }
         out->duration_s
             = m_metadataParsed.get("duration_s", 0.f).asFloat();
-        out->extruder_temperature
-            = m_metadataParsed.get("extruder_temperature", 0.f).asInt();
         out->chamber_temperature
             = m_metadataParsed.get("chamber_temperature",
                                    Json::Value(0U)).asUInt();
         out->uses_raft
             = m_metadataParsed.get("miracle_config", Json::Value())
             .get("doRaft", false).asBool();
-        const std::string material
-            = m_metadataParsed.get("material", "UNKNOWN").asString();
-        if (material.size() > MATERIAL_MAX_LENGTH) {
-            return Error::kMaxStringLengthExceeded;
-        }
-        material.copy(out->material, material.size());
-        if (!m_metadataParsed["tool_type"].isNull()) {
-            out->tool_type
-                = bwcoreutils::YonkersTool
-                ::type_from_type_name(m_metadataParsed.get("tool_type",
-                                                           "unknown")
-                                      .asString());
-        } else {
-            out->tool_type = bwcoreutils::TYPE::UNKNOWN_TYPE;
-        }
         const std::string type
             = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
@@ -306,21 +388,19 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
 }
 
 TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* out) const {
-    switch(m_metafileVersion.major) {
-    case -1:{
+    if (m_metafileVersion.major == -1) {
         return TinyThingReader::Error::kNotYetUnzipped;
-    } break;
-    case 0:{
+    } else if (m_metafileVersion.major == 0) {
         const Json::Value printer_settings
             = m_metadataParsed.get("printer_settings", Json::Value());
         out->shells = printer_settings.get("shells", (int)0).asInt();
         out->layer_height = printer_settings.get("layer_height", 0.f).asFloat();
         out->infill_density = printer_settings.get("infill", 0.f).asFloat();
         out->uses_support = printer_settings.get("support", false).asBool();
-        out->max_flow_rate = 0.f; // Not included in this version
+        // Not included in this version
+        out->max_flow_rate[0] = out->max_flow_rate[1] = 0.f;
         out->slicer_name = printer_settings.get("slicer", "UNKNOWN").asString();
-    }break;
-    case 1:{
+    } else {
         const Json::Value miracle_config
             = m_metadataParsed.get("miracle_config", Json::Value());
         out->shells = miracle_config.get("numberOfShells", (int)0).asInt();
@@ -328,10 +408,15 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
         out->infill_density
             = miracle_config.get("infillDensity", 0.f).asFloat();
         out->uses_support = miracle_config.get("doSupport", false).asBool();
-        out->max_flow_rate
-            = m_metadataParsed.get("max_flow_rate", 0.f).asFloat();
         out->slicer_name = miracle_config.get("slicer", "UNKNOWN").asString();
-    }break;
+        if (m_metafileVersion.major < 3) {
+            out->max_flow_rate[0]
+                = m_metadataParsed.get("max_flow_rate", 0.f).asFloat();
+            out->max_flow_rate[1] = 0;          
+        } else {
+            out->max_flow_rate[0] = 0;
+            out->max_flow_rate[1] = 0;
+        }
     }
     return Error::kOK;
 }
