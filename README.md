@@ -22,9 +22,9 @@ The jsontoolpath file is output by Miracle Grue.
 ## Thumbnails
 .makerbot files contain 3 thumbnails:
 
-    thumbnail_55x40.png 
-    thumbnail_110x80.png 
-    thumbnail_320x200.png 
+    thumbnail_55x40.png
+    thumbnail_110x80.png
+    thumbnail_320x200.png
 
 The thumbnails will be displayed in the Bot LCD UI and will also be used in Makerware in any "tinything" file lists
 

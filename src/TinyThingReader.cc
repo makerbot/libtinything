@@ -182,7 +182,6 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
             = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
         if(std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
-          std::cout << "fuck; piss" << std::endl;
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which is allowed to be a JSON null
@@ -201,13 +200,10 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
             }
         }
     } else if (m_metafileVersion.major == 3) {
-      const std::string type
+        const std::string type
             = m_metadataParsed.get("bot_type", "_9999").asString();
         const size_t pid_idx = type.rfind('_')+1;
         if(std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
-          std::cout << "how the fuck did i get here: my type " << (int)data.pid
-                    << " their type "
-                    << std::stoi(type.substr(pid_idx), nullptr, 16) << std::endl;
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which must be a list of the right length, but may

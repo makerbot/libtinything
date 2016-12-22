@@ -10,6 +10,7 @@ errors = {
     'max_string_length_exceeded': 5
 }
 
+
 class VerificationStruct(ctypes.LittleEndianStructure):
     _fields_ = (
         ("tool_count", ctypes.c_uint8),
@@ -17,14 +18,16 @@ class VerificationStruct(ctypes.LittleEndianStructure):
         ("pid", ctypes.c_uint8)
     )
 
+
 def good_str(ctypes_buf):
     return bytes(ctypes_buf).decode('ascii').rstrip('\x00')
 
+
 class MetadataStruct(ctypes.LittleEndianStructure):
-    
+
     fields = [
         ("extruder_count", ctypes.c_int, int),
-        ("extrusion_distance_mm", ctypes.c_float*2, lambda l: [float (f) for f in l]),
+        ("extrusion_distance_mm", ctypes.c_float*2, lambda l: [float(f) for f in l]),
         ("extruder_temperature", ctypes.c_int*2, lambda l: [int(i) for i in l]),
         ("extrusion_mass_g", ctypes.c_float*2, lambda l: [float(f) for f in l]),
         ("chamber_temperature", ctypes.c_int, int),
@@ -50,6 +53,7 @@ class MetadataStruct(ctypes.LittleEndianStructure):
         for (name, _, caster) in self.fields:
             res[name] = caster(getattr(self, name))
         return res
+
 
 class TinyThing:
     """
@@ -90,21 +94,25 @@ class TinyThing:
         prof_pointer = ctypes.POINTER(ctypes.c_char)()
         error = self._libtinything.GetSliceProfile(self.reader,
                                                    ctypes.byref(prof_pointer))
-        prof_dict = json.loads(bytes(ctypes.string_at(prof_pointer))\
+        prof_dict = json.loads(bytes(ctypes.string_at(prof_pointer))
                                .decode('UTF-8'))
         return prof_dict
 
     def __del__(self):
         self._libtinything.DestroyTinyThingReader(self.reader)
 
+
 class ToolMismatchException(ValueError):
     pass
+
 
 class MachineMismatchException(ValueError):
     pass
 
+
 class NotYetUnzippedException(RuntimeError):
     pass
+
 
 class VersionMismatchException(RuntimeError):
     pass

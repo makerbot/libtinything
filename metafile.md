@@ -25,29 +25,29 @@ comments are added to indicate the source of various metadata values
         "extrusion_mass_b_grams": 0.0,  // miracle grue output
         "extrusion_distance_a_mm": 2255.707508943489, // miracle grue output
         "printer_settings": { // print profile (miracle grue input)
-            "default_raft_extruder": 0, 
-            "slicer": "MIRACLEGRUE", 
-            "platform_temperature": 110, 
-            "shells": 2, 
-            "default_support_extruder": 0, 
-            "support": false, 
-            "layer_height": 0.2, 
-            "travel_speed": 150, 
+            "default_raft_extruder": 0,
+            "slicer": "MIRACLEGRUE",
+            "platform_temperature": 110,
+            "shells": 2,
+            "default_support_extruder": 0,
+            "support": false,
+            "layer_height": 0.2,
+            "travel_speed": 150,
             "extruder_temperatures": [
-                230, 
+                230,
                 230
-            ], 
+            ],
             "materials": [
-                "PLA", 
+                "PLA",
                 "PLA"
-            ], 
-            "infill": 0.1, 
-            "heat_platform": false, 
-            "raft": true, 
-            "do_auto_support": false, 
-            "path": null, 
-            "print_speed": 90, 
-            "do_auto_raft": true, 
+            ],
+            "infill": 0.1,
+            "heat_platform": false,
+            "raft": true,
+            "do_auto_support": false,
+            "path": null,
+            "print_speed": 90,
+            "do_auto_raft": true,
             "extruder": "0"
         }
     }
@@ -82,7 +82,7 @@ comments are added to indicate the source of various metadata values
     }
 
 ### Example metadata file: Version 1.1.0
-    
+
     {
         "version": "1.1.0",
         ...all keys and values from version 1.0.0...
@@ -94,7 +94,7 @@ comments are added to indicate the source of various metadata values
     }
 
 ### Example metadata file: Version 2.0.0
-    
+
     {
         "version": "2.0.0",
         ...all keys and values from version 1.1.0...
