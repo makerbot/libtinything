@@ -51,7 +51,10 @@ class MetadataStruct(ctypes.LittleEndianStructure):
     def to_dict(self):
         res = {}
         for (name, _, caster) in self.fields:
-            res[name] = caster(getattr(self, name))
+            res[name] = val = caster(getattr(self, name))
+            # Fix the stupid ctypes resstriction on dynamic array sizes
+            if isinstance(val, list):
+                val[:] = val[:res['extruder_count']]
         return res
 
 
