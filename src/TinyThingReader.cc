@@ -262,7 +262,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         const std::string material = m_metadataParsed["printer_settings"]
             .get("materials", Json::Value(Json::ValueType::arrayValue))
             .get(Json::ArrayIndex(0), "UNKNOWN").asString();
-        if (material.size() > MATERIAL_MAX_LENGTH) {
+        if (material.size() >= MATERIAL_MAX_LENGTH) {
             return Error::kMaxStringLengthExceeded;
         }
         memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
@@ -284,7 +284,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             out->extruder_count = 1;
             const std::string material
               = m_metadataParsed.get("material", "UNKNOWN").asString();
-            if (material.size() > MATERIAL_MAX_LENGTH) {
+            if (material.size() >= MATERIAL_MAX_LENGTH) {
               return Error::kMaxStringLengthExceeded;
             }
             memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
@@ -318,7 +318,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
                 const std::string material
                     = ENSURE_ARRAY(m_metadataParsed, "material",
                                    i, "").asString();
-                if (material.size() > MATERIAL_MAX_LENGTH) {
+                if (material.size() >= MATERIAL_MAX_LENGTH) {
                     return Error::kMaxStringLengthExceeded;
                 }
                 memset(out->material[i], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
