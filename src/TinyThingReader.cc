@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 
 #include <iostream>
+#include <string.h>
 
 using namespace LibTinyThing;
 
@@ -264,6 +265,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         if (material.size() > MATERIAL_MAX_LENGTH) {
             return Error::kMaxStringLengthExceeded;
         }
+        memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
         material.copy(out->material[0], material.size());
         out->material[1][0] = 0;
         out->extruder_count = 1;
@@ -285,6 +287,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             if (material.size() > MATERIAL_MAX_LENGTH) {
               return Error::kMaxStringLengthExceeded;
             }
+            memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
             material.copy(out->material[0], material.size());
             out->material[1][0] = 0;
             if (!m_metadataParsed["tool_type"].isNull()) {
@@ -318,6 +321,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
                 if (material.size() > MATERIAL_MAX_LENGTH) {
                     return Error::kMaxStringLengthExceeded;
                 }
+                memset(out->material[i], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
                 material.copy(out->material[i], material.size());
                 out->tool_type[i]
                     = bwcoreutils::YonkersTool
