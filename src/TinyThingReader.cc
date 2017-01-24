@@ -215,15 +215,15 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         }
         // Now check the tool, which must be a list of the right length, but may
         // contain NULL
-        if(m_metadataParsed["tool_type"].size() != data.tool_count) {
+        if(m_metadataParsed["tool_types"].size() != data.tool_count) {
             return Error::kToolMismatch;
         } else {
             for (size_t i=0; i<data.tool_count; i++) {
-                if (m_metadataParsed["tool_type"][Json::ArrayIndex(i)].isNull()) {
+                if (m_metadataParsed["tool_types"][Json::ArrayIndex(i)].isNull()) {
                     continue;
                 }
                 const std::string name
-                    = m_metadataParsed["tool_type"][Json::ArrayIndex(i)]
+                    = m_metadataParsed["tool_types"][Json::ArrayIndex(i)]
                   .asString();
                 const bwcoreutils::TYPE meta_tool
                     = bwcoreutils::YonkersTool::type_from_type_name(name);
@@ -310,21 +310,21 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             out->tool_type[1] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         } else if (m_metafileVersion.major == 3) {
             out->extruder_count
-                = std::max(2, (int)m_metadataParsed["extruder_temperature"].size());
+                = std::max(2, (int)m_metadataParsed["extruder_temperatures"].size());
             for (size_t i=0;
                  i<std::max(2, out->extruder_count);
                  i++) {
                 out->extrusion_mass_g[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_mass_g",
+                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_masses_g",
                                    i, 0.f).asFloat();
                 out->extrusion_distance_mm[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_distance_mm",
+                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_distances_mm",
                                    i, 0.f).asFloat();
                 out->extruder_temperature[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extruder_temperature",
+                    = ENSURE_ARRAY(m_metadataParsed, "extruder_temperatures",
                                    i, 0).asInt();
                 const std::string material
-                    = ENSURE_ARRAY(m_metadataParsed, "material",
+                    = ENSURE_ARRAY(m_metadataParsed, "materials",
                                    i, "").asString();
                 if (material.size() >= MATERIAL_MAX_LENGTH) {
                     return Error::kMaxStringLengthExceeded;
@@ -334,7 +334,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
                 out->tool_type[i]
                     = bwcoreutils::YonkersTool
                     ::type_from_type_name(ENSURE_ARRAY(m_metadataParsed,
-                                                       "tool_type",
+                                                       "tool_types",
                                                        i, "unknown")
                                           .asString());
             }
