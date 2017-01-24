@@ -40,5 +40,6 @@ class TinyThingReader::Private {
     unsigned int m_toolpathSize;
     unsigned int m_toolpathPos;
     SemVer m_metafileVersion;
+    static SemVer maxSupportedVersion();
 };
 }
