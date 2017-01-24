@@ -75,7 +75,8 @@ class TinyThing:
         c_struct = VerificationStruct()
         c_struct.tool_count = len(tools)
         c_struct.pid = pid
-        c_struct.tools = (ctypes.c_int*2)(*tools)
+        for tool_idx in range(min(len(tools), 2)):
+            c_struct.tool[tool_idx] = tools[tool_idx]
         error = self._libtinything.DoesMetadataMatch(self.reader, ctypes.byref(c_struct))
         if error == errors['not_yet_unzipped']:
             raise NotYetUnzippedException('meta.json')

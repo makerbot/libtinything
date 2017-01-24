@@ -6,8 +6,8 @@
 #include <vector>
 
 namespace bwcoreutils {
-    enum class TOOL;
-    enum class TYPE;
+    enum class TOOL : int;
+    enum class TYPE : int;
 }
 
 namespace LibTinyThing {
