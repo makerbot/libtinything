@@ -127,12 +127,14 @@ The biggest change in this version is a move to multi-extrusion by default. Any 
 
 Here is an example of keys that are different from version 2.0.0. A full example metafile may be found [here](example_meta_v3.json).
 
+The old keys should be kept for backwards compatibility; note that the new list versions of the keys have plural names.
+
 	{
 		"version": "3.0.0",
-		"extruder_temperature": [215, 0],
-		"extrusion_distance_mm": [122131, 0],
-		"extrusion_mass_g": [220, 0],
-		"material": ["pla", "pla"],
-		"tool_type": ["mk13", "mk13"]
+		"extruder_temperatures": [215, 0],
+		"extrusion_distances_mm": [122131, 0],
+		"extrusion_masses_g": [220, 0],
+		"materials": ["pla", "pla"],
+		"tool_types": ["mk13", "mk13"]
 		...
 	}
