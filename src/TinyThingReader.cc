@@ -17,7 +17,10 @@ using namespace LibTinyThing;
 
 #define ENSURE_ARRAY(obj, array_key, index, def)\
   obj.get(array_key, Json::arrayValue).get(index, def)
-  
+
+SemVer TinyThingReader::Private::maxSupportedVersion() {
+    return SemVer(3, 0, 0);
+}
 
 Metadata::Metadata() : extrusion_mass_g{0.f, 0.f},
                        extrusion_distance_mm{0,0},
@@ -169,6 +172,9 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         // We have not yet parsed the metadata file, don't even try to use the JSON
         return kNotYetUnzipped;
     }
+    if (m_metafileVersion > maxSupportedVersion()) {
+        return Error::kVersionMismatch;
+    }
     if(m_metafileVersion.major == 0) {
         // This slice is old enough to not be versioned, we'll use good old fashioned
         // hope to ensure it's correct
@@ -209,15 +215,15 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         }
         // Now check the tool, which must be a list of the right length, but may
         // contain NULL
-        if(m_metadataParsed["tool_type"].size() != data.tool_count) {
+        if(m_metadataParsed["tool_types"].size() != data.tool_count) {
             return Error::kToolMismatch;
         } else {
             for (size_t i=0; i<data.tool_count; i++) {
-                if (m_metadataParsed["tool_type"][Json::ArrayIndex(i)].isNull()) {
+                if (m_metadataParsed["tool_types"][Json::ArrayIndex(i)].isNull()) {
                     continue;
                 }
                 const std::string name
-                    = m_metadataParsed["tool_type"][Json::ArrayIndex(i)]
+                    = m_metadataParsed["tool_types"][Json::ArrayIndex(i)]
                   .asString();
                 const bwcoreutils::TYPE meta_tool
                     = bwcoreutils::YonkersTool::type_from_type_name(name);
@@ -229,9 +235,9 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
             }
           }
         }
-    } else {
-        return Error::kVersionMismatch;
     }
+    // If you are adding support for a new version, please make sure to update
+    // maxSupportedVersion
     return Error::kOK;
 }
 
@@ -239,7 +245,9 @@ template<class MetadataType>
 TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) const {
     if (m_metafileVersion.major == -1) {
         return TinyThingReader::Error::kNotYetUnzipped;
-    } else if (m_metafileVersion == SemVer(0, 0, 0)) {
+    } else if (m_metafileVersion > maxSupportedVersion()) {
+        return TinyThingReader::Error::kVersionMismatch;
+    }  else if (m_metafileVersion == SemVer(0, 0, 0)) {
         out->extrusion_mass_g[0]
             = m_metadataParsed.get("extrusion_mass_a_grams", 0.f).asFloat()
             + m_metadataParsed.get("extrusion_mass_b_grams", 0.f).asFloat();
@@ -302,21 +310,21 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
             out->tool_type[1] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         } else if (m_metafileVersion.major == 3) {
             out->extruder_count
-                = std::max(2, (int)m_metadataParsed["extruder_temperature"].size());
+                = std::max(2, (int)m_metadataParsed["extruder_temperatures"].size());
             for (size_t i=0;
                  i<std::max(2, out->extruder_count);
                  i++) {
                 out->extrusion_mass_g[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_mass_g",
+                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_masses_g",
                                    i, 0.f).asFloat();
                 out->extrusion_distance_mm[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_distance_mm",
+                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_distances_mm",
                                    i, 0.f).asFloat();
                 out->extruder_temperature[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extruder_temperature",
+                    = ENSURE_ARRAY(m_metadataParsed, "extruder_temperatures",
                                    i, 0).asInt();
                 const std::string material
-                    = ENSURE_ARRAY(m_metadataParsed, "material",
+                    = ENSURE_ARRAY(m_metadataParsed, "materials",
                                    i, "").asString();
                 if (material.size() >= MATERIAL_MAX_LENGTH) {
                     return Error::kMaxStringLengthExceeded;
@@ -326,11 +334,13 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
                 out->tool_type[i]
                     = bwcoreutils::YonkersTool
                     ::type_from_type_name(ENSURE_ARRAY(m_metadataParsed,
-                                                       "tool_type",
+                                                       "tool_types",
                                                        i, "unknown")
                                           .asString());
             }
         }
+        // If you are trying to add a new version, please update
+        // maxSupportedVersion
         out->duration_s
             = m_metadataParsed.get("duration_s", 0.f).asFloat();
         out->chamber_temperature
@@ -390,6 +400,8 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
 TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* out) const {
     if (m_metafileVersion.major == -1) {
         return TinyThingReader::Error::kNotYetUnzipped;
+    } else if (m_metafileVersion > maxSupportedVersion()) {
+        return TinyThingReader::Error::kVersionMismatch;
     } else if (m_metafileVersion.major == 0) {
         const Json::Value printer_settings
             = m_metadataParsed.get("printer_settings", Json::Value());
@@ -418,6 +430,8 @@ TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* ou
             out->max_flow_rate[1] = 0;
         }
     }
+    // If you are adding a new version, please make sure to update
+    // maxSupportedVersion
     return Error::kOK;
 }
 
