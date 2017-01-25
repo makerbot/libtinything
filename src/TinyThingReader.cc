@@ -16,7 +16,7 @@
 
 using namespace LibTinyThing;  // NOLINT(build/namespaces)
 
-SemVer TinyThingReader::Private::maxSupportedV3ersion() {
+SemVer TinyThingReader::Private::maxSupportedVersion() {
     return SemVer(3, 0, 0);
 }
 
@@ -281,7 +281,8 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         out->extrusion_distance_mm[1] = 0;
         out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
         out->extruder_temperature[0]
-            = get_leaf(m_metadataParsed, "toolhead_0_temperature", 0l);
+            = get_leaf(m_metadataParsed, "toolhead_0_temperature",
+                       static_cast<int>(0));
         out->extruder_temperature[1] = 0;
         out->chamber_temperature
             = get_leaf(m_metadataParsed, "chamber_temperature", 0);
@@ -296,7 +297,7 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         if (material.size() >= MATERIAL_MAX_LENGTH) {
             return Error::kMaxStringLengthExceeded;
         }
-        memset(out->material[0], 0, sizeof(material[0]));
+        memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
         material.copy(out->material[0], material.size());
         out->material[1][0] = 0;
         out->extruder_count = 1;
@@ -312,7 +313,7 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
             out->extrusion_distance_mm[1] = 0;
             out->extruder_temperature[0] = get_leaf(m_metadataParsed,
                                                     "extruder_temperature",
-                                                    0l);
+                                                    static_cast<int>(0));
             out->extruder_temperature[1] = 0;
             out->extruder_count = 1;
             const std::string material = get_leaf(m_metadataParsed,
@@ -320,7 +321,7 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
             if (material.size() >= MATERIAL_MAX_LENGTH) {
               return Error::kMaxStringLengthExceeded;
             }
-            memset(out->material[0], 0, sizeof(material[0]));
+            memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
             material.copy(out->material[0], material.size());
             out->material[1][0] = 0;
             out->tool_type[0]
@@ -346,14 +347,14 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
                 out->extruder_temperature[i]
                     = get_leaf(get_arr(m_metadataParsed,
                                        "extruder_temperatures"),
-                               ai, 0l);
+                               ai, static_cast<int>(0));
                 const std::string material
                     = get_leaf(get_arr(m_metadataParsed, "materials"),
                                ai, "");
                 if (material.size() >= MATERIAL_MAX_LENGTH) {
                     return Error::kMaxStringLengthExceeded;
                 }
-                memset(out->material[i], 0, sizeof(material[i]));
+                memset(out->material[i], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
                 material.copy(out->material[i], material.size());
                 out->tool_type[i]
                     = bwcoreutils::YonkersTool
@@ -367,7 +368,7 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
         out->chamber_temperature = get_leaf(m_metadataParsed,
                                             "chamber_temperature",
-                                            0l);
+                                            static_cast<int>(0));
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);
         const std::string type = get_leaf(m_metadataParsed,
@@ -431,7 +432,7 @@ TinyThingReader::Private::getCppOnlyMetadata(Metadata* out) const {
     } else if (m_metafileVersion.major == 0) {
         const Json::Value printer_settings = get_obj(m_metadataParsed,
                                                      "printer_settings");
-        out->shells = get_leaf(printer_settings, "shells", 0l);
+        out->shells = get_leaf(printer_settings, "shells", static_cast<int>(0));
         out->layer_height = get_leaf(printer_settings, "layer_height", 0.f);
         out->infill_density = get_leaf(printer_settings, "infill", 0.f);
         out->uses_support = get_leaf(printer_settings, "support", false);
@@ -441,7 +442,8 @@ TinyThingReader::Private::getCppOnlyMetadata(Metadata* out) const {
     } else {
         const Json::Value miracle_config = get_obj(m_metadataParsed,
                                                    "miracle_config");
-        out->shells = get_leaf(miracle_config, "numberOfShells", 0l);
+        out->shells = get_leaf(miracle_config, "numberOfShells",
+                               static_cast<int>(0));
         out->layer_height = get_leaf(miracle_config, "layerHeight", 0.f);
         out->infill_density = get_leaf(miracle_config, "infillDensity", 0.f);
         out->uses_support = get_leaf(miracle_config, "doSupport", false);

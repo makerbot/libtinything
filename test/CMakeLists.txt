@@ -1,8 +1,6 @@
 find_package(MBCoreUtils REQUIRED)
 find_package(JsonCpp REQUIRED)
 
-find_python()
-
 add_executable(reader_tests
   test_module.cpp
   reader_tests.cpp
