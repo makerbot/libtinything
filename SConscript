@@ -11,6 +11,7 @@ env.BWSetCompilerToGCC()
 env.BWDependsOnJsonCpp()
 
 env.BWDependsOnBWCodegenSharedCPP()
+env.BWDependsOnMBCoreUtils()
 
 env.BWPyInstallPkg('../python/tinything')
 
