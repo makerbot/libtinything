@@ -213,16 +213,20 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which is allowed to be a JSON null
-        // Default: a null
-        const std::string name = get_leaf(m_metadataParsed, "tool_type",
+        if (m_metadataParsed.isMember("tool_type")
+            && m_metadataParsed["tool_type"].isNull()) {
+            // Ignore nulls when checking tool types
+        } else {
+            const std::string name = get_leaf(m_metadataParsed, "tool_type",
                                               "unknown");
-        const bwcoreutils::TYPE meta_tool
-            = bwcoreutils::YonkersTool::type_from_type_name(name);
-        const bwcoreutils::TYPE current_tool
-            = bwcoreutils::YonkersTool(data.tool_id[0]).type();
-        if (!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
-                                                           current_tool)) {
-            return Error::kToolMismatch;
+            const bwcoreutils::TYPE meta_tool
+                = bwcoreutils::YonkersTool::type_from_type_name(name);
+            const bwcoreutils::TYPE current_tool
+                = bwcoreutils::YonkersTool(data.tool_id[0]).type();
+            if (!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
+                                                                current_tool)) {
+                return Error::kToolMismatch;
+            }
         }
     } else if (m_metafileVersion.major == 3) {
         const std::string type = get_leaf(m_metadataParsed, "bot_type",

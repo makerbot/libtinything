@@ -66,26 +66,31 @@ BOOST_AUTO_TEST_CASE(corrupt) {
 }
 
 BOOST_AUTO_TEST_CASE(tool_null) {
-    // Check that a null entry in a tool list never fails a match
-    LibTinyThing::TinyThingReader reader("tool_null.makerbot");
-    BOOST_REQUIRE(reader.unzipMetadataFile());
-    LibTinyThing::VerificationData vd;
-    vd.pid = 0xb;
-    vd.tool_count = 1;
-    LibTinyThing::Metadata m;
-    BOOST_CHECK_EQUAL(reader.getMetadata(&m),
-                      LibTinyThing::TinyThingReader::Error::kOK);
-    BOOST_CHECK(m.tool_type[0] == bwcoreutils::TYPE::UNKNOWN_TYPE);
-    std::array<bwcoreutils::TOOL, 6> ids{{bwcoreutils::TOOL::INVALID_ID,
-                bwcoreutils::TOOL::MARK_11,
-                bwcoreutils::TOOL::MARK_12_1,
-                bwcoreutils::TOOL::MARK_13,
-                bwcoreutils::TOOL::MARK_13_IMPLA,
-                bwcoreutils::TOOL::MK14_0}};
-    for (const auto id : ids) {
-        vd.tool_id[0] = id;
-        BOOST_CHECK_EQUAL(reader.doesMetadataFileMatchConfig(vd),
+    // Check that a null entry in a tool list never fails a match, across
+    // versions
+    std::array<std::string, 2> versions{{"tool_null_v3.makerbot",
+                "tool_null_v11.makerbot"}};
+    for (const auto& name : versions) {
+        LibTinyThing::TinyThingReader reader(name);
+        BOOST_REQUIRE(reader.unzipMetadataFile());
+        LibTinyThing::VerificationData vd;
+        vd.pid = 0xb;
+        vd.tool_count = 1;
+        LibTinyThing::Metadata m;
+        BOOST_CHECK_EQUAL(reader.getMetadata(&m),
                           LibTinyThing::TinyThingReader::Error::kOK);
+        BOOST_CHECK(m.tool_type[0] == bwcoreutils::TYPE::UNKNOWN_TYPE);
+        std::array<bwcoreutils::TOOL, 6> ids{{bwcoreutils::TOOL::INVALID_ID,
+                    bwcoreutils::TOOL::MARK_11,
+                    bwcoreutils::TOOL::MARK_12_1,
+                    bwcoreutils::TOOL::MARK_13,
+                    bwcoreutils::TOOL::MARK_13_IMPLA,
+                    bwcoreutils::TOOL::MK14_0}};
+        for (const auto id : ids) {
+            vd.tool_id[0] = id;
+            BOOST_CHECK_EQUAL(reader.doesMetadataFileMatchConfig(vd),
+                              LibTinyThing::TinyThingReader::Error::kOK);
+        }
     }
 }
 
