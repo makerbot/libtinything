@@ -1,4 +1,10 @@
+// Copyright MakerBot Inc. 2017
+
 #include <bwcoreutils/tool_mappings.hh>
+#include <mbcoreutils/jsoncpp_wrappers.h>
+
+#include <sys/stat.h>
+#include <string.h>
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
@@ -8,17 +14,9 @@
 #include "TinyThingReader_Impl.hh"
 #include "semver.hh"
 
-#include <sys/stat.h>
+using namespace LibTinyThing;  // NOLINT(build/namespaces)
 
-#include <iostream>
-#include <string.h>
-
-using namespace LibTinyThing;
-
-#define ENSURE_ARRAY(obj, array_key, index, def)\
-  obj.get(array_key, Json::arrayValue).get(index, def)
-
-SemVer TinyThingReader::Private::maxSupportedVersion() {
+SemVer TinyThingReader::Private::maxSupportedV3ersion() {
     return SemVer(3, 0, 0);
 }
 
@@ -37,12 +35,14 @@ Metadata::Metadata() : extrusion_mass_g{0.f, 0.f},
                        uuid(),
                        material{"UNKNOWN","UNKNOWN"},
                        slicer_name("UNKNOWN"),
-                       tool_type{bwcoreutils::TYPE::UNKNOWN_TYPE, bwcoreutils::TYPE::UNKNOWN_TYPE},
+                       tool_type{bwcoreutils::TYPE::UNKNOWN_TYPE,
+                               bwcoreutils::TYPE::UNKNOWN_TYPE},
                        bot_pid(9999) {}
 
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
     : m_filePath(filePath),
       m_via_fd(fd > 0),
+      m_metadataParsed(Json::objectValue),
       m_zipFile(NULL),
       m_incremental(false),
       m_toolpathSize(0),
@@ -64,32 +64,49 @@ TinyThingReader::Private::~Private() {
 
 bool TinyThingReader::Private::hasJsonToolpath() const {
     return (m_zipFile != NULL &&
-            unzLocateFile(m_zipFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK &&
+            unzLocateFile(m_zipFile,
+                          Config::kToolpathFilename.c_str(),
+                          0) == UNZ_OK &&
             unzOpenCurrentFile(m_zipFile) == UNZ_OK);
 }
 
 bool TinyThingReader::Private::hasMetadata() const {
     return (m_zipFile != NULL &&
-            unzLocateFile(m_zipFile, Config::kMetadataFilename.c_str(), 0) == UNZ_OK &&
+            unzLocateFile(m_zipFile,
+                          Config::kMetadataFilename.c_str(),
+                          0) == UNZ_OK &&
             unzOpenCurrentFile(m_zipFile) == UNZ_OK);
 }
 
 bool TinyThingReader::Private::isValid() const {
     return (
         m_zipFile != NULL &&
-        unzLocateFile(m_zipFile, Config::kMetadataFilename.c_str(), 0) == UNZ_OK &&
-        unzLocateFile(m_zipFile, Config::kSmallThumbnailFilename.c_str(), 0) == UNZ_OK &&
-        unzLocateFile(m_zipFile, Config::kMediumThumbnailFilename.c_str(), 0) == UNZ_OK &&
-        unzLocateFile(m_zipFile, Config::kSmallThumbnailFilename.c_str(), 0) == UNZ_OK &&
-        unzLocateFile(m_zipFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK &&
+        unzLocateFile(m_zipFile,
+                      Config::kMetadataFilename.c_str(),
+                      0) == UNZ_OK &&
+        unzLocateFile(m_zipFile,
+                      Config::kSmallThumbnailFilename.c_str(),
+                      0) == UNZ_OK &&
+        unzLocateFile(m_zipFile,
+                      Config::kMediumThumbnailFilename.c_str(),
+                      0) == UNZ_OK &&
+        unzLocateFile(m_zipFile,
+                      Config::kSmallThumbnailFilename.c_str(),
+                      0) == UNZ_OK &&
+        unzLocateFile(m_zipFile,
+                      Config::kToolpathFilename.c_str(),
+                      0) == UNZ_OK &&
         unzOpenCurrentFile(m_zipFile) == UNZ_OK);
 }
 
 bool TinyThingReader::Private::resetToolpath() {
     m_toolpathPos = 0;
     unz_file_info fileInfo;
-    bool locateFile = (unzLocateFile(m_zipFile, Config::kToolpathFilename.c_str(), 0) == UNZ_OK);
-    bool getInfo = (unzGetCurrentFileInfo(m_zipFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK);
+    bool locateFile = (unzLocateFile(m_zipFile,
+                                     Config::kToolpathFilename.c_str(),
+                                     0) == UNZ_OK);
+    bool getInfo = (unzGetCurrentFileInfo(m_zipFile, &fileInfo,
+                                          NULL, 0, NULL, 0, NULL, 0) == UNZ_OK);
     bool openCurrent = (unzOpenCurrentFile(m_zipFile) == UNZ_OK);
     if (locateFile && getInfo && openCurrent) {
       m_toolpathSize = fileInfo.uncompressed_size;
@@ -117,12 +134,12 @@ std::string TinyThingReader::Private::getToolpathIncr(const int chars) {
 
 int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
     if (!m_incremental) {
-        if(!resetToolpath()) {
+        if (!resetToolpath()) {
             // Oops, we have an error
             return 0;
         }
     }
-        
+
     int chars_to_read = chars;
     if (m_toolpathPos >= m_toolpathSize) {
       // at end of file
@@ -140,13 +157,15 @@ int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
     return chars_to_read;
 }
 
-bool TinyThingReader::Private::unzipFile(const std::string& fileName, std::string &output) const{
+bool TinyThingReader::Private::unzipFile(const std::string& fileName,
+                                         std::string &output) const{
     if (m_zipFile != NULL   &&
         unzLocateFile(m_zipFile, fileName.c_str(), 0) == UNZ_OK &&
         unzOpenCurrentFile(m_zipFile) == UNZ_OK) {
       unz_file_info fileInfo;
 
-      if (unzGetCurrentFileInfo(m_zipFile, &fileInfo, NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
+      if (unzGetCurrentFileInfo(m_zipFile, &fileInfo,
+                                NULL, 0, NULL, 0, NULL, 0) == UNZ_OK) {
         // Create a buffer large enough to hold the uncompressed file
         output.resize(fileInfo.uncompressed_size);
         if (unzReadCurrentFile(m_zipFile,
@@ -159,81 +178,80 @@ bool TinyThingReader::Private::unzipFile(const std::string& fileName, std::strin
     return false;
 }
 
-bool TinyThingReader::Private::parseFile(const std::string& contents, Json::Value* output) {
+bool TinyThingReader::Private::parseFile(const std::string& contents,
+                                         Json::Value* output) {
     Json::Reader reader;
-    // Just because Json::Reader doesn't follow the style guide about using pointers instead
-    // of non-const refs doesn't mean we don't have to
+    // Just because Json::Reader doesn't follow the style guide about using
+    // pointers instead of non-const refs doesn't mean we don't have to
     return reader.parse(contents, *output);
 }
 
 TinyThingReader::Error
 TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
-    if(m_metadataFileContents.empty()) {
-        // We have not yet parsed the metadata file, don't even try to use the JSON
+    using namespace MakerBot::SafeJson;  // NOLINT(build/namespaces)
+    if (m_metadataFileContents.empty()) {
+        // We have not yet parsed the metadata file, don't even try to use it
         return kNotYetUnzipped;
     }
     if (m_metafileVersion > maxSupportedVersion()) {
         return Error::kVersionMismatch;
     }
-    if(m_metafileVersion.major == 0) {
-        // This slice is old enough to not be versioned, we'll use good old fashioned
+    if (m_metafileVersion.major == 0) {
+        // This slice is old enough to not be versioned, we'll use good old
         // hope to ensure it's correct
         return Error::kOK;
         // Metafile version 2 indicates that the jsontoolpath may contain
         // comments intended to help toolpathviz, per SLIC-356
-    } else if(m_metafileVersion.major <= 2) {
+    } else if (m_metafileVersion.major <= 2) {
         // Check bot type first, since this is guaranteed to exist even if
         // the print was sliced with a custom profile. Default: a value we
         // will never use as a PID.
-        const std::string type
-            = m_metadataParsed.get("bot_type", "_9999").asString();
+        const std::string type = get_leaf(m_metadataParsed, "bot_type",
+                                          "_9999");
         const size_t pid_idx = type.rfind('_')+1;
-        if(std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
+        if (std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which is allowed to be a JSON null
         // Default: a null
-        if(!m_metadataParsed["tool_type"].isNull()) {
-            const std::string name
-                = m_metadataParsed.get("tool_type",
-                                       Json::Value()).asString();
-            const bwcoreutils::TYPE meta_tool
-                = bwcoreutils::YonkersTool::type_from_type_name(name);
-            const bwcoreutils::TYPE current_tool
-                = bwcoreutils::YonkersTool(data.tool_id[0]).type();
-            if(!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
-                                                               current_tool)) {
-                return Error::kToolMismatch;
-            }
+        const std::string name = get_leaf(m_metadataParsed, "tool_type",
+                                              "unknown");
+        const bwcoreutils::TYPE meta_tool
+            = bwcoreutils::YonkersTool::type_from_type_name(name);
+        const bwcoreutils::TYPE current_tool
+            = bwcoreutils::YonkersTool(data.tool_id[0]).type();
+        if (!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
+                                                           current_tool)) {
+            return Error::kToolMismatch;
         }
     } else if (m_metafileVersion.major == 3) {
-        const std::string type
-            = m_metadataParsed.get("bot_type", "_9999").asString();
+        const std::string type = get_leaf(m_metadataParsed, "bot_type",
+                                          "_9999");
         const size_t pid_idx = type.rfind('_')+1;
-        if(std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
+        if (std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which must be a list of the right length, but may
         // contain NULL
-        if(m_metadataParsed["tool_types"].size() != data.tool_count) {
+        auto tools = get_arr(m_metadataParsed, "tool_types");
+        if (tools.size() != data.tool_count) {
             return Error::kToolMismatch;
         } else {
-            for (size_t i=0; i<data.tool_count; i++) {
-                if (m_metadataParsed["tool_types"][Json::ArrayIndex(i)].isNull()) {
+            for (size_t i = 0; i < data.tool_count; i++) {
+                Json::ArrayIndex ai(i);
+                if (tools[ai].isNull()) {
                     continue;
                 }
-                const std::string name
-                    = m_metadataParsed["tool_types"][Json::ArrayIndex(i)]
-                  .asString();
+                const std::string name = get_leaf(tools, ai, "unknown");
                 const bwcoreutils::TYPE meta_tool
                     = bwcoreutils::YonkersTool::type_from_type_name(name);
                 const bwcoreutils::TYPE current_tool
                     = bwcoreutils::YonkersTool(data.tool_id[i]).type();
-                if(!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
+                if (!bwcoreutils::YonkersTool::toolpaths_equivalent(meta_tool,
                                                                current_tool)) {
                     return Error::kToolMismatch;
+                }
             }
-          }
         }
     }
     // If you are adding support for a new version, please make sure to update
@@ -242,142 +260,148 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
 }
 
 template<class MetadataType>
-TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) const {
-    if (m_metafileVersion.major == -1) {
+TinyThingReader::Error
+TinyThingReader::Private::getMetadata(MetadataType* out) const {
+    using namespace MakerBot::SafeJson;  // NOLINT(build/namespaces)
+    if (m_metadataFileContents.empty()) {
+        // We have not yet parsed the metadata file, don't even try to use the
+        // JSON
         return TinyThingReader::Error::kNotYetUnzipped;
-    } else if (m_metafileVersion > maxSupportedVersion()) {
+    }
+    if (m_metafileVersion > maxSupportedVersion()) {
         return TinyThingReader::Error::kVersionMismatch;
     }  else if (m_metafileVersion == SemVer(0, 0, 0)) {
         out->extrusion_mass_g[0]
-            = m_metadataParsed.get("extrusion_mass_a_grams", 0.f).asFloat()
-            + m_metadataParsed.get("extrusion_mass_b_grams", 0.f).asFloat();
+            = get_leaf(m_metadataParsed, "extrusion_mass_a_grams", 0.f)
+            + get_leaf(m_metadataParsed, "extrusion_mass_b_grams", 0.f);
         out->extrusion_mass_g[1] = 0;
         out->extrusion_distance_mm[0]
-            = m_metadataParsed.get("extrusion_distance_a_mm", 0.f).asFloat()
-            + m_metadataParsed.get("extrusion_distance_b_mm", 0.f).asFloat();
+            = get_leaf(m_metadataParsed, "extrusion_distance_a_mm", 0.f)
+            + get_leaf(m_metadataParsed, "extrusion_distance_b_mm", 0.f);
         out->extrusion_distance_mm[1] = 0;
-        out->duration_s = m_metadataParsed.get("duration_s", 0.f).asFloat();
+        out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
         out->extruder_temperature[0]
-            = m_metadataParsed.get("toolhead_0_temperature", 0).asInt();
+            = get_leaf(m_metadataParsed, "toolhead_0_temperature", 0l);
         out->extruder_temperature[1] = 0;
         out->chamber_temperature
-            = m_metadataParsed.get("chamber_temperature", 0).asInt();
-        out->uses_raft
-            = m_metadataParsed["printer_settings"].get("raft", false).asBool();
+            = get_leaf(m_metadataParsed, "chamber_temperature", 0);
+        auto printer_settings = get_obj(m_metadataParsed, "printer_settings");
+        out->uses_raft = get_leaf(printer_settings, "raft", false);
         out->tool_type[0] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         out->tool_type[1] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         out->bot_pid = 9999;
-        const std::string material = m_metadataParsed["printer_settings"]
-            .get("materials", Json::Value(Json::ValueType::arrayValue))
-            .get(Json::ArrayIndex(0), "UNKNOWN").asString();
+        const std::string material
+          = get_leaf(get_arr(printer_settings, "materials"),
+                     Json::ArrayIndex(0), "UNKNOWN");
         if (material.size() >= MATERIAL_MAX_LENGTH) {
             return Error::kMaxStringLengthExceeded;
         }
-        memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
+        memset(out->material[0], 0, sizeof(material[0]));
         material.copy(out->material[0], material.size());
         out->material[1][0] = 0;
         out->extruder_count = 1;
     } else {
       // All metafiles from version 1.0.0 on have this data
         if (m_metafileVersion.major <= 2) {
-            out->extrusion_mass_g[0]
-                = m_metadataParsed.get("extrusion_mass_g", 0.f).asFloat();
+            out->extrusion_mass_g[0] = get_leaf(m_metadataParsed,
+                                                "extrusion_mass_g", 0.f);
             out->extrusion_mass_g[1] = 0;
-            out->extrusion_distance_mm[0]
-                = m_metadataParsed.get("extrusion_distance_mm", 0.f).asFloat();
+            out->extrusion_distance_mm[0] = get_leaf(m_metadataParsed,
+                                                     "extrusion_distance_mm",
+                                                     0.f);
             out->extrusion_distance_mm[1] = 0;
-            out->extruder_temperature[0]
-                = m_metadataParsed.get("extruder_temperature", 0.f).asInt();
+            out->extruder_temperature[0] = get_leaf(m_metadataParsed,
+                                                    "extruder_temperature",
+                                                    0l);
             out->extruder_temperature[1] = 0;
             out->extruder_count = 1;
-            const std::string material
-              = m_metadataParsed.get("material", "UNKNOWN").asString();
+            const std::string material = get_leaf(m_metadataParsed,
+                                                  "material", "UNKNOWN");
             if (material.size() >= MATERIAL_MAX_LENGTH) {
               return Error::kMaxStringLengthExceeded;
             }
-            memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
+            memset(out->material[0], 0, sizeof(material[0]));
             material.copy(out->material[0], material.size());
             out->material[1][0] = 0;
-            if (!m_metadataParsed["tool_type"].isNull()) {
-              out->tool_type[0]
+            out->tool_type[0]
                 = bwcoreutils::YonkersTool
-                ::type_from_type_name(m_metadataParsed.get("tool_type",
-                                                           "unknown")
-                                      .asString());
-            } else {
-              out->tool_type[0] = bwcoreutils::TYPE::UNKNOWN_TYPE;
-            }
+                  ::type_from_type_name(get_leaf(m_metadataParsed,
+                                                 "tool_type", "unknown"));
             out->tool_type[1] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         } else if (m_metafileVersion.major == 3) {
-            out->extruder_count
-                = std::max(2, (int)m_metadataParsed["extruder_temperatures"].size());
-            for (size_t i=0;
-                 i<std::max(2, out->extruder_count);
-                 i++) {
+            size_t extruders = std::max(2u,
+                                        get_arr(m_metadataParsed,
+                                                "extruder_temperatures")
+                                        .size());
+            out->extruder_count = extruders;
+            for (size_t i = 0; i < extruders; i++) {
+                Json::ArrayIndex ai(i);
                 out->extrusion_mass_g[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_masses_g",
-                                   i, 0.f).asFloat();
+                    = get_leaf(get_arr(m_metadataParsed, "extrusion_masses_g"),
+                               ai, 0.f);
                 out->extrusion_distance_mm[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extrusion_distances_mm",
-                                   i, 0.f).asFloat();
+                    = get_leaf(get_arr(m_metadataParsed,
+                                       "extrusion_distances_mm"),
+                               ai, 0.f);
                 out->extruder_temperature[i]
-                    = ENSURE_ARRAY(m_metadataParsed, "extruder_temperatures",
-                                   i, 0).asInt();
+                    = get_leaf(get_arr(m_metadataParsed,
+                                       "extruder_temperatures"),
+                               ai, 0l);
                 const std::string material
-                    = ENSURE_ARRAY(m_metadataParsed, "materials",
-                                   i, "").asString();
+                    = get_leaf(get_arr(m_metadataParsed, "materials"),
+                               ai, "");
                 if (material.size() >= MATERIAL_MAX_LENGTH) {
                     return Error::kMaxStringLengthExceeded;
                 }
-                memset(out->material[i], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
+                memset(out->material[i], 0, sizeof(material[i]));
                 material.copy(out->material[i], material.size());
                 out->tool_type[i]
                     = bwcoreutils::YonkersTool
-                    ::type_from_type_name(ENSURE_ARRAY(m_metadataParsed,
-                                                       "tool_types",
-                                                       i, "unknown")
-                                          .asString());
+                      ::type_from_type_name(get_leaf(get_arr(m_metadataParsed,
+                                                             "tool_types"),
+                                                     ai, "unknown"));
             }
         }
         // If you are trying to add a new version, please update
         // maxSupportedVersion
-        out->duration_s
-            = m_metadataParsed.get("duration_s", 0.f).asFloat();
-        out->chamber_temperature
-            = m_metadataParsed.get("chamber_temperature",
-                                   Json::Value(0U)).asUInt();
-        out->uses_raft
-            = m_metadataParsed.get("miracle_config", Json::Value())
-            .get("doRaft", false).asBool();
-        const std::string type
-            = m_metadataParsed.get("bot_type", "_9999").asString();
+        out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
+        out->chamber_temperature = get_leaf(m_metadataParsed,
+                                            "chamber_temperature",
+                                            0l);
+        out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
+                                  "doRaft", false);
+        const std::string type = get_leaf(m_metadataParsed,
+                                          "bot_type", "_9999");
         const size_t pid_idx = type.rfind('_')+1;
         out->bot_pid = std::stoi(type.substr(pid_idx), nullptr, 16);
 
-        if (m_metafileVersion > SemVer(1, 0, 0)) {
-            out->bounding_box_x_min
-                = m_metadataParsed.get("bounding_box_x_min",
-                                       Json::Value(0.f)).asFloat();
-            out->bounding_box_x_max
-                = m_metadataParsed.get("bounding_box_x_max",
-                                       Json::Value(0.f)).asFloat();
-            out->bounding_box_y_min
-                = m_metadataParsed.get("bounding_box_y_min",
-                                       Json::Value(0.f)).asFloat();
-            out->bounding_box_y_max
-                = m_metadataParsed.get("bounding_box_y_max",
-                                       Json::Value(0.f)).asFloat();
-            out->bounding_box_z_min
-                = m_metadataParsed.get("bounding_box_z_min",
-                                       Json::Value(0.f)).asFloat();
-            out->bounding_box_z_max
-                = m_metadataParsed.get("bounding_box_z_max",
-                                       Json::Value(0.f)).asFloat();
+        if (m_metafileVersion > SemVer(1, 0, 0)
+            && m_metafileVersion < SemVer(3, 0, 0)) {
+            out->bounding_box_x_min = get_leaf(m_metadataParsed,
+                                               "bounding_box_x_min", 0.f);
+            out->bounding_box_x_max = get_leaf(m_metadataParsed,
+                                               "bounding_box_x_max", 0.f);
+            out->bounding_box_y_min = get_leaf(m_metadataParsed,
+                                               "bounding_box_y_min", 0.f);
+            out->bounding_box_y_max = get_leaf(m_metadataParsed,
+                                               "bounding_box_y_max", 0.f);
+            out->bounding_box_z_min = get_leaf(m_metadataParsed,
+                                               "bounding_box_z_min", 0.f);
+            out->bounding_box_z_max = get_leaf(m_metadataParsed,
+                                               "bounding_box_z_max", 0.f);
+        } else if (m_metafileVersion >= SemVer(3, 0, 0)) {
+            auto bounding_box = get_obj(m_metadataParsed, "bounding_box");
+            out->bounding_box_x_max = get_leaf(bounding_box, "x_max", 0.f);
+            out->bounding_box_x_min = get_leaf(bounding_box, "x_min", 0.f);
+            out->bounding_box_y_max = get_leaf(bounding_box, "y_max", 0.f);
+            out->bounding_box_y_min = get_leaf(bounding_box, "y_min", 0.f);
+            out->bounding_box_z_max = get_leaf(bounding_box, "z_max", 0.f);
+            out->bounding_box_z_min = get_leaf(bounding_box, "z_min", 0.f);
         }
     }
 
     // common output
-    out->thing_id = m_metadataParsed.get("thing_id", (int)0).asUInt();
+    out->thing_id = get_leaf(m_metadataParsed, "thing_id", (unsigned int)0);
     if (!m_via_fd) {
         struct stat stat_buffer;
         // I'm going to ignore the return value here because if we've gotten to
@@ -388,7 +412,7 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
         // File size is meaningless for drm prints because we stream them
         out->file_size = 0;
     }
-    const std::string uuid = m_metadataParsed.get("uuid", "").asString();
+    const std::string uuid = get_leaf(m_metadataParsed, "uuid", "");
     if (uuid.size() > UUID_MAX_LENGTH) {
         return Error::kMaxStringLengthExceeded;
     }
@@ -397,34 +421,36 @@ TinyThingReader::Error TinyThingReader::Private::getMetadata(MetadataType* out) 
     return Error::kOK;
 }
 
-TinyThingReader::Error TinyThingReader::Private::getCppOnlyMetadata(Metadata* out) const {
+TinyThingReader::Error
+TinyThingReader::Private::getCppOnlyMetadata(Metadata* out) const {
+    using namespace MakerBot::SafeJson;  // NOLINT(build/namespaces)
     if (m_metafileVersion.major == -1) {
         return TinyThingReader::Error::kNotYetUnzipped;
     } else if (m_metafileVersion > maxSupportedVersion()) {
         return TinyThingReader::Error::kVersionMismatch;
     } else if (m_metafileVersion.major == 0) {
-        const Json::Value printer_settings
-            = m_metadataParsed.get("printer_settings", Json::Value());
-        out->shells = printer_settings.get("shells", (int)0).asInt();
-        out->layer_height = printer_settings.get("layer_height", 0.f).asFloat();
-        out->infill_density = printer_settings.get("infill", 0.f).asFloat();
-        out->uses_support = printer_settings.get("support", false).asBool();
+        const Json::Value printer_settings = get_obj(m_metadataParsed,
+                                                     "printer_settings");
+        out->shells = get_leaf(printer_settings, "shells", 0l);
+        out->layer_height = get_leaf(printer_settings, "layer_height", 0.f);
+        out->infill_density = get_leaf(printer_settings, "infill", 0.f);
+        out->uses_support = get_leaf(printer_settings, "support", false);
         // Not included in this version
         out->max_flow_rate[0] = out->max_flow_rate[1] = 0.f;
-        out->slicer_name = printer_settings.get("slicer", "UNKNOWN").asString();
+        out->slicer_name = get_leaf(printer_settings, "slicer", "UNKNOWN");
     } else {
-        const Json::Value miracle_config
-            = m_metadataParsed.get("miracle_config", Json::Value());
-        out->shells = miracle_config.get("numberOfShells", (int)0).asInt();
-        out->layer_height = miracle_config.get("layerHeight", 0.f).asFloat();
-        out->infill_density
-            = miracle_config.get("infillDensity", 0.f).asFloat();
-        out->uses_support = miracle_config.get("doSupport", false).asBool();
-        out->slicer_name = miracle_config.get("slicer", "UNKNOWN").asString();
+        const Json::Value miracle_config = get_obj(m_metadataParsed,
+                                                   "miracle_config");
+        out->shells = get_leaf(miracle_config, "numberOfShells", 0l);
+        out->layer_height = get_leaf(miracle_config, "layerHeight", 0.f);
+        out->infill_density = get_leaf(miracle_config, "infillDensity", 0.f);
+        out->uses_support = get_leaf(miracle_config, "doSupport", false);
+        out->slicer_name = get_leaf(miracle_config, "slicer", "UNKNOWN");
         if (m_metafileVersion.major < 3) {
-            out->max_flow_rate[0]
-                = m_metadataParsed.get("max_flow_rate", 0.f).asFloat();
-            out->max_flow_rate[1] = 0;          
+            out->max_flow_rate[0] = get_leaf(m_metadataParsed,
+                                             "max_flow_rate",
+                                             0.f);
+            out->max_flow_rate[1] = 0;
         } else {
             out->max_flow_rate[0] = 0;
             out->max_flow_rate[1] = 0;
@@ -453,81 +479,84 @@ TinyThingReader::~TinyThingReader() {
 }
 
 bool TinyThingReader::unzipMetadataFile() {
-  const bool unzipped
-    = m_private->unzipFile(Config::kMetadataFilename, 
-                             m_private->m_metadataFileContents);
-  if(!unzipped) {return unzipped;}
-  const bool extracted
-    = Private::parseFile(m_private->m_metadataFileContents,
-                         &(m_private->m_metadataParsed));
-  m_private->m_metafileVersion
-    = SemVer(m_private->m_metadataParsed.get("version",
-                                             Json::Value("0.0.0"))
-             .asString());
-  if (extracted) {
-      auto fw = Json::FastWriter();
-      m_private->m_sliceProfileContents
-          = fw.write(m_private->m_metadataParsed.get("miracle_config",
-                                                     Json::Value(Json::ValueType::objectValue)));
-  }
-  return extracted;
+    using namespace MakerBot::SafeJson;  // NOLINT(build/namespaces)
+    const bool unzipped
+        = m_private->unzipFile(Config::kMetadataFilename,
+                               m_private->m_metadataFileContents);
+    if (!unzipped) {return unzipped;}
+    const bool extracted
+        = Private::parseFile(m_private->m_metadataFileContents,
+                             &(m_private->m_metadataParsed));
+    m_private->m_metafileVersion
+        = SemVer(get_leaf(m_private->m_metadataParsed, "version", "0.0.0"));
+    if (extracted) {
+        auto fw = Json::FastWriter();
+        m_private->m_sliceProfileContents
+            = fw.write(get_obj(m_private->m_metadataParsed, "miracle_config"));
+    }
+    return extracted;
 }
 
 bool TinyThingReader::unzipSmallThumbnailFile() {
     return m_private->unzipFile(
-        Config::kSmallThumbnailFilename, 
+        Config::kSmallThumbnailFilename,
         m_private->m_smallThumbnailFileContents);
 }
 
 bool TinyThingReader::unzipMediumThumbnailFile() {
     return m_private->unzipFile(
-        Config::kMediumThumbnailFilename, 
+        Config::kMediumThumbnailFilename,
         m_private->m_mediumThumbnailFileContents);
 }
 
 bool TinyThingReader::unzipLargeThumbnailFile() {
     return m_private->unzipFile(
-        Config::kLargeThumbnailFilename, 
+        Config::kLargeThumbnailFilename,
         m_private->m_largeThumbnailFileContents);
 }
 
 bool TinyThingReader::unzipToolpathFile() {
     m_private->m_incremental = false;
     const bool ok = m_private->unzipFile(
-                         Config::kToolpathFilename, 
+                         Config::kToolpathFilename,
                          m_private->m_toolpathFileContents);
-    if(!ok) {
+    if (!ok) {
         return ok;
     } else {
         return m_private->resetToolpath();
     }
 }
 
-TinyThingReader::Error TinyThingReader::getSliceProfile(const char** out) const {
+TinyThingReader::Error
+TinyThingReader::getSliceProfile(const char** out) const {
     return m_private->getSliceProfile(out);
 }
 
 TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {
     const Error error = m_private->getMetadata<Metadata>(out);
-    if(error != kOK) {return error;}
+    if (error != kOK) {return error;}
     return m_private->getCppOnlyMetadata(out);
 }
 
-TinyThingReader::Error TinyThingReader::getMetadata(CInterfaceMetadata* out) const {
+TinyThingReader::Error
+TinyThingReader::getMetadata(CInterfaceMetadata* out) const {
     return m_private->getMetadata<CInterfaceMetadata>(out);
 }
 
-void TinyThingReader::getSmallThumbnailFileContents(std::string* contents) const {
+void
+TinyThingReader::getSmallThumbnailFileContents(std::string* contents) const {
     *contents = m_private->m_smallThumbnailFileContents;
 }
 
-void TinyThingReader::getMediumThumbnailFileContents(std::string* contents) const{
+void
+TinyThingReader::getMediumThumbnailFileContents(std::string* contents) const {
     *contents = m_private->m_mediumThumbnailFileContents;
 }
 
-void TinyThingReader::getLargeThumbnailFileContents(std::string* contents) const{
+void
+TinyThingReader::getLargeThumbnailFileContents(std::string* contents) const {
     *contents = m_private->m_largeThumbnailFileContents;
-} 
+}
 
 void TinyThingReader::getToolpathFileContents(std::string* contents) const {
     *contents = m_private->m_toolpathFileContents;
@@ -537,7 +566,7 @@ std::string TinyThingReader::getToolpathFileContents() const {
     return m_private->m_toolpathFileContents;
 }
 
-bool TinyThingReader::hasJsonToolpath() const{
+bool TinyThingReader::hasJsonToolpath() const {
     return m_private->hasJsonToolpath();
 }
 
@@ -546,12 +575,12 @@ bool TinyThingReader::hasMetadata() const {
     return m_private->hasMetadata();
 }
 
-bool TinyThingReader::isValid() const{
+bool TinyThingReader::isValid() const {
     return m_private->isValid();
 }
 
 // returns true if succesful
-bool TinyThingReader::resetToolpath(){
+bool TinyThingReader::resetToolpath() {
     return m_private->resetToolpath();
 }
 
@@ -569,6 +598,7 @@ int TinyThingReader::getToolpathIncr(char* buff, const int chars) {
 }
 
 TinyThingReader::Error
-TinyThingReader::doesMetadataFileMatchConfig(const VerificationData& config) const {
+TinyThingReader::doesMetadataFileMatchConfig(
+                                         const VerificationData& config) const {
     return m_private->verifyMetadata(config);
 }
