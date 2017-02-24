@@ -30,7 +30,9 @@ target_link_libraries(reader_tests
   )
 
 construct_env_path(
+  PREPEND_ENV_VAL_WINDOWS PATH
   PREPEND_ENV_VAL_LINUX LD_LIBRARY_PATH
+  PREPEND_ENV_VAL_DARWIN DYLD_LIBRARY_PATH
   VALUES
     "$<TARGET_FILE_DIR:tinything>"
     "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
