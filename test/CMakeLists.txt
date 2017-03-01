@@ -26,7 +26,6 @@ target_link_libraries(reader_tests
   tinything
   JsonCpp::jsoncpp
   Boost::unit_test_framework
-  pthread
   )
 
 construct_env_path(
