@@ -20,23 +20,23 @@ SemVer TinyThingReader::Private::maxSupportedVersion() {
     return SemVer(3, 0, 0);
 }
 
-Metadata::Metadata() : extrusion_mass_g{0.f, 0.f},
-                       extrusion_distance_mm{0,0},
-                       extruder_temperature{0,0},
+Metadata::Metadata() : extrusion_mass_g({0.f, 0.f}),
+                       extrusion_distance_mm({0, 0}),
+                       extruder_temperature({0, 0}),
                        chamber_temperature(0),
                        shells(0),
                        layer_height(0),
                        infill_density(0),
                        uses_support(false),
                        duration_s(0),
-                       max_flow_rate{0, 0},
+                       max_flow_rate({0, 0}),
                        thing_id(0),
                        uses_raft(false),
                        uuid(),
-                       material{"UNKNOWN","UNKNOWN"},
+                       material({"UNKNOWN", "UNKNOWN"}),
                        slicer_name("UNKNOWN"),
-                       tool_type{bwcoreutils::TYPE::UNKNOWN_TYPE,
-                               bwcoreutils::TYPE::UNKNOWN_TYPE},
+                       tool_type({bwcoreutils::TYPE::UNKNOWN_TYPE,
+                               bwcoreutils::TYPE::UNKNOWN_TYPE}),
                        bot_pid(9999) {}
 
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
