@@ -26,7 +26,6 @@ target_link_libraries(reader_tests
   tinything
   JsonCpp::jsoncpp
   Boost::unit_test_framework
-  pthread
   )
 
 construct_env_path(
@@ -35,7 +34,8 @@ construct_env_path(
   PREPEND_ENV_VAL_DARWIN DYLD_LIBRARY_PATH
   VALUES
     "$<TARGET_FILE_DIR:tinything>"
-    "${CMAKE_INSTALL_PREFIX}/${LIB_INSTALL_DIR}"
+    "$<TARGET_FILE_DIR:JsonCpp::jsoncpp>"
+    "$<TARGET_FILE_DIR:Boost::unit_test_framework>"
   PREPEND_ASSIGNMENT
   OUTPUT_VARIABLE environment
   )

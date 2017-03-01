@@ -5,6 +5,7 @@
 
 #include <sys/stat.h>
 #include <string.h>
+#include <algorithm>
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
@@ -20,24 +21,34 @@ SemVer TinyThingReader::Private::maxSupportedVersion() {
     return SemVer(3, 0, 0);
 }
 
-Metadata::Metadata() : extrusion_mass_g{0.f, 0.f},
-                       extrusion_distance_mm{0,0},
-                       extruder_temperature{0,0},
+Metadata::Metadata() : extrusion_mass_g(),
+                       extrusion_distance_mm(),
+                       extruder_temperature(),
                        chamber_temperature(0),
                        shells(0),
                        layer_height(0),
                        infill_density(0),
                        uses_support(false),
                        duration_s(0),
-                       max_flow_rate{0, 0},
+                       max_flow_rate(),
                        thing_id(0),
                        uses_raft(false),
                        uuid(),
-                       material{"UNKNOWN","UNKNOWN"},
+                       material(),
                        slicer_name("UNKNOWN"),
-                       tool_type{bwcoreutils::TYPE::UNKNOWN_TYPE,
-                               bwcoreutils::TYPE::UNKNOWN_TYPE},
-                       bot_pid(9999) {}
+                       tool_type(),
+                       bot_pid(9999) {
+    // Because we still support VS 2013 which is not C++11 compliant,
+    // we have to initialize these in a pretty crappy way.
+    for (int i = 0; i < 2; ++i) {
+        extrusion_mass_g[i] = 0.f;
+        extrusion_distance_mm[i] = 0;
+        extruder_temperature[i] = 0;
+        max_flow_rate[i] = 0;
+        strcpy(material[i], "UNKNOWN");
+        tool_type[i] = bwcoreutils::TYPE::UNKNOWN_TYPE;
+    }
+}
 
 TinyThingReader::Private::Private(const std::string& filePath, int fd)
     : m_filePath(filePath),
