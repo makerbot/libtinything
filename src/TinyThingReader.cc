@@ -5,6 +5,7 @@
 
 #include <sys/stat.h>
 #include <string.h>
+#include <algorithm>
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
