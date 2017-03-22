@@ -21,7 +21,7 @@ else:
         artifactory_utils.ArtifactSelector(
             project="MBCoreUtils",
             revision="develop",
-            version="^3.9",
+            version="^4.0",
             debug=False,
             stable_required=True)
     ]
@@ -34,7 +34,7 @@ else:
             artifactory_utils.ArtifactSelector(
                 project="morepork-mbcoreutils",
                 revision="develop",
-                version="^3.9",
+                version="^4.0",
                 debug=False,
                 stable_required=True),
             artifactory_utils.ArtifactSelector(
