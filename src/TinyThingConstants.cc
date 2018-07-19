@@ -11,6 +11,10 @@ namespace LibTinyThing {
 	const std::string Config::kMediumThumbnailFilename = "thumbnail_110x80.png";
 	const std::string Config::kSmallThumbnailFilename = "thumbnail_55x40.png";
 
+    const std::string Config::kFullViewLargeThumbnailFilename = "full_view_thumbnail_320x200.png";
+    const std::string Config::kFullViewMediumThumbnailFilename = "full_view_thumbnail_110x80.png";
+    const std::string Config::kFullViewSmallThumbnailFilename = "full_view_thumbnail_55x40.png";
+
 	const int Config::kLargeThumbnailWidth = 320;
 	const int Config::kMediumThumbnailWidth = 110;
 	const int Config::kSmallThumbnailWidth = 55;

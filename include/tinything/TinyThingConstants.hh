@@ -13,6 +13,10 @@ namespace LibTinyThing {
         static const std::string kMediumThumbnailFilename;
         static const std::string kSmallThumbnailFilename;
 
+        static const std::string kFullViewLargeThumbnailFilename;
+        static const std::string kFullViewMediumThumbnailFilename;
+        static const std::string kFullViewSmallThumbnailFilename;
+
         static const int kLargeThumbnailWidth;
         static const int kMediumThumbnailWidth;
         static const int kSmallThumbnailWidth;

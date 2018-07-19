@@ -30,6 +30,9 @@ class TinyThingReader::Private {
     std::string m_smallThumbnailFileContents;
     std::string m_mediumThumbnailFileContents;
     std::string m_largeThumbnailFileContents;
+    std::string m_fullViewSmallThumbnailFileContents;
+    std::string m_fullViewMediumThumbnailFileContents;
+    std::string m_fullViewLargeThumbnailFileContents;
     std::string m_metadataFileContents;
     std::string m_sliceProfileContents;
     Json::Value m_metadataParsed;

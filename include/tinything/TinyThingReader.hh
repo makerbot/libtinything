@@ -105,6 +105,9 @@ namespace LibTinyThing {
         bool unzipSmallThumbnailFile();
         bool unzipMediumThumbnailFile();
         bool unzipLargeThumbnailFile();
+        bool unzipFullViewSmallThumbnailFile();
+        bool unzipFullViewMediumThumbnailFile();
+        bool unzipFullViewLargeThumbnailFile();
         bool unzipToolpathFile();
 
         // these are accessors for the unzipped contents of each of the
@@ -113,6 +116,9 @@ namespace LibTinyThing {
         void getSmallThumbnailFileContents(std::string* contents) const;
         void getMediumThumbnailFileContents(std::string* contents) const;
         void getLargeThumbnailFileContents(std::string* contents) const;
+        void getFullViewSmallThumbnailFileContents(std::string* contents) const;
+        void getFullViewMediumThumbnailFileContents(std::string* contents) const;
+        void getFullViewLargeThumbnailFileContents(std::string* contents) const;
         void getToolpathFileContents(std::string* contents) const;
         std::string getToolpathFileContents() const;
         // checks to see if toolpath is present
