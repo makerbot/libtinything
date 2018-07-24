@@ -117,17 +117,21 @@ public:
                 std::cout << "ERROR: could not add large thumbnail" << std::endl;
                 return false;
             }
-            // The below three addFile calls have no error handling, because they are expected to fail
-            // for any printer below 6th gen, since they aren't expected to have full-view thumbnails
-            addFile(Config::kFullViewSmallThumbnailFilename,
+            if(!addFile(Config::kFullViewSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewSmallThumbnailFilename,
-                        false, false);
-            addFile(Config::kFullViewMediumThumbnailFilename,
+                        false, false)){
+                std::cout << "ERROR: could not add small full-view thumbnail"<< Config::kFullViewSmallThumbnailFilename << std::endl;
+            }
+            if(!addFile(Config::kFullViewMediumThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewMediumThumbnailFilename,
-                        false, false);
-            addFile(Config::kFullViewLargeThumbnailFilename,
+                        false, false)){
+                std::cout << "ERROR: could not add medium full-view thumbnail" << Config::kFullViewSmallThumbnailFilename << std::endl;
+            }
+            if(!addFile(Config::kFullViewLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewLargeThumbnailFilename,
-                        false, false);
+                        false, false)){
+                std::cout << "ERROR: could not add large full-view thumbnail" << Config::kFullViewSmallThumbnailFilename << std::endl;
+            }
         } else {
             // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }
