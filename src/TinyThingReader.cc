@@ -535,19 +535,19 @@ bool TinyThingReader::unzipLargeThumbnailFile() {
 bool TinyThingReader::unzipFullViewSmallThumbnailFile() {
     return m_private->unzipFile(
         Config::kFullViewSmallThumbnailFilename,
-        m_private->m_smallThumbnailFileContents);
+        m_private->m_fullViewSmallThumbnailFileContents);
 }
 
 bool TinyThingReader::unzipFullViewMediumThumbnailFile() {
     return m_private->unzipFile(
         Config::kFullViewMediumThumbnailFilename,
-        m_private->m_mediumThumbnailFileContents);
+        m_private->m_fullViewMediumThumbnailFileContents);
 }
 
 bool TinyThingReader::unzipFullViewLargeThumbnailFile() {
     return m_private->unzipFile(
         Config::kFullViewLargeThumbnailFilename,
-        m_private->m_largeThumbnailFileContents);
+        m_private->m_fullViewLargeThumbnailFileContents);
 }
 
 bool TinyThingReader::unzipToolpathFile() {
@@ -595,17 +595,17 @@ TinyThingReader::getLargeThumbnailFileContents(std::string* contents) const {
 
 void
 TinyThingReader::getFullViewSmallThumbnailFileContents(std::string* contents) const {
-    *contents = m_private->m_smallThumbnailFileContents;
+    *contents = m_private->m_fullViewSmallThumbnailFileContents;
 }
 
 void
 TinyThingReader::getFullViewMediumThumbnailFileContents(std::string* contents) const {
-    *contents = m_private->m_mediumThumbnailFileContents;
+    *contents = m_private->m_fullViewMediumThumbnailFileContents;
 }
 
 void
 TinyThingReader::getFullViewLargeThumbnailFileContents(std::string* contents) const {
-    *contents = m_private->m_largeThumbnailFileContents;
+    *contents = m_private->m_fullViewLargeThumbnailFileContents;
 }
 
 void TinyThingReader::getToolpathFileContents(std::string* contents) const {

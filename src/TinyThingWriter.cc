@@ -125,12 +125,12 @@ public:
             if(!addFile(Config::kFullViewMediumThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewMediumThumbnailFilename,
                         false, false)){
-                std::cout << "ERROR: could not add medium full-view thumbnail" << Config::kFullViewSmallThumbnailFilename << std::endl;
+                std::cout << "ERROR: could not add medium full-view thumbnail" << Config::kFullViewMediumThumbnailFilename << std::endl;
             }
             if(!addFile(Config::kFullViewLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewLargeThumbnailFilename,
                         false, false)){
-                std::cout << "ERROR: could not add large full-view thumbnail" << Config::kFullViewSmallThumbnailFilename << std::endl;
+                std::cout << "ERROR: could not add large full-view thumbnail" << Config::kFullViewLargeThumbnailFilename << std::endl;
             }
         } else {
             // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
