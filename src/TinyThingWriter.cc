@@ -23,8 +23,8 @@ public:
                  const std::string& filePath,
                  bool compress, bool createZip) {
 
-        // std::cout << "INFO: Adding " << filePath << " to "
-        //     << m_zipFilePath << " as " << fileName << std::endl;
+         std::cout << "INFO: Adding " << filePath << " to "
+             << m_zipFilePath << " as " << fileName << std::endl;
 
         int append_status = APPEND_STATUS_ADDINZIP;
         if (createZip) {
@@ -32,8 +32,10 @@ public:
         }
 
         zipFile zip(zipOpen(m_zipFilePath.c_str(), append_status));
-        if (!zip)
+        if (!zip) {
+            std::cout << "ERROR: Couldn't zip " << m_zipFilePath.c_str() << std::endl;
             return false;
+        }
 
         zip_fileinfo zi;
 
