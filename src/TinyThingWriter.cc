@@ -128,7 +128,6 @@ public:
             addFile(Config::kFullViewLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewLargeThumbnailFilename,
                         false, false);
-            }
         } else {
             // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }
