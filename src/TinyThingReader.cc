@@ -105,15 +105,6 @@ bool TinyThingReader::Private::isValid() const {
                       Config::kLargeThumbnailFilename.c_str(),
                       0) == UNZ_OK &&
         unzLocateFile(m_zipFile,
-                      Config::kFullViewSmallThumbnailFilename.c_str(),
-                      0) == UNZ_OK &&
-        unzLocateFile(m_zipFile,
-                      Config::kFullViewMediumThumbnailFilename.c_str(),
-                      0) == UNZ_OK &&
-        unzLocateFile(m_zipFile,
-                      Config::kFullViewLargeThumbnailFilename.c_str(),
-                      0) == UNZ_OK &&
-        unzLocateFile(m_zipFile,
                       Config::kToolpathFilename.c_str(),
                       0) == UNZ_OK &&
         unzOpenCurrentFile(m_zipFile) == UNZ_OK);
