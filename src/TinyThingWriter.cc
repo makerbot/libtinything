@@ -96,9 +96,9 @@ public:
         } else {
             std::cout << "WARNING: skipping metadata, not specified" << std::endl;
         }
-        // add metadata if it is set
-        if (!m_thumbnailDirPath.empty()){
 
+        // add thumbnails if path is set
+        if (!m_thumbnailDirPath.empty()){
             if(!addFile(Config::kSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSmallThumbnailFilename,
                         false, false)){
