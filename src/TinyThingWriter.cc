@@ -23,8 +23,8 @@ public:
                  const std::string& filePath,
                  bool compress, bool createZip) {
 
-         std::cout << "INFO: Adding " << filePath << " to "
-             << m_zipFilePath << " as " << fileName << std::endl;
+        // std::cout << "INFO: Adding " << filePath << " to "
+        //     << m_zipFilePath << " as " << fileName << std::endl;
 
         int append_status = APPEND_STATUS_ADDINZIP;
         if (createZip) {
@@ -32,10 +32,8 @@ public:
         }
 
         zipFile zip(zipOpen(m_zipFilePath.c_str(), append_status));
-        if (!zip) {
-            std::cout << "ERROR: Couldn't zip " << m_zipFilePath.c_str() << std::endl;
+        if (!zip)
             return false;
-        }
 
         zip_fileinfo zi;
 
@@ -98,9 +96,9 @@ public:
         } else {
             std::cout << "WARNING: skipping metadata, not specified" << std::endl;
         }
-
         // add metadata if it is set
         if (!m_thumbnailDirPath.empty()){
+
             if(!addFile(Config::kSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSmallThumbnailFilename,
                         false, false)){
@@ -119,21 +117,17 @@ public:
                 std::cout << "ERROR: could not add large thumbnail" << std::endl;
                 return false;
             }
-            if(!addFile(Config::kFullViewSmallThumbnailFilename,
+            // The below three addFile calls have no error handling, because they are expected to fail
+            // for any printer below 6th gen, since they aren't expected to have full-view thumbnails
+            addFile(Config::kFullViewSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewSmallThumbnailFilename,
-                        false, false)){
-                std::cout << "ERROR: could not add small full-view thumbnail"<< Config::kFullViewSmallThumbnailFilename << std::endl;
-            }
-            if(!addFile(Config::kFullViewMediumThumbnailFilename,
+                        false, false)
+            addFile(Config::kFullViewMediumThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewMediumThumbnailFilename,
-                        false, false)){
-                std::cout << "ERROR: could not add medium full-view thumbnail" << Config::kFullViewMediumThumbnailFilename << std::endl;
-            }
-            if(!addFile(Config::kFullViewLargeThumbnailFilename,
+                        false, false)
+            addFile(Config::kFullViewLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewLargeThumbnailFilename,
-                        false, false)){
-                std::cout << "ERROR: could not add large full-view thumbnail" << Config::kFullViewLargeThumbnailFilename << std::endl;
-            }
+                        false, false);
         } else {
             // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }
