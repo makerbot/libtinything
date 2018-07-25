@@ -97,7 +97,7 @@ public:
             std::cout << "WARNING: skipping metadata, not specified" << std::endl;
         }
 
-        // add metadata if it is set
+        // add thumbnails if path is set
         if (!m_thumbnailDirPath.empty()){
             if(!addFile(Config::kSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSmallThumbnailFilename,
@@ -117,6 +117,17 @@ public:
                 std::cout << "ERROR: could not add large thumbnail" << std::endl;
                 return false;
             }
+            // The below three addFile calls have no error handling, because they are expected to fail
+            // for any printer below 6th gen, since they aren't expected to have full-view thumbnails
+            addFile(Config::kFullViewSmallThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kFullViewSmallThumbnailFilename,
+                        false, false);
+            addFile(Config::kFullViewMediumThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kFullViewMediumThumbnailFilename,
+                        false, false);
+            addFile(Config::kFullViewLargeThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kFullViewLargeThumbnailFilename,
+                        false, false);
         } else {
             // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }
