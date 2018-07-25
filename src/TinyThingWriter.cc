@@ -121,10 +121,10 @@ public:
             // for any printer below 6th gen, since they aren't expected to have full-view thumbnails
             addFile(Config::kFullViewSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewSmallThumbnailFilename,
-                        false, false)
+                        false, false);
             addFile(Config::kFullViewMediumThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewMediumThumbnailFilename,
-                        false, false)
+                        false, false);
             addFile(Config::kFullViewLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kFullViewLargeThumbnailFilename,
                         false, false);
