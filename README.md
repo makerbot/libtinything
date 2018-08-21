@@ -29,7 +29,7 @@ For Birdwing bots, they are:
 
 For Sombrero bots, they are:
 
-    thumbnail_106x140.png
+    thumbnail_140x106.png
     thumbnail_212x300.png
     thumbnail_960x1460.png
 
