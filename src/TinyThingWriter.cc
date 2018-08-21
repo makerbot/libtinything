@@ -99,35 +99,49 @@ public:
 
         // add thumbnails if path is set
         if (!m_thumbnailDirPath.empty()){
-            if(!addFile(Config::kSmallThumbnailFilename,
+            int thumbnailCount = 0;
+            // try to add birdwing-style images, which should only work for birdwing bots
+            if(addFile(Config::kSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSmallThumbnailFilename,
                         false, false)){
-                std::cout << "ERROR: could not add small thumbnail" << std::endl;
-                return false;
+                std::cout << "Adding small thumbnail" << std::endl;
+                thumbnailCount++;
             }
-            if(!addFile(Config::kMediumThumbnailFilename,
+            if(addFile(Config::kMediumThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kMediumThumbnailFilename,
                         false, false)){
-                std::cout << "ERROR: could not add medium thumbnail" << std::endl;
-                return false;
+                std::cout << "Adding medium thumbnail" << std::endl;
+                thumbnailCount++;
             }
-            if(!addFile(Config::kLargeThumbnailFilename,
+            if(addFile(Config::kLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kLargeThumbnailFilename,
                         false, false)){
-                std::cout << "ERROR: could not add large thumbnail" << std::endl;
+                std::cout << "Adding large thumbnail" << std::endl;
+                thumbnailCount++;
+            }
+            // try to add sombrero-style images, which should only work for sombrero bots
+            if(addFile(Config::kSombreroSmallThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kSombreroSmallThumbnailFilename,
+                        false, false)){
+                std::cout << "Adding small thumbnail" << std::endl;
+                thumbnailCount++;
+            }
+            if(addFile(Config::kSombreroMediumThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kSombreroMediumThumbnailFilename,
+                        false, false)){
+                std::cout << "Adding medium thumbnail" << std::endl;
+                thumbnailCount++;
+            }
+            if(addFile(Config::kSombreroLargeThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kSombreroLargeThumbnailFilename,
+                        false, false)){
+                std::cout << "Adding large thumbnail" << std::endl;
+                thumbnailCount++;
+            }
+            if (thumbnailCount != 3){
+                std::cout << "ERROR: Expected to add 3 thumbnail images. Was only able to add" << thumbnailCount << "." << std::endl;
                 return false;
             }
-            // The below three addFile calls have no error handling, because they are expected to fail
-            // for any printer below 6th gen, since they aren't expected to have full-view thumbnails
-            addFile(Config::kFullViewSmallThumbnailFilename,
-                        m_thumbnailDirPath + "/" + Config::kFullViewSmallThumbnailFilename,
-                        false, false);
-            addFile(Config::kFullViewMediumThumbnailFilename,
-                        m_thumbnailDirPath + "/" + Config::kFullViewMediumThumbnailFilename,
-                        false, false);
-            addFile(Config::kFullViewLargeThumbnailFilename,
-                        m_thumbnailDirPath + "/" + Config::kFullViewLargeThumbnailFilename,
-                        false, false);
         } else {
             // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
         }

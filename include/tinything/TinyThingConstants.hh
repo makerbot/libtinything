@@ -13,9 +13,9 @@ namespace LibTinyThing {
         static const std::string kMediumThumbnailFilename;
         static const std::string kSmallThumbnailFilename;
 
-        static const std::string kFullViewLargeThumbnailFilename;
-        static const std::string kFullViewMediumThumbnailFilename;
-        static const std::string kFullViewSmallThumbnailFilename;
+        static const std::string kSombreroLargeThumbnailFilename;
+        static const std::string kSombreroMediumThumbnailFilename;
+        static const std::string kSombreroSmallThumbnailFilename;
 
         static const int kLargeThumbnailWidth;
         static const int kMediumThumbnailWidth;
@@ -24,6 +24,14 @@ namespace LibTinyThing {
         static const int kLargeThumbnailHeight;
         static const int kMediumThumbnailHeight;
         static const int kSmallThumbnailHeight;
+
+        static const int kSombreroLargeThumbnailWidth;
+        static const int kSombreroMediumThumbnailWidth;
+        static const int kSombreroSmallThumbnailWidth;
+
+        static const int kSombreroLargeThumbnailHeight;
+        static const int kSombreroMediumThumbnailHeight;
+        static const int kSombreroSmallThumbnailHeight;
 	};
 }
 

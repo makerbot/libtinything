@@ -532,22 +532,22 @@ bool TinyThingReader::unzipLargeThumbnailFile() {
         m_private->m_largeThumbnailFileContents);
 }
 
-bool TinyThingReader::unzipFullViewSmallThumbnailFile() {
+bool TinyThingReader::unzipSombreroSmallThumbnailFile() {
     return m_private->unzipFile(
-        Config::kFullViewSmallThumbnailFilename,
-        m_private->m_fullViewSmallThumbnailFileContents);
+        Config::kSombreroSmallThumbnailFilename,
+        m_private->m_sombreroSmallThumbnailFileContents);
 }
 
-bool TinyThingReader::unzipFullViewMediumThumbnailFile() {
+bool TinyThingReader::unzipSombreroMediumThumbnailFile() {
     return m_private->unzipFile(
-        Config::kFullViewMediumThumbnailFilename,
-        m_private->m_fullViewMediumThumbnailFileContents);
+        Config::kSombreroMediumThumbnailFilename,
+        m_private->m_sombreroMediumThumbnailFileContents);
 }
 
-bool TinyThingReader::unzipFullViewLargeThumbnailFile() {
+bool TinyThingReader::unzipSombreroLargeThumbnailFile() {
     return m_private->unzipFile(
-        Config::kFullViewLargeThumbnailFilename,
-        m_private->m_fullViewLargeThumbnailFileContents);
+        Config::kSombreroLargeThumbnailFilename,
+        m_private->m_sombreroLargeThumbnailFileContents);
 }
 
 bool TinyThingReader::unzipToolpathFile() {
@@ -594,18 +594,18 @@ TinyThingReader::getLargeThumbnailFileContents(std::string* contents) const {
 }
 
 void
-TinyThingReader::getFullViewSmallThumbnailFileContents(std::string* contents) const {
-    *contents = m_private->m_fullViewSmallThumbnailFileContents;
+TinyThingReader::getSombreroSmallThumbnailFileContents(std::string* contents) const {
+    *contents = m_private->m_sombreroSmallThumbnailFileContents;
 }
 
 void
-TinyThingReader::getFullViewMediumThumbnailFileContents(std::string* contents) const {
-    *contents = m_private->m_fullViewMediumThumbnailFileContents;
+TinyThingReader::getSombreroMediumThumbnailFileContents(std::string* contents) const {
+    *contents = m_private->m_sombreroMediumThumbnailFileContents;
 }
 
 void
-TinyThingReader::getFullViewLargeThumbnailFileContents(std::string* contents) const {
-    *contents = m_private->m_fullViewLargeThumbnailFileContents;
+TinyThingReader::getSombreroLargeThumbnailFileContents(std::string* contents) const {
+    *contents = m_private->m_sombreroLargeThumbnailFileContents;
 }
 
 void TinyThingReader::getToolpathFileContents(std::string* contents) const {
