@@ -104,38 +104,32 @@ public:
             if(addFile(Config::kSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSmallThumbnailFilename,
                         false, false)){
-                std::cout << "Adding small thumbnail" << std::endl;
                 thumbnailCount++;
             }
             if(addFile(Config::kMediumThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kMediumThumbnailFilename,
                         false, false)){
-                std::cout << "Adding medium thumbnail" << std::endl;
                 thumbnailCount++;
             }
             if(addFile(Config::kLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kLargeThumbnailFilename,
                         false, false)){
-                std::cout << "Adding large thumbnail" << std::endl;
                 thumbnailCount++;
             }
             // try to add sombrero-style images, which should only work for sombrero bots
             if(addFile(Config::kSombreroSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSombreroSmallThumbnailFilename,
                         false, false)){
-                std::cout << "Adding small thumbnail" << std::endl;
                 thumbnailCount++;
             }
             if(addFile(Config::kSombreroMediumThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSombreroMediumThumbnailFilename,
                         false, false)){
-                std::cout << "Adding medium thumbnail" << std::endl;
                 thumbnailCount++;
             }
             if(addFile(Config::kSombreroLargeThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSombreroLargeThumbnailFilename,
                         false, false)){
-                std::cout << "Adding large thumbnail" << std::endl;
                 thumbnailCount++;
             }
             if (thumbnailCount != 3){
