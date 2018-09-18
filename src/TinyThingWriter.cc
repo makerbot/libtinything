@@ -61,8 +61,10 @@ public:
         // TODO(pshaw): dont load entire file into memory
         std::ifstream file(filePath.c_str(), 
             std::ios::in | std::ios::ate | std::ios::binary);
-        if (!file.is_open())
+        if (!file.is_open()) {
+            zipClose(zip, "MakerBot file");
             return false;
+        }
 
         std::ifstream::pos_type size = file.tellg();
 
