@@ -14,13 +14,13 @@ else:
             stable_required=True),
         artifactory_utils.ArtifactSelector(
             project="json-cpp",
-            revision="develop",
+            revision="ReleaseMorepork0.59",
             version="3.*",
             debug=False,
             stable_required=True),
         artifactory_utils.ArtifactSelector(
             project="MBCoreUtils",
-            revision="develop",
+            revision="ReleaseMorepork0.59",
             version="^4.0",
             debug=False,
             stable_required=True)
@@ -33,13 +33,13 @@ else:
         dependencies.extend([
             artifactory_utils.ArtifactSelector(
                 project="morepork-mbcoreutils",
-                revision="develop",
+                revision="ReleaseMorepork0.59",
                 version="^4.0",
                 debug=False,
                 stable_required=True),
             artifactory_utils.ArtifactSelector(
                 project="morepork-json-cpp",
-                revision="develop",
+                revision="ReleaseMorepork0.59",
                 version="3.*",
                 debug=False,
                 stable_required=True),
