@@ -20,14 +20,20 @@ Describes the toolpath. See [the spec](jsontoolpath.md) in this directory for mo
 The jsontoolpath file is output by Miracle Grue.
 
 ## Thumbnails
-.makerbot files contain 3 thumbnails.
-For Birdwing bots, they are:
+.makerbot files contain 6 thumbnails.
+All bots have the 3 following:
+    isometric_thumbnail_120x120
+    isometric_thumbnail_320x320
+    isometric_thumbnail_640x640
+
+The other 3 thumbnails differ by bot.
+Birdwing bots additionally have:
 
     thumbnail_55x40.png
     thumbnail_110x80.png
     thumbnail_320x200.png
 
-For Sombrero bots, they are:
+Method bots additionally have:
 
     thumbnail_140x106.png
     thumbnail_212x300.png

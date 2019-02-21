@@ -102,6 +102,25 @@ public:
         // add thumbnails if path is set
         if (!m_thumbnailDirPath.empty()){
             int thumbnailCount = 0;
+            // try to add isometric images, which should work for all bots
+            if(addFile(Config::kIsometricSmallThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kIsometricSmallThumbnailFilename,
+                        false, false)){
+                std::cout << "Adding small isometric thumbnail" << std::endl;
+                thumbnailCount++;
+            }
+            if(addFile(Config::kIsometricMediumThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kIsometricMediumThumbnailFilename,
+                        false, false)){
+                std::cout << "Adding medium isometric thumbnail" << std::endl;
+                thumbnailCount++;
+            }
+            if(addFile(Config::kIsometricLargeThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kIsometricLargeThumbnailFilename,
+                        false, false)){
+                std::cout << "Adding large isometric thumbnail" << std::endl;
+                thumbnailCount++;
+            }
             // try to add birdwing-style images, which should only work for birdwing bots
             if(addFile(Config::kSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kSmallThumbnailFilename,
@@ -140,8 +159,8 @@ public:
                 std::cout << "Adding large thumbnail" << std::endl;
                 thumbnailCount++;
             }
-            if (thumbnailCount != 3){
-                std::cout << "ERROR: Expected to add 3 thumbnail images. Was only able to add" << thumbnailCount << "." << std::endl;
+            if (thumbnailCount != 6){
+                std::cout << "ERROR: Expected to add 6 thumbnail images. Was only able to add" << thumbnailCount << "." << std::endl;
                 return false;
             }
         } else {

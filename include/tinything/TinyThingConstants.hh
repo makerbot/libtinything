@@ -9,6 +9,10 @@ namespace LibTinyThing {
         static const std::string kMetadataFilename;
         static const std::string kToolpathFilename;
 
+        static const std::string kIsometricLargeThumbnailFilename;
+        static const std::string kIsometricMediumThumbnailFilename;
+        static const std::string kIsometricSmallThumbnailFilename;
+
         static const std::string kLargeThumbnailFilename;
         static const std::string kMediumThumbnailFilename;
         static const std::string kSmallThumbnailFilename;
@@ -16,6 +20,14 @@ namespace LibTinyThing {
         static const std::string kSombreroLargeThumbnailFilename;
         static const std::string kSombreroMediumThumbnailFilename;
         static const std::string kSombreroSmallThumbnailFilename;
+
+        static const int kIsometricLargeThumbnailWidth;
+        static const int kIsometricMediumThumbnailWidth;
+        static const int kIsometricSmallThumbnailWidth;
+
+        static const int kIsometricLargeThumbnailHeight;
+        static const int kIsometricMediumThumbnailHeight;
+        static const int kIsometricSmallThumbnailHeight;
 
         static const int kLargeThumbnailWidth;
         static const int kMediumThumbnailWidth;

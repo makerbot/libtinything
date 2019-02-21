@@ -102,6 +102,9 @@ namespace LibTinyThing {
         // and cache them in memory. they return true if the unzip is
         // succesful
         bool unzipMetadataFile();
+        bool unzipIsometricSmallThumbnailFile();
+        bool unzipIsometricMediumThumbnailFile();
+        bool unzipIsometricLargeThumbnailFile();
         bool unzipSmallThumbnailFile();
         bool unzipMediumThumbnailFile();
         bool unzipLargeThumbnailFile();
@@ -113,6 +116,9 @@ namespace LibTinyThing {
         // these are accessors for the unzipped contents of each of the
         // files. they should only be called after each has been
         // unzipped.
+        void getIsometricSmallThumbnailFileContents(std::string* contents) const;
+        void getIsometricMediumThumbnailFileContents(std::string* contents) const;
+        void getIsometricLargeThumbnailFileContents(std::string* contents) const;
         void getSmallThumbnailFileContents(std::string* contents) const;
         void getMediumThumbnailFileContents(std::string* contents) const;
         void getLargeThumbnailFileContents(std::string* contents) const;
