@@ -54,15 +54,17 @@ public:
 
         const int compression = compress ? Z_DEFAULT_COMPRESSION : 0;
 
-        zipOpenNewFileInZip(zip, fileName.c_str(), &zi,
-                            NULL, 0, NULL, 0, NULL,
-                            Z_DEFLATED, compression);
-
         // TODO(pshaw): dont load entire file into memory
         std::ifstream file(filePath.c_str(), 
             std::ios::in | std::ios::ate | std::ios::binary);
-        if (!file.is_open())
+        if (!file.is_open()) {
+            zipClose(zip, "MakerBot file");
             return false;
+        }
+
+        zipOpenNewFileInZip(zip, fileName.c_str(), &zi,
+                            NULL, 0, NULL, 0, NULL,
+                            Z_DEFLATED, compression);
 
         std::ifstream::pos_type size = file.tellg();
 
