@@ -27,6 +27,9 @@ class TinyThingReader::Private {
     const bool m_via_fd;
 
     std::string m_toolpathFileContents;
+    std::string m_isometricSmallThumbnailFileContents;
+    std::string m_isometricMediumThumbnailFileContents;
+    std::string m_isometricLargeThumbnailFileContents;
     std::string m_smallThumbnailFileContents;
     std::string m_mediumThumbnailFileContents;
     std::string m_largeThumbnailFileContents;

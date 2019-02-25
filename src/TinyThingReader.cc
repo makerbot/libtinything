@@ -514,6 +514,24 @@ bool TinyThingReader::unzipMetadataFile() {
     return extracted;
 }
 
+bool TinyThingReader::unzipIsometricSmallThumbnailFile() {
+    return m_private->unzipFile(
+        Config::kIsometricSmallThumbnailFilename,
+        m_private->m_isometricSmallThumbnailFileContents);
+}
+
+bool TinyThingReader::unzipIsometricMediumThumbnailFile() {
+    return m_private->unzipFile(
+        Config::kIsometricMediumThumbnailFilename,
+        m_private->m_isometricMediumThumbnailFileContents);
+}
+
+bool TinyThingReader::unzipIsometricLargeThumbnailFile() {
+    return m_private->unzipFile(
+        Config::kIsometricLargeThumbnailFilename,
+        m_private->m_isometricLargeThumbnailFileContents);
+}
+
 bool TinyThingReader::unzipSmallThumbnailFile() {
     return m_private->unzipFile(
         Config::kSmallThumbnailFilename,
@@ -576,6 +594,21 @@ TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {
 TinyThingReader::Error
 TinyThingReader::getMetadata(CInterfaceMetadata* out) const {
     return m_private->getMetadata<CInterfaceMetadata>(out);
+}
+
+void
+TinyThingReader::getIsometricSmallThumbnailFileContents(std::string* contents) const {
+    *contents = m_private->m_isometricSmallThumbnailFileContents;
+}
+
+void
+TinyThingReader::getIsometricMediumThumbnailFileContents(std::string* contents) const {
+    *contents = m_private->m_isometricMediumThumbnailFileContents;
+}
+
+void
+TinyThingReader::getIsometricLargeThumbnailFileContents(std::string* contents) const {
+    *contents = m_private->m_isometricLargeThumbnailFileContents;
 }
 
 void
