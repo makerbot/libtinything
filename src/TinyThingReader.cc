@@ -249,12 +249,16 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         // Now check the tool, which must be a list of the right length, but may
         // contain NULL
         auto tools = get_arr(m_metadataParsed, "tool_types");
+        auto tool_extrusion_distances = get_arr(m_metadataParsed,
+                                            "extrusion_distances_mm");
         if (tools.size() != data.tool_count) {
             return Error::kToolMismatch;
         } else {
             for (size_t i = 0; i < data.tool_count; i++) {
                 Json::ArrayIndex ai(i);
-                if (tools[ai].isNull()) {
+                const float dist = get_leaf(tool_extrusion_distances, ai, 0);
+                if (tools[ai].isNull() || dist <= 0 ||
+                    tool_extrusion_distances[ai].isNull()) {
                     continue;
                 }
                 const std::string name = get_leaf(tools, ai, "unknown");
