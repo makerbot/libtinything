@@ -76,7 +76,15 @@ TinyThingReader::Private::~Private() {
 bool TinyThingReader::Private::hasJsonToolpath() const {
     return (m_zipFile != NULL &&
             unzLocateFile(m_zipFile,
-                          Config::kToolpathFilename.c_str(),
+                          Config::kJsonToolpathFilename.c_str(),
+                          0) == UNZ_OK &&
+            unzOpenCurrentFile(m_zipFile) == UNZ_OK);
+}
+
+bool TinyThingReader::Private::hasGcodeToolpath() const {
+    return (m_zipFile != NULL &&
+            unzLocateFile(m_zipFile,
+                          Config::kGcodeToolpathFilename.c_str(),
                           0) == UNZ_OK &&
             unzOpenCurrentFile(m_zipFile) == UNZ_OK);
 }
@@ -104,9 +112,12 @@ bool TinyThingReader::Private::isValid() const {
         unzLocateFile(m_zipFile,
                       Config::kLargeThumbnailFilename.c_str(),
                       0) == UNZ_OK &&
-        unzLocateFile(m_zipFile,
-                      Config::kToolpathFilename.c_str(),
-                      0) == UNZ_OK &&
+        (unzLocateFile(m_zipFile,
+                      Config::kJsonToolpathFilename.c_str(),
+                      0) == UNZ_OK ||
+            unzLocateFile(m_zipFile,
+                          Config::kGcodeToolpathFilename.c_str(),
+                          0) == UNZ_OK) &&
         unzOpenCurrentFile(m_zipFile) == UNZ_OK);
 }
 
@@ -114,11 +125,15 @@ bool TinyThingReader::Private::resetToolpath() {
     m_toolpathPos = 0;
     unz_file_info fileInfo;
     bool locateFile = (unzLocateFile(m_zipFile,
-                                     Config::kToolpathFilename.c_str(),
+                                     Config::kJsonToolpathFilename.c_str(),
+                                     0) == UNZ_OK) ||
+                      (unzLocateFile(m_zipFile,
+                                     Config::kGcodeToolpathFilename.c_str(),
                                      0) == UNZ_OK);
     bool getInfo = (unzGetCurrentFileInfo(m_zipFile, &fileInfo,
                                           NULL, 0, NULL, 0, NULL, 0) == UNZ_OK);
     bool openCurrent = (unzOpenCurrentFile(m_zipFile) == UNZ_OK);
+
     if (locateFile && getInfo && openCurrent) {
       m_toolpathSize = fileInfo.uncompressed_size;
       m_incremental = true;
@@ -570,14 +585,23 @@ bool TinyThingReader::unzipSombreroLargeThumbnailFile() {
 
 bool TinyThingReader::unzipToolpathFile() {
     m_private->m_incremental = false;
-    const bool ok = m_private->unzipFile(
-                         Config::kToolpathFilename,
-                         m_private->m_toolpathFileContents);
-    if (!ok) {
-        return ok;
-    } else {
+    // first try jsontoolpath
+    bool ok = m_private->unzipFile(
+            Config::kJsonToolpathFilename,
+            m_private->m_toolpathFileContents);
+    if (ok) {
         return m_private->resetToolpath();
     }
+
+    ok = m_private->unzipFile(
+            Config::kGcodeToolpathFilename,
+            m_private->m_toolpathFileContents);
+
+    if (ok) {
+        return m_private->resetToolpath();
+    }
+
+    return ok;
 }
 
 TinyThingReader::Error
@@ -653,6 +677,9 @@ bool TinyThingReader::hasJsonToolpath() const {
     return m_private->hasJsonToolpath();
 }
 
+bool TinyThingReader::hasGcodeToolpath() const {
+    return m_private->hasGcodeToolpath();
+}
 
 bool TinyThingReader::hasMetadata() const {
     return m_private->hasMetadata();

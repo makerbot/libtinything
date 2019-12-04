@@ -86,8 +86,21 @@ public:
             std::cout << "ERROR: No toolpath file" << std::endl;
             return false;
         }
-        if (!addFile(Config::kToolpathFilename, m_toolpathFilePath, true, true))
+        const std::string gcode_ending = ".gcode";
+        int expected_extension_idx =
+                m_toolpathFilePath.size() - gcode_ending.size();
+        bool is_gcode_toolpath =
+            m_toolpathFilePath.rfind(gcode_ending) == expected_extension_idx;
+
+        if (!addFile(
+                is_gcode_toolpath ?
+                    Config::kGcodeToolpathFilename :
+                    Config::kJsonToolpathFilename,
+                m_toolpathFilePath,
+                true,
+                true)) {
             return false;
+        }
 
         // add metadata if it is set
         if (!m_metadataFilePath.empty()){

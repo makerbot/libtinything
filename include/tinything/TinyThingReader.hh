@@ -129,6 +129,7 @@ namespace LibTinyThing {
         std::string getToolpathFileContents() const;
         // checks to see if toolpath is present
         bool hasJsonToolpath() const;
+        bool hasGcodeToolpath() const;
 
         // checks to see if all files are present
         bool isValid() const;
