@@ -5,7 +5,8 @@ namespace LibTinyThing {
     // TODO(pshaw): defining values here to get past linker errors
     // would be ideal to define these in a .cc file
     const std::string Config::kMetadataFilename = "meta.json";
-    const std::string Config::kToolpathFilename = "print.jsontoolpath";
+    const std::string Config::kJsonToolpathFilename = "print.jsontoolpath";
+    const std::string Config::kGcodeToolpathFilename = "print.gcode";
 
     const std::string Config::kIsometricLargeThumbnailFilename = "isometric_thumbnail_640x640.png";
     const std::string Config::kIsometricMediumThumbnailFilename = "isometric_thumbnail_320x320.png";

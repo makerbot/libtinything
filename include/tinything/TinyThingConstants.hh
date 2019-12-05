@@ -7,7 +7,8 @@
 namespace LibTinyThing {
     struct TINYTHING_API Config {
         static const std::string kMetadataFilename;
-        static const std::string kToolpathFilename;
+        static const std::string kJsonToolpathFilename;
+        static const std::string kGcodeToolpathFilename;
 
         static const std::string kIsometricLargeThumbnailFilename;
         static const std::string kIsometricMediumThumbnailFilename;
