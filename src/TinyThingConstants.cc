@@ -20,6 +20,8 @@ namespace LibTinyThing {
     const std::string Config::kSombreroMediumThumbnailFilename = "thumbnail_212x300.png";
     const std::string Config::kSombreroSmallThumbnailFilename = "thumbnail_140x106.png";
 
+    const std::string Config::kSmallSquareThumbnailFilename = "thumbnail_90x90.png";
+
     const int Config::kIsometricLargeThumbnailWidth = 640;
     const int Config::kIsometricMediumThumbnailWidth = 320;
     const int Config::kIsometricSmallThumbnailWidth = 120;
@@ -43,4 +45,7 @@ namespace LibTinyThing {
     const int Config::kSombreroLargeThumbnailHeight = 1460;
     const int Config::kSombreroMediumThumbnailHeight = 300;
     const int Config::kSombreroSmallThumbnailHeight = 106;
+
+    const int Config::kSmallSquareThumbnailWidth = 90;
+    const int Config::kSmallSquareThumbnailHeight = 90;
 }
