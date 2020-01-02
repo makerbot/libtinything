@@ -407,8 +407,13 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
                                   "doRaft", false);
         const std::string type = get_leaf(m_metadataParsed,
                                           "bot_type", "_9999");
-        const size_t pid_idx = type.rfind('_')+1;
-        out->bot_pid = std::stoi(type.substr(pid_idx), nullptr, 16);
+
+        const size_t pid_idx = type.rfind('_');
+        if (pid_idx != std::string::npos) {
+            out->bot_pid = std::stoi(type.substr(pid_idx+1), nullptr, 16);
+        } else if (type == "sketch") {  // :(
+            out->bot_pid = 0x20;
+        }
 
         if (m_metafileVersion > SemVer(1, 0, 0)
             && m_metafileVersion < SemVer(3, 0, 0)) {
