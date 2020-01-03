@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <algorithm>
+#include <cstdlib>
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
@@ -212,6 +213,23 @@ bool TinyThingReader::Private::parseFile(const std::string& contents,
     return reader.parse(contents, *output);
 }
 
+// Compute the numeric PID of the printer from a bot type string.  If a valid PID
+// PID (a positive integer less than 2^16) cannot be determined, we return 9999.
+static unsigned int parse_pid(const std::string & type) {
+    size_t pid_idx = type.rfind('_');
+    if (pid_idx != std::string::npos) {
+        long bot_pid = std::strtol(type.substr(pid_idx+1).c_str(), nullptr, 16);
+        if (bot_pid <= 0 || bot_pid > 0xffff) {
+            bot_pid = 9999;
+        }
+        return bot_pid;
+    } else if (type == "sketch") {  // :(
+        return 0xE5;
+    } else {
+        return 9999;
+    }
+}
+
 TinyThingReader::Error
 TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
     using namespace MakerBot::SafeJson;  // NOLINT(build/namespaces)
@@ -232,10 +250,8 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
         // Check bot type first, since this is guaranteed to exist even if
         // the print was sliced with a custom profile. Default: a value we
         // will never use as a PID.
-        const std::string type = get_leaf(m_metadataParsed, "bot_type",
-                                          "_9999");
-        const size_t pid_idx = type.rfind('_')+1;
-        if (std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
+        const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
+        if (parse_pid(type) != data.pid) {
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which is allowed to be a JSON null
@@ -255,10 +271,8 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
             }
         }
     } else if (m_metafileVersion.major == 3) {
-        const std::string type = get_leaf(m_metadataParsed, "bot_type",
-                                          "_9999");
-        const size_t pid_idx = type.rfind('_')+1;
-        if (std::stoi(type.substr(pid_idx), nullptr, 16) != data.pid) {
+        const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
+        if (parse_pid(type) != data.pid) {
             return Error::kBotTypeMismatch;
         }
         // Now check the tool, which must be a list of the right length, but may
@@ -405,10 +419,8 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
                                             static_cast<int>(0));
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);
-        const std::string type = get_leaf(m_metadataParsed,
-                                          "bot_type", "_9999");
-        const size_t pid_idx = type.rfind('_')+1;
-        out->bot_pid = std::stoi(type.substr(pid_idx), nullptr, 16);
+        const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
+        out->bot_pid = parse_pid(type);
 
         if (m_metafileVersion > SemVer(1, 0, 0)
             && m_metafileVersion < SemVer(3, 0, 0)) {
