@@ -599,6 +599,12 @@ bool TinyThingReader::unzipSombreroLargeThumbnailFile() {
         m_private->m_sombreroLargeThumbnailFileContents);
 }
 
+bool TinyThingReader::unzipSmallSquareThumbnailFile() {
+    return m_private->unzipFile(
+        Config::kSmallSquareThumbnailFilename,
+        m_private->m_smallSquareThumbnailFileContents);
+}
+
 bool TinyThingReader::unzipToolpathFile() {
     m_private->m_incremental = false;
     // first try jsontoolpath
@@ -680,6 +686,12 @@ void
 TinyThingReader::getSombreroLargeThumbnailFileContents(std::string* contents) const {
     *contents = m_private->m_sombreroLargeThumbnailFileContents;
 }
+
+void
+TinyThingReader::getSmallSquareThumbnailFileContents(std::string* contents) const {
+    *contents = m_private->m_smallSquareThumbnailFileContents;
+}
+
 
 void TinyThingReader::getToolpathFileContents(std::string* contents) const {
     *contents = m_private->m_toolpathFileContents;

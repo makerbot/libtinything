@@ -115,6 +115,7 @@ public:
         // add thumbnails if path is set
         if (!m_thumbnailDirPath.empty()){
             int thumbnailCount = 0;
+            bool gotSquareThumbnail = false;
             // try to add isometric images, which should work for all bots
             if(addFile(Config::kIsometricSmallThumbnailFilename,
                         m_thumbnailDirPath + "/" + Config::kIsometricSmallThumbnailFilename,
@@ -172,9 +173,24 @@ public:
                 std::cout << "Adding large thumbnail" << std::endl;
                 thumbnailCount++;
             }
-            if (thumbnailCount != 6){
-                std::cout << "ERROR: Expected to add 6 thumbnail images. Was only able to add" << thumbnailCount << "." << std::endl;
-                return false;
+            if(addFile(Config::kSmallSquareThumbnailFilename,
+                        m_thumbnailDirPath + "/" + Config::kSmallSquareThumbnailFilename,
+                        false, false)){
+                std::cout << "Adding small square thumbnail" << std::endl;
+                gotSquareThumbnail = true;
+                thumbnailCount++;
+            }
+            // Sketch is currently the only bot that uses the square thumbnail,
+            // and the 90x90 one is the only thumbnail (of the non-isometric
+            // ones) that it uses
+            if (gotSquareThumbnail) {
+                 if (thumbnailCount != 4) {
+                     std::cout << "ERROR: Expected to add 4 thumbnail images; got " << thumbnailCount << "." << std::endl;
+                     return false;
+                 }
+            } else if (thumbnailCount != 6) {
+                 std::cout << "ERROR: Expected to add 6 thumbnail images; got " << thumbnailCount << "." << std::endl;
+                 return false;
             }
         } else {
             // std::cout << "WARNING: Skipping thumbnails, not specified" << std::endl;
