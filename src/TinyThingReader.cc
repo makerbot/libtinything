@@ -183,8 +183,8 @@ int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
     return chars_to_read;
 }
 
-bool TinyThingReader::Private::unzipFile(const std::string& fileName,
-                                         std::string &output) const{
+bool TinyThingReader::Private::unzipFile(
+    const std::string& fileName, std::string &output) const {
     if (m_zipFile != NULL   &&
         unzLocateFile(m_zipFile, fileName.c_str(), 0) == UNZ_OK &&
         unzOpenCurrentFile(m_zipFile) == UNZ_OK) {
@@ -400,9 +400,19 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         // If you are trying to add a new version, please update
         // maxSupportedVersion
         out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
-        out->chamber_temperature = get_leaf(m_metadataParsed,
+        if (m_metadataParsed.isMember("build_plane_temperature")) {
+            out->chamber_temperature = get_leaf(m_metadataParsed,
+                                           "build_plane_temperature",
+                                           static_cast<int>(0));
+            if (out->chamber_temperature > 40) {
+                out->chamber_temperature = (
+                out->chamber_temperature + 13) / 1.333;
+            }
+        } else {
+            out->chamber_temperature = get_leaf(m_metadataParsed,
                                             "chamber_temperature",
                                             static_cast<int>(0));
+        }
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);
         const std::string type = get_leaf(m_metadataParsed,
@@ -625,17 +635,20 @@ TinyThingReader::getMetadata(CInterfaceMetadata* out) const {
 }
 
 void
-TinyThingReader::getIsometricSmallThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricSmallThumbnailFileContents(
+    std::string* contents) const {
     *contents = m_private->m_isometricSmallThumbnailFileContents;
 }
 
 void
-TinyThingReader::getIsometricMediumThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricMediumThumbnailFileContents(
+    std::string* contents) const {
     *contents = m_private->m_isometricMediumThumbnailFileContents;
 }
 
 void
-TinyThingReader::getIsometricLargeThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricLargeThumbnailFileContents(
+    std::string* contents) const {
     *contents = m_private->m_isometricLargeThumbnailFileContents;
 }
 
@@ -655,17 +668,20 @@ TinyThingReader::getLargeThumbnailFileContents(std::string* contents) const {
 }
 
 void
-TinyThingReader::getSombreroSmallThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroSmallThumbnailFileContents(
+    std::string* contents) const {
     *contents = m_private->m_sombreroSmallThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSombreroMediumThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroMediumThumbnailFileContents(
+    std::string* contents) const {
     *contents = m_private->m_sombreroMediumThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSombreroLargeThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroLargeThumbnailFileContents(
+    std::string* contents) const {
     *contents = m_private->m_sombreroLargeThumbnailFileContents;
 }
 
