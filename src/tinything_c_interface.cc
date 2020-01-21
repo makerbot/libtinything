@@ -44,6 +44,12 @@ int GetSliceProfile(const TinyThingReader* tinything,
 }
 
 extern "C"
+int GetPurgeRoutines(const TinyThingReader* tinything,
+                     const char** out) {
+    return tinything->getPurgeRoutines(out);
+}
+
+extern "C"
 bool IsValid(const TinyThingReader* tinything) {
     return tinything->isValid();
 }

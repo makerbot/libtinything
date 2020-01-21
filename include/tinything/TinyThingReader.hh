@@ -154,6 +154,8 @@ namespace LibTinyThing {
         // under the caller's control as soon as possible.
         Error getSliceProfile(const char** profile) const;
 
+        Error getPurgeRoutines(const char** purge_routines) const;
+
         // Hacky method to support MBD doing its own metadata parsing for some
         // reason
         std::string getMetadataFileContents() const;

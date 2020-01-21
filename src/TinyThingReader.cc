@@ -519,6 +519,15 @@ TinyThingReader::Private::getSliceProfile(const char** out) const {
     return TinyThingReader::kOK;
 }
 
+TinyThingReader::Error
+TinyThingReader::Private::getPurgeRoutines(const char** out) const {
+    if (m_purgeRoutineContents.empty()) {
+        *out = nullptr;
+        return TinyThingReader::kNotYetUnzipped;
+    }
+    *out = m_purgeRoutineContents.c_str();
+    return TinyThingReader::kOK;
+}
 
 TinyThingReader::TinyThingReader(const std::string& filePath, int fd)
     : m_private(new Private(filePath, fd)) {}
@@ -541,6 +550,8 @@ bool TinyThingReader::unzipMetadataFile() {
         auto fw = Json::FastWriter();
         m_private->m_sliceProfileContents
             = fw.write(get_obj(m_private->m_metadataParsed, "miracle_config"));
+        m_private->m_purgeRoutineContents =
+            fw.write(get_arr(m_private->m_metadataParsed, "purge_routines"));
     }
     return extracted;
 }
@@ -629,6 +640,11 @@ bool TinyThingReader::unzipToolpathFile() {
 TinyThingReader::Error
 TinyThingReader::getSliceProfile(const char** out) const {
     return m_private->getSliceProfile(out);
+}
+
+TinyThingReader::Error
+TinyThingReader::getPurgeRoutines(const char** out) const {
+    return m_private->getPurgeRoutines(out);
 }
 
 TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {
