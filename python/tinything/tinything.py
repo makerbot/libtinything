@@ -102,6 +102,14 @@ class TinyThing:
                                .decode('UTF-8'))
         return prof_dict
 
+    def get_purge_routines(self):
+        purge_routine_pointer = ctypes.POINTER(ctypes.c_char)()
+        error = self._libtinything.GetPurgeRoutines(self.reader,
+                                                    ctypes.byref(purge_routine_pointer))
+        purge_routine_list = json.loads(bytes(ctypes.string_at(purge_routine_pointer))
+                               .decode('UTF-8'))
+        return purge_routine_list
+
     def __del__(self):
         self._libtinything.DestroyTinyThingReader(self.reader)
 

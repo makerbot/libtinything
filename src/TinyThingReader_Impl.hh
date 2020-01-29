@@ -23,6 +23,7 @@ class TinyThingReader::Private {
     Error getMetadata(MetadataType* out) const;
 
     Error getSliceProfile(const char** out) const;
+    Error getPurgeRoutines(const char** out) const;
 
     const std::string m_filePath;
     const bool m_via_fd;
@@ -40,6 +41,7 @@ class TinyThingReader::Private {
     std::string m_smallSquareThumbnailFileContents;
     std::string m_metadataFileContents;
     std::string m_sliceProfileContents;
+    std::string m_purgeRoutineContents;
     Json::Value m_metadataParsed;
 
     // variables to support incremental toolpath unzipping
