@@ -1,5 +1,6 @@
-#ifndef TINYTHINGREADER_HH_
-#define TINYTHINGREADER_HH_
+// Copyright MakerBot Industries 2020
+#ifndef INCLUDE_TINYTHING_TINYTHINGREADER_HH_
+#define INCLUDE_TINYTHING_TINYTHINGREADER_HH_
 
 #include <memory>
 #include <string>
@@ -13,9 +14,9 @@ namespace bwcoreutils {
 namespace LibTinyThing {
     // I feel really badly for anyone who makes the uuid
     // longer than 100 chars and has to troubleshoot why print history
-    // isn't working. 
+    // isn't working.
     // The good news is if you've found this, you've probably
-    // found what you were looking for. 
+    // found what you were looking for.
     static const unsigned int UUID_MAX_LENGTH = 100;
     // this would be a pretty dang wordy material
     static const unsigned int MATERIAL_MAX_LENGTH = 50;
@@ -28,7 +29,8 @@ namespace LibTinyThing {
         float extrusion_mass_g[2];
         float extrusion_distance_mm[2];
         int extruder_temperature[2];
-        int chamber_temperature;
+        int sensor_target_temperature;
+        int buildplane_target_temperature;
         int shells;
         float layer_height;
         float infill_density;
@@ -52,7 +54,7 @@ namespace LibTinyThing {
     };
     // Struct containing all information required to verify whether
     // the TinyThing has been sliced for a given printer
-    
+
     struct TINYTHING_API VerificationData {
         uint8_t tool_count;
         bwcoreutils::TOOL tool_id[2];
@@ -66,7 +68,8 @@ namespace LibTinyThing {
         float extrusion_distance_mm[2];
         int extruder_temperature[2];
         float extrusion_mass_g[2];
-        int chamber_temperature;
+        int sensor_target_temperature;
+        int buildplane_target_temperature;
         uint32_t thing_id;
         float duration_s;
         bool uses_raft;
@@ -82,18 +85,18 @@ namespace LibTinyThing {
         float bounding_box_z_max;
         uint32_t file_size;
     };
-    
+
     class TINYTHING_API TinyThingReader {
     public:
         enum Error {
-            kOK=0,
-            kNotYetUnzipped=1,
-            kToolMismatch=2,
-            kBotTypeMismatch=3,
-            kVersionMismatch=4,
-            kMaxStringLengthExceeded=5
+            kOK                      = 0,
+            kNotYetUnzipped          = 1,
+            kToolMismatch            = 2,
+            kBotTypeMismatch         = 3,
+            kVersionMismatch         = 4,
+            kMaxStringLengthExceeded = 5
         };
-        
+
         // passing in a fd will use an already opened file handle
         TinyThingReader(const std::string& filePath, int fd = -1);
         ~TinyThingReader();
@@ -117,16 +120,23 @@ namespace LibTinyThing {
         // these are accessors for the unzipped contents of each of the
         // files. they should only be called after each has been
         // unzipped.
-        void getIsometricSmallThumbnailFileContents(std::string* contents) const;
-        void getIsometricMediumThumbnailFileContents(std::string* contents) const;
-        void getIsometricLargeThumbnailFileContents(std::string* contents) const;
+        void getIsometricSmallThumbnailFileContents(std::string* contents)
+            const;
+        void getIsometricMediumThumbnailFileContents(std::string* contents)
+            const;
+        void getIsometricLargeThumbnailFileContents(std::string* contents)
+            const;
         void getSmallThumbnailFileContents(std::string* contents) const;
         void getMediumThumbnailFileContents(std::string* contents) const;
         void getLargeThumbnailFileContents(std::string* contents) const;
-        void getSombreroSmallThumbnailFileContents(std::string* contents) const;
-        void getSombreroMediumThumbnailFileContents(std::string* contents) const;
-        void getSombreroLargeThumbnailFileContents(std::string* contents) const;
-        void getSmallSquareThumbnailFileContents(std::string* contents) const;
+        void getSombreroSmallThumbnailFileContents(std::string* contents)
+            const;
+        void getSombreroMediumThumbnailFileContents(std::string* contents)
+            const;
+        void getSombreroLargeThumbnailFileContents(std::string* contents)
+            const;
+        void getSmallSquareThumbnailFileContents(std::string* contents)
+            const;
         void getToolpathFileContents(std::string* contents) const;
         std::string getToolpathFileContents() const;
         // checks to see if toolpath is present
@@ -175,7 +185,6 @@ namespace LibTinyThing {
         class Private;
         std::unique_ptr<Private> m_private;
     };
-
 }
 
-#endif /* TINYTHINGREADER_HH_ */
+#endif  // INCLUDE_TINYTHING_TINYTHINGREADER_HH_

@@ -25,7 +25,8 @@ SemVer TinyThingReader::Private::maxSupportedVersion() {
 Metadata::Metadata() : extrusion_mass_g(),
                        extrusion_distance_mm(),
                        extruder_temperature(),
-                       chamber_temperature(0),
+                       sensor_target_temperature(0),
+                       buildplane_target_temperature(0),
                        shells(0),
                        layer_height(0),
                        infill_density(0),
@@ -185,7 +186,7 @@ int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
 }
 
 bool TinyThingReader::Private::unzipFile(const std::string& fileName,
-                                         std::string &output) const{
+                                         std::string &output) const {
     if (m_zipFile != NULL   &&
         unzLocateFile(m_zipFile, fileName.c_str(), 0) == UNZ_OK &&
         unzOpenCurrentFile(m_zipFile) == UNZ_OK) {
@@ -213,12 +214,13 @@ bool TinyThingReader::Private::parseFile(const std::string& contents,
     return reader.parse(contents, *output);
 }
 
-// Compute the numeric PID of the printer from a bot type string.  If a valid PID
+// Compute the numeric PID of the printer from a bot type string.  If a valid
 // PID (a positive integer less than 2^16) cannot be determined, we return 9999.
 static unsigned int parse_pid(const std::string & type) {
     size_t pid_idx = type.rfind('_');
     if (pid_idx != std::string::npos) {
-        long bot_pid = std::strtol(type.substr(pid_idx+1).c_str(), nullptr, 16);
+        int64_t bot_pid = std::strtol(type.substr(pid_idx+1).c_str(),
+            nullptr, 16);
         if (bot_pid <= 0 || bot_pid > 0xffff) {
             bot_pid = 9999;
         }
@@ -319,33 +321,37 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
     if (m_metafileVersion > maxSupportedVersion()) {
         return TinyThingReader::Error::kVersionMismatch;
     }  else if (m_metafileVersion == SemVer(0, 0, 0)) {
-        out->extrusion_mass_g[0]
-            = get_leaf(m_metadataParsed, "extrusion_mass_a_grams", 0.f)
-            + get_leaf(m_metadataParsed, "extrusion_mass_b_grams", 0.f);
+        out->extrusion_mass_g[0] =
+            get_leaf(m_metadataParsed, "extrusion_mass_a_grams", 0.f) +
+            get_leaf(m_metadataParsed, "extrusion_mass_b_grams", 0.f);
         out->extrusion_mass_g[1] = 0;
-        out->extrusion_distance_mm[0]
-            = get_leaf(m_metadataParsed, "extrusion_distance_a_mm", 0.f)
-            + get_leaf(m_metadataParsed, "extrusion_distance_b_mm", 0.f);
+        out->extrusion_distance_mm[0] =
+            get_leaf(m_metadataParsed, "extrusion_distance_a_mm", 0.f) +
+            get_leaf(m_metadataParsed, "extrusion_distance_b_mm", 0.f);
         out->extrusion_distance_mm[1] = 0;
         out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
-        out->extruder_temperature[0]
-            = get_leaf(m_metadataParsed, "toolhead_0_temperature",
+        out->extruder_temperature[0] =
+            get_leaf(m_metadataParsed, "toolhead_0_temperature",
                        static_cast<int>(0));
         out->extruder_temperature[1] = 0;
-        out->chamber_temperature
-            = get_leaf(m_metadataParsed, "chamber_temperature", 0);
+        out->sensor_target_temperature =
+            get_leaf(m_metadataParsed, "chamber_temperature", 0);
+        out->buildplane_target_temperature =
+                (out->sensor_target_temperature > 40)?static_cast<int>(
+                (out->sensor_target_temperature * 1.333) - 13):
+                (out->sensor_target_temperature);
         auto printer_settings = get_obj(m_metadataParsed, "printer_settings");
         out->uses_raft = get_leaf(printer_settings, "raft", false);
         out->tool_type[0] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         out->tool_type[1] = bwcoreutils::TYPE::UNKNOWN_TYPE;
         out->bot_pid = 9999;
-        const std::string material
-          = get_leaf(get_arr(printer_settings, "materials"),
+        const std::string material =
+            get_leaf(get_arr(printer_settings, "materials"),
                      Json::ArrayIndex(0), "UNKNOWN");
         if (material.size() >= MATERIAL_MAX_LENGTH) {
             return Error::kMaxStringLengthExceeded;
         }
-        memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
+        memset(out->material[0], 0, sizeof(char) * MATERIAL_MAX_LENGTH);
         material.copy(out->material[0], material.size());
         out->material[1][0] = 0;
         out->extruder_count = 1;
@@ -369,7 +375,7 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
             if (material.size() >= MATERIAL_MAX_LENGTH) {
               return Error::kMaxStringLengthExceeded;
             }
-            memset(out->material[0], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
+            memset(out->material[0], 0, sizeof(char) * MATERIAL_MAX_LENGTH);
             material.copy(out->material[0], material.size());
             out->material[1][0] = 0;
             out->tool_type[0]
@@ -402,7 +408,7 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
                 if (material.size() >= MATERIAL_MAX_LENGTH) {
                     return Error::kMaxStringLengthExceeded;
                 }
-                memset(out->material[i], 0, sizeof(char)*MATERIAL_MAX_LENGTH);
+                memset(out->material[i], 0, sizeof(char) * MATERIAL_MAX_LENGTH);
                 material.copy(out->material[i], material.size());
                 out->tool_type[i]
                     = bwcoreutils::YonkersTool
@@ -414,9 +420,23 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         // If you are trying to add a new version, please update
         // maxSupportedVersion
         out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
-        out->chamber_temperature = get_leaf(m_metadataParsed,
+        if (m_metadataParsed.isMember("build_plane_temperature")) {
+            out->buildplane_target_temperature = get_leaf(m_metadataParsed,
+                                           "build_plane_temperature",
+                                            static_cast<int>(0));
+            out->sensor_target_temperature =
+                    (out->buildplane_target_temperature > 40)?static_cast<int>(
+                    (out->buildplane_target_temperature + 13) / 1.333):
+                    (out->buildplane_target_temperature);
+        } else {
+            out->sensor_target_temperature = get_leaf(m_metadataParsed,
                                             "chamber_temperature",
                                             static_cast<int>(0));
+            out->buildplane_target_temperature =
+                    (out->sensor_target_temperature > 40)?static_cast<int>(
+                    (out->sensor_target_temperature * 1.333) - 13):
+                    (out->sensor_target_temperature);
+        }
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);
         const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
@@ -659,17 +679,20 @@ TinyThingReader::getMetadata(CInterfaceMetadata* out) const {
 }
 
 void
-TinyThingReader::getIsometricSmallThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricSmallThumbnailFileContents(std::string* contents)
+const {
     *contents = m_private->m_isometricSmallThumbnailFileContents;
 }
 
 void
-TinyThingReader::getIsometricMediumThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricMediumThumbnailFileContents(std::string* contents)
+const {
     *contents = m_private->m_isometricMediumThumbnailFileContents;
 }
 
 void
-TinyThingReader::getIsometricLargeThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricLargeThumbnailFileContents(std::string* contents)
+const {
     *contents = m_private->m_isometricLargeThumbnailFileContents;
 }
 
@@ -689,22 +712,26 @@ TinyThingReader::getLargeThumbnailFileContents(std::string* contents) const {
 }
 
 void
-TinyThingReader::getSombreroSmallThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroSmallThumbnailFileContents(std::string* contents)
+const {
     *contents = m_private->m_sombreroSmallThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSombreroMediumThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroMediumThumbnailFileContents(std::string* contents)
+const {
     *contents = m_private->m_sombreroMediumThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSombreroLargeThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroLargeThumbnailFileContents(std::string* contents)
+const {
     *contents = m_private->m_sombreroLargeThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSmallSquareThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSmallSquareThumbnailFileContents(std::string* contents)
+const {
     *contents = m_private->m_smallSquareThumbnailFileContents;
 }
 

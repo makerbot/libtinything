@@ -1,4 +1,8 @@
+// Copyright MakerBot Industries 2020
+#ifndef SRC_TINYTHINGREADER_IMPL_HH_
+#define SRC_TINYTHINGREADER_IMPL_HH_
 #include <jsoncpp/json/json.h>
+#include <string>
 #include "tinything/TinyThingReader.hh"
 #include "semver.hh"
 namespace LibTinyThing {
@@ -46,10 +50,11 @@ class TinyThingReader::Private {
 
     // variables to support incremental toolpath unzipping
     unzFile m_zipFile;
-    bool m_incremental; // are we set to incrementally unzip
+    bool m_incremental;  // are we set to incrementally unzip
     unsigned int m_toolpathSize;
     unsigned int m_toolpathPos;
     SemVer m_metafileVersion;
     static SemVer maxSupportedVersion();
 };
 }
+#endif  // SRC_TINYTHINGREADER_IMPL_HH_
