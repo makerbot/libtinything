@@ -27,10 +27,14 @@ class MetadataStruct(ctypes.LittleEndianStructure):
 
     fields = [
         ("extruder_count", ctypes.c_int, int),
-        ("extrusion_distance_mm", ctypes.c_float*2, lambda l: [float(f) for f in l]),
-        ("extruder_temperature", ctypes.c_int*2, lambda l: [int(i) for i in l]),
-        ("extrusion_mass_g", ctypes.c_float*2, lambda l: [float(f) for f in l]),
+        ("extrusion_distance_mm", ctypes.c_float*2,
+            lambda l: [float(f) for f in l]),
+        ("extruder_temperature",  ctypes.c_int*2,
+            lambda l: [int(i) for i in l]),
+        ("extrusion_mass_g",      ctypes.c_float*2,
+            lambda l: [float(f) for f in l]),
         ("chamber_temperature", ctypes.c_int, int),
+        ("buildplane_target_temperature", ctypes.c_int, int),
         ("thing_id", ctypes.c_int, int),
         ("duration_s", ctypes.c_float, float),
         ("uses_raft", ctypes.c_bool, bool),
@@ -62,7 +66,7 @@ class TinyThing:
     """
     @param lib_path: optional parameter for custom library path
     """
-    def __init__(self, zipfile_path:str, fd:int=0, lib_path:str='/usr/lib/libtinything.so'):
+    def __init__(self, zipfile_path: str, fd: int=0, lib_path: str='/usr/lib/libtinything.so'):
         self._libtinything = ctypes.CDLL(lib_path)
         if None is not zipfile_path:
             c_path = ctypes.c_char_p(bytes(zipfile_path.encode('UTF-8')))
@@ -77,7 +81,8 @@ class TinyThing:
         c_struct.pid = pid
         for tool_idx in range(min(len(tools), 2)):
             c_struct.tool[tool_idx] = tools[tool_idx]
-        error = self._libtinything.DoesMetadataMatch(self.reader, ctypes.byref(c_struct))
+        error = self._libtinything.DoesMetadataMatch(
+            self.reader, ctypes.byref(c_struct))
         if error == errors['not_yet_unzipped']:
             raise NotYetUnzippedException('meta.json')
         else:
@@ -96,18 +101,18 @@ class TinyThing:
 
     def get_slice_profile(self):
         prof_pointer = ctypes.POINTER(ctypes.c_char)()
-        error = self._libtinything.GetSliceProfile(self.reader,
-                                                   ctypes.byref(prof_pointer))
+        error = self._libtinything.GetSliceProfile(
+            self.reader, ctypes.byref(prof_pointer))
         prof_dict = json.loads(bytes(ctypes.string_at(prof_pointer))
                                .decode('UTF-8'))
         return prof_dict
 
     def get_purge_routines(self):
         purge_routine_pointer = ctypes.POINTER(ctypes.c_char)()
-        error = self._libtinything.GetPurgeRoutines(self.reader,
-                                                    ctypes.byref(purge_routine_pointer))
-        purge_routine_list = json.loads(bytes(ctypes.string_at(purge_routine_pointer))
-                               .decode('UTF-8'))
+        error = self._libtinything.GetPurgeRoutines(
+            self.reader, ctypes.byref(purge_routine_pointer))
+        purge_routine_list = json.loads(bytes(ctypes.string_at(
+            purge_routine_pointer)).decode('UTF-8'))
         return purge_routine_list
 
     def __del__(self):
