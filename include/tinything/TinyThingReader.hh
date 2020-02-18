@@ -154,8 +154,6 @@ namespace LibTinyThing {
         // a config (defined above)
         Error doesMetadataFileMatchConfig(
                 const VerificationData& config) const;
-        static int chamberTempFromBuildplane(const int buildplane_temp);
-        static int buildplaneTempFromChamber(const int chamber_temp);
         Error getMetadata(Metadata* out) const;
         Error getMetadata(CInterfaceMetadata* out) const;
         // Methods to get the slice profile, as a cstring (will be in the
@@ -185,6 +183,8 @@ namespace LibTinyThing {
     private:
         class Private;
         std::unique_ptr<Private> m_private;
+        static int chamberTempFromBuildplane(const int buildplane_temp);
+        static int buildplaneTempFromChamber(const int chamber_temp);
     };
 
 }

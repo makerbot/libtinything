@@ -7,6 +7,7 @@
 #include <string.h>
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
@@ -312,14 +313,14 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
 int TinyThingReader::chamberTempFromBuildplane(
                              const int buildplane_temp) {
     return (buildplane_temp > 40)?
-     round((buildplane_temp + 13) / 1.333):
-           (buildplane_temp);
+        std::round((buildplane_temp + 13) / 1.333):
+        (buildplane_temp);
 }
 int TinyThingReader::buildplaneTempFromChamber(
                              const int chamber_temp) {
     return (chamber_temp > 40)?
-     round((chamber_temp * 1.333) - 13):
-           (chamber_temp);
+        std::round((chamber_temp * 1.333) - 13):
+        (chamber_temp);
 }
 
 template<class MetadataType>
