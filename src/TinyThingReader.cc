@@ -310,17 +310,17 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
     return Error::kOK;
 }
 
-int TinyThingReader::chamberTempFromBuildplane(
-                             const int buildplane_temp) {
-    return (buildplane_temp > 40)?
-        std::round((buildplane_temp + 13) / 1.333):
-        (buildplane_temp);
-}
-int TinyThingReader::buildplaneTempFromChamber(
-                             const int chamber_temp) {
-    return (chamber_temp > 40)?
-        std::round((chamber_temp * 1.333) - 13):
-        (chamber_temp);
+namespace {  // Making static free (non-member) functions:
+    int chamberTempFromBuildplane(const int buildplane_temp) {
+        return (buildplane_temp > 40)?
+            std::round((buildplane_temp + 13) / 1.333):
+            (buildplane_temp);
+    }
+    int buildplaneTempFromChamber(const int chamber_temp) {
+        return (chamber_temp > 40)?
+            std::round((chamber_temp * 1.333) - 13):
+            (chamber_temp);
+    }
 }
 
 template<class MetadataType>
@@ -431,21 +431,15 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         // maxSupportedVersion
         out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
         if (m_metadataParsed.isMember("build_plane_temperature")) {
-             out->buildplane_target_temperature =
-                     get_leaf(m_metadataParsed,
-                     "build_plane_temperature",
-                     static_cast<int>(0));
-             out->chamber_temperature =
-                     TinyThingReader::chamberTempFromBuildplane(
-                     out->buildplane_target_temperature);
+             out->buildplane_target_temperature = get_leaf(m_metadataParsed,
+                     "build_plane_temperature", static_cast<int>(0));
+             out->chamber_temperature = chamberTempFromBuildplane(
+                 out->buildplane_target_temperature);
         } else {
-             out->chamber_temperature =
-                     get_leaf(m_metadataParsed,
-                     "chamber_temperature",
-                     static_cast<int>(0));
-             out->buildplane_target_temperature =
-                     TinyThingReader::buildplaneTempFromChamber(
-                     out->chamber_temperature);
+             out->chamber_temperature = get_leaf(m_metadataParsed,
+                     "chamber_temperature", static_cast<int>(0));
+             out->buildplane_target_temperature = buildplaneTempFromChamber(
+                 out->chamber_temperature);
         }
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);

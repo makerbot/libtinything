@@ -183,8 +183,6 @@ namespace LibTinyThing {
     private:
         class Private;
         std::unique_ptr<Private> m_private;
-        static int chamberTempFromBuildplane(const int buildplane_temp);
-        static int buildplaneTempFromChamber(const int chamber_temp);
     };
 
 }
