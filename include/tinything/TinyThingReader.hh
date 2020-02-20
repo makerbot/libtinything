@@ -13,9 +13,9 @@ namespace bwcoreutils {
 namespace LibTinyThing {
     // I feel really badly for anyone who makes the uuid
     // longer than 100 chars and has to troubleshoot why print history
-    // isn't working. 
+    // isn't working.
     // The good news is if you've found this, you've probably
-    // found what you were looking for. 
+    // found what you were looking for.
     static const unsigned int UUID_MAX_LENGTH = 100;
     // this would be a pretty dang wordy material
     static const unsigned int MATERIAL_MAX_LENGTH = 50;
@@ -29,6 +29,7 @@ namespace LibTinyThing {
         float extrusion_distance_mm[2];
         int extruder_temperature[2];
         int chamber_temperature;
+        int buildplane_target_temperature;
         int shells;
         float layer_height;
         float infill_density;
@@ -52,7 +53,7 @@ namespace LibTinyThing {
     };
     // Struct containing all information required to verify whether
     // the TinyThing has been sliced for a given printer
-    
+
     struct TINYTHING_API VerificationData {
         uint8_t tool_count;
         bwcoreutils::TOOL tool_id[2];
@@ -67,6 +68,7 @@ namespace LibTinyThing {
         int extruder_temperature[2];
         float extrusion_mass_g[2];
         int chamber_temperature;
+        int buildplane_target_temperature;
         uint32_t thing_id;
         float duration_s;
         bool uses_raft;
@@ -82,18 +84,18 @@ namespace LibTinyThing {
         float bounding_box_z_max;
         uint32_t file_size;
     };
-    
+
     class TINYTHING_API TinyThingReader {
     public:
         enum Error {
-            kOK=0,
-            kNotYetUnzipped=1,
-            kToolMismatch=2,
-            kBotTypeMismatch=3,
-            kVersionMismatch=4,
-            kMaxStringLengthExceeded=5
+            kOK                      = 0,
+            kNotYetUnzipped          = 1,
+            kToolMismatch            = 2,
+            kBotTypeMismatch         = 3,
+            kVersionMismatch         = 4,
+            kMaxStringLengthExceeded = 5
         };
-        
+
         // passing in a fd will use an already opened file handle
         TinyThingReader(const std::string& filePath, int fd = -1);
         ~TinyThingReader();
@@ -117,15 +119,21 @@ namespace LibTinyThing {
         // these are accessors for the unzipped contents of each of the
         // files. they should only be called after each has been
         // unzipped.
-        void getIsometricSmallThumbnailFileContents(std::string* contents) const;
-        void getIsometricMediumThumbnailFileContents(std::string* contents) const;
-        void getIsometricLargeThumbnailFileContents(std::string* contents) const;
+        void getIsometricSmallThumbnailFileContents(
+                std::string* contents) const;
+        void getIsometricMediumThumbnailFileContents(
+                std::string* contents) const;
+        void getIsometricLargeThumbnailFileContents(
+                std::string* contents) const;
         void getSmallThumbnailFileContents(std::string* contents) const;
         void getMediumThumbnailFileContents(std::string* contents) const;
         void getLargeThumbnailFileContents(std::string* contents) const;
-        void getSombreroSmallThumbnailFileContents(std::string* contents) const;
-        void getSombreroMediumThumbnailFileContents(std::string* contents) const;
-        void getSombreroLargeThumbnailFileContents(std::string* contents) const;
+        void getSombreroSmallThumbnailFileContents(
+                std::string* contents) const;
+        void getSombreroMediumThumbnailFileContents(
+                std::string* contents) const;
+        void getSombreroLargeThumbnailFileContents(
+                std::string* contents) const;
         void getSmallSquareThumbnailFileContents(std::string* contents) const;
         void getToolpathFileContents(std::string* contents) const;
         std::string getToolpathFileContents() const;
@@ -144,20 +152,21 @@ namespace LibTinyThing {
 
         // check to see if the metadata file is acceptable given
         // a config (defined above)
-        Error doesMetadataFileMatchConfig(const VerificationData& config) const;
+        Error doesMetadataFileMatchConfig(
+                const VerificationData& config) const;
         Error getMetadata(Metadata* out) const;
         Error getMetadata(CInterfaceMetadata* out) const;
-        // Methods to get the slice profile, as a cstring (will be in the value
-        // pointed to by the out arg). This pointer is a pointer to a buffer
-        // held by the TinyThingReader object; it is no longer valid if this
-        // instance dies. it is likely a good idea to copy it out to somewhere
-        // under the caller's control as soon as possible.
+        // Methods to get the slice profile, as a cstring (will be in the
+        // value pointed to by the out arg). This pointer is a pointer to a
+        // buffer held by the TinyThingReader object; it is no longer valid
+        // if this instance dies. it is likely a good idea to copy it out
+        // to somewhere under the caller's control as soon as possible.
         Error getSliceProfile(const char** profile) const;
 
         Error getPurgeRoutines(const char** purge_routines) const;
 
-        // Hacky method to support MBD doing its own metadata parsing for some
-        // reason
+        // Hacky method to support MBD doing its own metadata parsing for
+        // some reason
         std::string getMetadataFileContents() const;
         // incremental unzipping of toolpath
         // unzipping any other part of the file

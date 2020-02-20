@@ -7,6 +7,7 @@
 #include <string.h>
 #include <algorithm>
 #include <cstdlib>
+#include <cmath>
 
 #include "tinything/TinyThingReader.hh"
 #include "tinything/TinyThingConstants.hh"
@@ -26,6 +27,7 @@ Metadata::Metadata() : extrusion_mass_g(),
                        extrusion_distance_mm(),
                        extruder_temperature(),
                        chamber_temperature(0),
+                       buildplane_target_temperature(0),
                        shells(0),
                        layer_height(0),
                        infill_density(0),
@@ -185,7 +187,7 @@ int TinyThingReader::Private::getToolpathIncr(char* buff, int chars) {
 }
 
 bool TinyThingReader::Private::unzipFile(const std::string& fileName,
-                                         std::string &output) const{
+                                         std::string &output) const {
     if (m_zipFile != NULL   &&
         unzLocateFile(m_zipFile, fileName.c_str(), 0) == UNZ_OK &&
         unzOpenCurrentFile(m_zipFile) == UNZ_OK) {
@@ -213,8 +215,9 @@ bool TinyThingReader::Private::parseFile(const std::string& contents,
     return reader.parse(contents, *output);
 }
 
-// Compute the numeric PID of the printer from a bot type string.  If a valid PID
-// PID (a positive integer less than 2^16) cannot be determined, we return 9999.
+// Compute the numeric PID of the printer from a bot type string.  If a valid
+// PID PID (a positive integer less than 2^16) cannot be determined, we return
+// 9999.
 static unsigned int parse_pid(const std::string & type) {
     size_t pid_idx = type.rfind('_');
     if (pid_idx != std::string::npos) {
@@ -305,6 +308,19 @@ TinyThingReader::Private::verifyMetadata(const VerificationData& data) const {
     // If you are adding support for a new version, please make sure to update
     // maxSupportedVersion
     return Error::kOK;
+}
+
+namespace {  // Making static free (non-member) functions:
+    int chamberTempFromBuildplane(const int buildplane_temp) {
+        return (buildplane_temp > 40)?
+            std::round((buildplane_temp + 13) / 1.333):
+            (buildplane_temp);
+    }
+    int buildplaneTempFromChamber(const int chamber_temp) {
+        return (chamber_temp > 40)?
+            std::round((chamber_temp * 1.333) - 13):
+            (chamber_temp);
+    }
 }
 
 template<class MetadataType>
@@ -414,9 +430,17 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         // If you are trying to add a new version, please update
         // maxSupportedVersion
         out->duration_s = get_leaf(m_metadataParsed, "duration_s", 0.f);
-        out->chamber_temperature = get_leaf(m_metadataParsed,
-                                            "chamber_temperature",
-                                            static_cast<int>(0));
+        if (m_metadataParsed.isMember("build_plane_temperature")) {
+             out->buildplane_target_temperature = get_leaf(m_metadataParsed,
+                     "build_plane_temperature", static_cast<int>(0));
+             out->chamber_temperature = chamberTempFromBuildplane(
+                 out->buildplane_target_temperature);
+        } else {
+             out->chamber_temperature = get_leaf(m_metadataParsed,
+                     "chamber_temperature", static_cast<int>(0));
+             out->buildplane_target_temperature = buildplaneTempFromChamber(
+                 out->chamber_temperature);
+        }
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);
         const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
@@ -659,17 +683,20 @@ TinyThingReader::getMetadata(CInterfaceMetadata* out) const {
 }
 
 void
-TinyThingReader::getIsometricSmallThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricSmallThumbnailFileContents(
+        std::string* contents) const {
     *contents = m_private->m_isometricSmallThumbnailFileContents;
 }
 
 void
-TinyThingReader::getIsometricMediumThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricMediumThumbnailFileContents(
+        std::string* contents) const {
     *contents = m_private->m_isometricMediumThumbnailFileContents;
 }
 
 void
-TinyThingReader::getIsometricLargeThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getIsometricLargeThumbnailFileContents(
+        std::string* contents) const {
     *contents = m_private->m_isometricLargeThumbnailFileContents;
 }
 
@@ -689,22 +716,26 @@ TinyThingReader::getLargeThumbnailFileContents(std::string* contents) const {
 }
 
 void
-TinyThingReader::getSombreroSmallThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroSmallThumbnailFileContents(
+        std::string* contents) const {
     *contents = m_private->m_sombreroSmallThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSombreroMediumThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroMediumThumbnailFileContents(
+        std::string* contents) const {
     *contents = m_private->m_sombreroMediumThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSombreroLargeThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSombreroLargeThumbnailFileContents(
+        std::string* contents) const {
     *contents = m_private->m_sombreroLargeThumbnailFileContents;
 }
 
 void
-TinyThingReader::getSmallSquareThumbnailFileContents(std::string* contents) const {
+TinyThingReader::getSmallSquareThumbnailFileContents(
+        std::string* contents) const {
     *contents = m_private->m_smallSquareThumbnailFileContents;
 }
 
