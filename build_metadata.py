@@ -20,7 +20,7 @@ else:
             stable_required=True),
         artifactory_utils.ArtifactSelector(
             project="MBCoreUtils",
-            revision="ReleaseMorepork1.8",
+            revision="HotfixMorepork1.8.1",
             version="^4.0",
             debug=False,
             stable_required=True)
@@ -33,7 +33,7 @@ else:
         dependencies.extend([
             artifactory_utils.ArtifactSelector(
                 project="morepork-mbcoreutils",
-                revision="ReleaseMorepork1.8",
+                revision="HotfixMorepork1.8.1",
                 version="^4.0",
                 debug=False,
                 stable_required=True),
