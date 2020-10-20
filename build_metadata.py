@@ -8,7 +8,7 @@ else:
     dependencies = [
         artifactory_utils.ArtifactSelector(
             project="Toolchain-Release",
-            revision="develop",
+            revision="libcpp_flag",
             version="^4.6",
             debug=False,
             stable_required=True),
