@@ -8,7 +8,8 @@ else:
     dependencies = [
         artifactory_utils.ArtifactSelector(
             project="Toolchain-Release",
-            revision="libcpp_flag",
+            revision="develop",
+            version="^4.6",
             debug=False,
             stable_required=True),
         artifactory_utils.ArtifactSelector(
@@ -21,6 +22,12 @@ else:
             project="MBCoreUtils",
             revision="develop",
             version="^4.0",
+            debug=False,
+            stable_required=True)
+        artifactory_utils.ArtifactSelector(
+            project="boost",
+            revision="master",
+            version="1.61.*",
             debug=False,
             stable_required=True)
     ]
