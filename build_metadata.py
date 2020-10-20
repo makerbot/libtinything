@@ -23,7 +23,7 @@ else:
             revision="develop",
             version="^4.0",
             debug=False,
-            stable_required=True)
+            stable_required=True),
         artifactory_utils.ArtifactSelector(
             project="boost",
             revision="master",
