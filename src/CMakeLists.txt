@@ -1,15 +1,6 @@
 
 find_package(JsonCpp REQUIRED)
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-    # ensure the slash direction
-    string(
-        REPLACE "\\" "/"
-        yajl_include_dir
-        "$ENV{MB_THIRD_PARTY}/yajl-2.1.0/yajl-${bitness_32or64}/include/")
-elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(yajl_include_dir /usr/local/yajl/include/)
-endif()
 
 set(headers
     zlib/crc32.h
@@ -51,8 +42,7 @@ set(sources
 include_directories(
     "${PROJECT_SOURCE_DIR}/include"
     "${PROJECT_SOURCE_DIR}/src/zlib"
-    "${PROJECT_SOURCE_DIR}/src/miniunzip"
-    ${yajl_include_dir})
+    "${PROJECT_SOURCE_DIR}/src/miniunzip")
 
 add_library(tinything ${sources} ${headers})
 use_standard_flags(tinything)
@@ -73,6 +63,3 @@ install(
     DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
     DESTINATION "${HEADER_INSTALL_DIR}")
 
-install(
-    DIRECTORY ${yajl_include_dir}
-    DESTINATION "${HEADER_INSTALL_DIR}")

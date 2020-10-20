@@ -14,12 +14,12 @@ target_include_directories(reader_tests
 
 use_standard_flags(reader_tests)
 
-find_package(
-  Boost
+
+  find_package(
+  Boost 1.61 EXACT
   REQUIRED
   CONFIG
-  COMPONENTS unit_test_framework
-  )
+  COMPONENTS unit_test_framework)
 
 target_link_libraries(reader_tests
   PRIVATE
