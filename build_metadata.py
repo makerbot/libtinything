@@ -9,7 +9,6 @@ else:
         artifactory_utils.ArtifactSelector(
             project="Toolchain-Release",
             revision="libcpp_flag",
-            version="^4.6",
             debug=False,
             stable_required=True),
         artifactory_utils.ArtifactSelector(
