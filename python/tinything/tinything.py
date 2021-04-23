@@ -35,6 +35,7 @@ class MetadataStruct(ctypes.LittleEndianStructure):
             lambda l: [float(f) for f in l]),
         ("chamber_temperature", ctypes.c_int, int),
         ("buildplane_target_temperature", ctypes.c_int, int),
+        ("platform_temperature", ctypes.c_int, int),
         ("thing_id", ctypes.c_int, int),
         ("duration_s", ctypes.c_float, float),
         ("uses_raft", ctypes.c_bool, bool),

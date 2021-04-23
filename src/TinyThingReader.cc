@@ -28,6 +28,7 @@ Metadata::Metadata() : extrusion_mass_g(),
                        extruder_temperature(),
                        chamber_temperature(0),
                        buildplane_target_temperature(0),
+                       platform_temperature(0),
                        shells(0),
                        layer_height(0),
                        infill_density(0),
@@ -440,6 +441,10 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
                      "chamber_temperature", static_cast<int>(0));
              out->buildplane_target_temperature = buildplaneTempFromChamber(
                  out->chamber_temperature);
+        }
+        if (m_metadataParsed.isMember("platform_temperature")) {
+             out->platform_temperature = get_leaf(m_metadataParsed,
+                     "platform_temperature", static_cast<int>(0));
         }
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);
