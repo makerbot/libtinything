@@ -442,10 +442,8 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
              out->buildplane_target_temperature = buildplaneTempFromChamber(
                  out->chamber_temperature);
         }
-        if (m_metadataParsed.isMember("platform_temperature")) {
-             out->platform_temperature = get_leaf(m_metadataParsed,
-                     "platform_temperature", static_cast<int>(0));
-        }
+        out->platform_temperature = get_leaf(m_metadataParsed,
+            "platform_temperature", static_cast<int>(0));
         out->uses_raft = get_leaf(get_obj(m_metadataParsed, "miracle_config"),
                                   "doRaft", false);
         const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
