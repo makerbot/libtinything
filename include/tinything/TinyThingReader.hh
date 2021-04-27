@@ -30,6 +30,7 @@ namespace LibTinyThing {
         int extruder_temperature[2];
         int chamber_temperature;
         int buildplane_target_temperature;
+        int platform_temperature;
         int shells;
         float layer_height;
         float infill_density;
@@ -69,6 +70,7 @@ namespace LibTinyThing {
         float extrusion_mass_g[2];
         int chamber_temperature;
         int buildplane_target_temperature;
+        int platform_temperature;
         uint32_t thing_id;
         float duration_s;
         bool uses_raft;
