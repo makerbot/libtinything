@@ -41,6 +41,9 @@ namespace LibTinyThing {
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
         char material[2][MATERIAL_MAX_LENGTH];
+        float override_tau_accel;
+        float override_tau_decel;
+        float override_winding_current;
         std::string slicer_name;
         bwcoreutils::TYPE tool_type[2];
         unsigned int bot_pid;
@@ -76,6 +79,9 @@ namespace LibTinyThing {
         bool uses_raft;
         char uuid[UUID_MAX_LENGTH];
         char material[2][MATERIAL_MAX_LENGTH];
+        float override_tau_accel;
+        float override_tau_decel;
+        float override_winding_current;
         bwcoreutils::TYPE tool_type[2];
         unsigned int bot_pid;
         float bounding_box_x_min;

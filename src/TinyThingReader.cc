@@ -39,6 +39,9 @@ Metadata::Metadata() : extrusion_mass_g(),
                        uses_raft(false),
                        uuid(),
                        material(),
+                       override_tau_accel(0),
+                       override_tau_decel(0),
+                       override_winding_current(0),
                        slicer_name("UNKNOWN"),
                        tool_type(),
                        bot_pid(9999) {
@@ -448,6 +451,9 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
                                   "doRaft", false);
         const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
         out->bot_pid = parse_pid(type);
+        out->override_tau_accel       = get_leaf(m_metadataParsed,"override_tau_accel",       0.f);
+        out->override_tau_decel       = get_leaf(m_metadataParsed,"override_tau_decel",       0.f);
+        out->override_winding_current = get_leaf(m_metadataParsed,"override_winding_current", 0.f);
 
         if (m_metafileVersion > SemVer(1, 0, 0)
             && m_metafileVersion < SemVer(3, 0, 0)) {
