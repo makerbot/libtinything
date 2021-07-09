@@ -38,9 +38,6 @@ Metadata::Metadata() : extrusion_mass_g(),
                        uses_raft(false),
                        uuid(),
                        material(),
-                       override_tau_accel(0),
-                       override_tau_decel(0),
-                       override_winding_current(0),
                        slicer_name("UNKNOWN"),
                        tool_type(),
                        bot_pid(9999) {
@@ -451,12 +448,15 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
         out->bot_pid = parse_pid(type);
 
-        out->override_tau_accel       = get_leaf(m_metadataParsed,
-            "override_tau_accel",       std::numeric_limits<float>::quiet_NaN());
-        out->override_tau_decel       = get_leaf(m_metadataParsed,
-            "override_tau_decel",       std::numeric_limits<float>::quiet_NaN());
-        out->override_winding_current = get_leaf(m_metadataParsed,
-            "override_winding_current", std::numeric_limits<float>::quiet_NaN());
+        {
+            auto accel_overrides = get_obj(m_metadataParsed, "accel_overrides");
+            out->accel_overrides_tau_accel       = get_leaf(accel_overrides,
+                "tau_accel",       std::numeric_limits<float>::quiet_NaN());
+            out->accel_overrides_tau_decel       = get_leaf(accel_overrides,
+                "tau_decel",       std::numeric_limits<float>::quiet_NaN());
+            out->accel_overrides_winding_current = get_leaf(accel_overrides,
+                "winding_current", std::numeric_limits<float>::quiet_NaN());
+        }
 
         if (m_metafileVersion > SemVer(1, 0, 0)
             && m_metafileVersion < SemVer(3, 0, 0)) {
@@ -565,6 +565,16 @@ TinyThingReader::Private::getPurgeRoutines(const char** out) const {
     return TinyThingReader::kOK;
 }
 
+TinyThingReader::Error
+TinyThingReader::Private::getAccelOverrides(const char** out) const {
+    if (m_accelOverridesContents.empty()) {
+        *out = nullptr;
+        return TinyThingReader::kNotYetUnzipped;
+    }
+    *out = m_accelOverridesContents.c_str();
+    return TinyThingReader::kOK;
+}
+
 TinyThingReader::TinyThingReader(const std::string& filePath, int fd)
     : m_private(new Private(filePath, fd)) {}
 
@@ -584,10 +594,12 @@ bool TinyThingReader::unzipMetadataFile() {
         = SemVer(get_leaf(m_private->m_metadataParsed, "version", "0.0.0"));
     if (extracted) {
         auto fw = Json::FastWriter();
-        m_private->m_sliceProfileContents
+        m_private->m_sliceProfileContents 
             = fw.write(get_obj(m_private->m_metadataParsed, "miracle_config"));
-        m_private->m_purgeRoutineContents =
-            fw.write(get_arr(m_private->m_metadataParsed, "purge_routines"));
+        m_private->m_purgeRoutineContents
+            = fw.write(get_arr(m_private->m_metadataParsed, "purge_routines"));
+        m_private->m_accelOverridesContents
+            = fw.write(get_arr(m_private->m_metadataParsed, "accel_overrides"));
     }
     return extracted;
 }
@@ -681,6 +693,11 @@ TinyThingReader::getSliceProfile(const char** out) const {
 TinyThingReader::Error
 TinyThingReader::getPurgeRoutines(const char** out) const {
     return m_private->getPurgeRoutines(out);
+}
+
+TinyThingReader::Error
+TinyThingReader::getAccelOverrides(const char** out) const {
+    return m_private->getAccelOverrides(out);
 }
 
 TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {

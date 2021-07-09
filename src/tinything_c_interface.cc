@@ -50,6 +50,12 @@ int GetPurgeRoutines(const TinyThingReader* tinything,
 }
 
 extern "C"
+int GetAccelOverrides(const TinyThingReader* tinything,
+                     const char** out) {
+    return tinything->getAccelOverrides(out);
+}
+
+extern "C"
 bool IsValid(const TinyThingReader* tinything) {
     return tinything->isValid();
 }
