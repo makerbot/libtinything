@@ -448,16 +448,6 @@ TinyThingReader::Private::getMetadata(MetadataType* out) const {
         const std::string type = get_leaf(m_metadataParsed, "bot_type", "");
         out->bot_pid = parse_pid(type);
 
-        {
-            auto accel_overrides = get_obj(m_metadataParsed, "accel_overrides");
-            out->accel_overrides_tau_accel       = get_leaf(accel_overrides,
-                "tau_accel",       std::numeric_limits<float>::quiet_NaN());
-            out->accel_overrides_tau_decel       = get_leaf(accel_overrides,
-                "tau_decel",       std::numeric_limits<float>::quiet_NaN());
-            out->accel_overrides_winding_current = get_leaf(accel_overrides,
-                "winding_current", std::numeric_limits<float>::quiet_NaN());
-        }
-
         if (m_metafileVersion > SemVer(1, 0, 0)
             && m_metafileVersion < SemVer(3, 0, 0)) {
             out->bounding_box_x_min = get_leaf(m_metadataParsed,
@@ -599,7 +589,7 @@ bool TinyThingReader::unzipMetadataFile() {
         m_private->m_purgeRoutineContents
             = fw.write(get_arr(m_private->m_metadataParsed, "purge_routines"));
         m_private->m_accelOverridesContents
-            = fw.write(get_arr(m_private->m_metadataParsed, "accel_overrides"));
+            = fw.write(get_obj(m_private->m_metadataParsed, "accel_overrides"));
     }
     return extracted;
 }

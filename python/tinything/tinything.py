@@ -41,9 +41,6 @@ class MetadataStruct(ctypes.LittleEndianStructure):
         ("uses_raft", ctypes.c_bool, bool),
         ("uuid", ctypes.c_char * 100, good_str),
         ("material", (ctypes.c_char*50)*2, lambda l: [good_str(s) for s in l]),
-        ("accel_overrides_tau_accel", ctypes.c_float, float),
-        ("accel_overrides_tau_decel", ctypes.c_float, float),
-        ("accel_overrides_winding_current", ctypes.c_float, float),
         ("tool_type", ctypes.c_int*2, lambda l: [int(i) for i in l]),
         ("bot_pid", ctypes.c_uint, int),
         ("bounding_box_x_min", ctypes.c_float, float),
@@ -123,9 +120,9 @@ class TinyThing:
         accel_overrides_pointer = ctypes.POINTER(ctypes.c_char)()
         error = self._libtinything.GetAccelOverrides(
             self.reader, ctypes.byref(accel_overrides_pointer))
-        accel_overrides_list = json.loads(bytes(ctypes.string_at(
+        accel_overrides_dict = json.loads(bytes(ctypes.string_at(
             accel_overrides_pointer)).decode('UTF-8'))
-        return accel_overrides_list
+        return accel_overrides_dict
 
     def __del__(self):
         self._libtinything.DestroyTinyThingReader(self.reader)
