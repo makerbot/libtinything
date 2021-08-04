@@ -26,6 +26,9 @@ TINYTHING_API int GetSliceProfile(const TinyThingReader* tinything,
 TINYTHING_API int GetPurgeRoutines(const TinyThingReader* tinything,
                                    const char** out);
 
+TINYTHING_API int GetAccelOverrides(const TinyThingReader* tinything,
+                                   const char** out);
+
 TINYTHING_API bool IsValid(const TinyThingReader* tinything);
 
 // WRITER FUNCTIONS

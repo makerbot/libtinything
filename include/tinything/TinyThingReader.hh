@@ -167,6 +167,8 @@ namespace LibTinyThing {
 
         Error getPurgeRoutines(const char** purge_routines) const;
 
+        Error getAccelOverrides(const char** accel_overrides) const;
+
         // Hacky method to support MBD doing its own metadata parsing for
         // some reason
         std::string getMetadataFileContents() const;
@@ -186,7 +188,6 @@ namespace LibTinyThing {
         class Private;
         std::unique_ptr<Private> m_private;
     };
-
 }
 
 #endif /* TINYTHINGREADER_HH_ */

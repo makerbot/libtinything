@@ -116,6 +116,14 @@ class TinyThing:
             purge_routine_pointer)).decode('UTF-8'))
         return purge_routine_list
 
+    def get_accel_overrides(self):
+        accel_overrides_pointer = ctypes.POINTER(ctypes.c_char)()
+        error = self._libtinything.GetAccelOverrides(
+            self.reader, ctypes.byref(accel_overrides_pointer))
+        accel_overrides_dict = json.loads(bytes(ctypes.string_at(
+            accel_overrides_pointer)).decode('UTF-8'))
+        return accel_overrides_dict
+
     def __del__(self):
         self._libtinything.DestroyTinyThingReader(self.reader)
 

@@ -1,5 +1,4 @@
 // Copyright MakerBot Inc. 2017
-
 #include <bwcoreutils/tool_mappings.hh>
 #include <mbcoreutils/jsoncpp_wrappers.h>
 
@@ -556,6 +555,16 @@ TinyThingReader::Private::getPurgeRoutines(const char** out) const {
     return TinyThingReader::kOK;
 }
 
+TinyThingReader::Error
+TinyThingReader::Private::getAccelOverrides(const char** out) const {
+    if (m_accelOverridesContents.empty()) {
+        *out = nullptr;
+        return TinyThingReader::kNotYetUnzipped;
+    }
+    *out = m_accelOverridesContents.c_str();
+    return TinyThingReader::kOK;
+}
+
 TinyThingReader::TinyThingReader(const std::string& filePath, int fd)
     : m_private(new Private(filePath, fd)) {}
 
@@ -575,10 +584,12 @@ bool TinyThingReader::unzipMetadataFile() {
         = SemVer(get_leaf(m_private->m_metadataParsed, "version", "0.0.0"));
     if (extracted) {
         auto fw = Json::FastWriter();
-        m_private->m_sliceProfileContents
+        m_private->m_sliceProfileContents 
             = fw.write(get_obj(m_private->m_metadataParsed, "miracle_config"));
-        m_private->m_purgeRoutineContents =
-            fw.write(get_arr(m_private->m_metadataParsed, "purge_routines"));
+        m_private->m_purgeRoutineContents
+            = fw.write(get_arr(m_private->m_metadataParsed, "purge_routines"));
+        m_private->m_accelOverridesContents
+            = fw.write(get_obj(m_private->m_metadataParsed, "accel_overrides"));
     }
     return extracted;
 }
@@ -672,6 +683,11 @@ TinyThingReader::getSliceProfile(const char** out) const {
 TinyThingReader::Error
 TinyThingReader::getPurgeRoutines(const char** out) const {
     return m_private->getPurgeRoutines(out);
+}
+
+TinyThingReader::Error
+TinyThingReader::getAccelOverrides(const char** out) const {
+    return m_private->getAccelOverrides(out);
 }
 
 TinyThingReader::Error TinyThingReader::getMetadata(Metadata* out) const {
