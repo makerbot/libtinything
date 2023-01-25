@@ -5,7 +5,7 @@
 #include <string>
 
 namespace LibTinyThing {
-    struct TINYTHING_API Config {
+    struct Config {
         static const std::string kMetadataFilename;
         static const std::string kJsonToolpathFilename;
         static const std::string kGcodeToolpathFilename;

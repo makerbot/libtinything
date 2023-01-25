@@ -7,7 +7,7 @@
 
 namespace LibTinyThing {
 
-	class TINYTHING_API TinyThingWriter {
+	class TinyThingWriter {
 	public:
 		TinyThingWriter(const std::string& filePath);
 

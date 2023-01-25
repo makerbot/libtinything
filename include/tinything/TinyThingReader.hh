@@ -22,7 +22,7 @@ namespace LibTinyThing {
 
     // Struct that contains the contents of a metadata file in
     // a version-independent way
-    struct TINYTHING_API Metadata {
+    struct Metadata {
         Metadata();
         int extruder_count;
         float extrusion_mass_g[2];
@@ -55,7 +55,7 @@ namespace LibTinyThing {
     // Struct containing all information required to verify whether
     // the TinyThing has been sliced for a given printer
 
-    struct TINYTHING_API VerificationData {
+    struct VerificationData {
         uint8_t tool_count;
         bwcoreutils::TOOL tool_id[2];
         uint8_t pid;
@@ -63,7 +63,7 @@ namespace LibTinyThing {
 
     // Struct containing only that data that doesn't absolutely suck
     // to export through a C interface
-    struct TINYTHING_API CInterfaceMetadata {
+    struct CInterfaceMetadata {
         int extruder_count;
         float extrusion_distance_mm[2];
         int extruder_temperature[2];
@@ -87,7 +87,7 @@ namespace LibTinyThing {
         uint32_t file_size;
     };
 
-    class TINYTHING_API TinyThingReader {
+    class  TinyThingReader {
     public:
         enum Error {
             kOK                      = 0,
