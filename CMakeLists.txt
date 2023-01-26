@@ -31,10 +31,3 @@ add_library(tinything ${TINYTHING_SOURCES} ${TINYTHING_HEADERS})
 target_link_libraries(tinything JsonCpp::JsonCpp)
 target_link_libraries(tinything ZLIB::ZLIB)
 target_link_libraries(tinything mb_core_utils::mb_core_utils)
-
-set(
-        WRITER_SOURCES
-        src/cli/writer.cc
-)
-add_executable(dot_makerbot_writer ${WRITER_SOURCES})
-target_link_libraries(dot_makerbot_writer tinything)

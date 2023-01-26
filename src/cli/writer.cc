@@ -18,7 +18,7 @@ static void printUsage() {
       "<metadata> "
       "<thumbnails>\n\n"
       "<output> is the path of the \".makerbot\" file that will be written\n"
-      "<toolpath> is the toolpath input file\n"
+      "<toolpath> is the \"print.jsontoolpath\" input file\n"
       "<metadata> is the \"meta.json\" input file\n"
       "<thumbnails> is the *directory* containing the three PNGs\n");
 }

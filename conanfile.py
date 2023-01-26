@@ -1,7 +1,7 @@
 #  Copyright (c) 2023 UltiMaker B.V.
 
 # from os import path
-from conans import ConanFile
+from conans import ConanFile, tools
 from conan.errors import ConanInvalidConfiguration
 from conan.tools.files import AutoPackager, copy, mkdir
 from conan.tools.cmake import CMakeToolchain, CMakeDeps, cmake_layout, CMake
@@ -26,12 +26,7 @@ class TinyThing(ConanFile):
     ]
     generators = "CMakeDeps"
 
-    # def layout(self):
-    #     cmake_layout(self)
-
     def generate(self):
-        deps = CMakeDeps(self)
-        deps.generate()
         tc = CMakeToolchain(self)
         tc.generate()
 
@@ -43,6 +38,9 @@ class TinyThing(ConanFile):
     def package(self):
         self.copy("include/*.h")
         self.copy("include/*.hh")
+        lib_patterns = ["*.a", "*.so", "*.dll", "*.lib", "*.lib", "*.dylib"]
+        for pattern in lib_patterns:
+            self.copy(pattern, dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["tinything"]
+        self.cpp_info.libs = tools.collect.libs(self)
