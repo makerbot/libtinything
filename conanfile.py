@@ -43,4 +43,4 @@ class TinyThing(ConanFile):
             self.copy(pattern, dst="lib", keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = tools.collect.libs(self)
+        self.cpp_info.libs = ["tinything"]
