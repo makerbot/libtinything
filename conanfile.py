@@ -4,8 +4,8 @@
 #
 from conans import ConanFile, CMake
 # from conan.errors import ConanInvalidConfiguration
-# from conan.tools.files import AutoPackager, copy, mkdir
-# from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
+from conan.tools.files import AutoPackager, copy, mkdir
+from conan.tools.cmake import CMakeToolchain, CMakeDeps, CMake, cmake_layout
 # from conan.tools.build import check_min_cppstd
 # from conan.tools.scm import Version
 
@@ -21,11 +21,10 @@ class TinyThing(ConanFile):
     ]
     generators = "CMakeDeps"
 
-    def imports(self):
-        self.copy("*.dll", dst="bin", src="bin") # From bin to bin
-        self.copy("*.dylib*", dst="bin", src="lib") # From lib to bin
-
     def build(self):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def package(self):
+        self.copy
