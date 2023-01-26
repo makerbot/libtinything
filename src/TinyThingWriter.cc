@@ -6,8 +6,8 @@
 #include <vector>
 #include <string>
 
-#include "tinything/TinyThingWriter.hh"
-#include "tinything/TinyThingConstants.hh"
+#include "TinyThingWriter.hh"
+#include "TinyThingConstants.hh"
 #include "miniunzip/unzip.h"
 #include "miniunzip/zip.h"
 

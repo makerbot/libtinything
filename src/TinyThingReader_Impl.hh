@@ -1,5 +1,5 @@
 #include <json/json.h>
-#include "tinything/TinyThingReader.hh"
+#include "TinyThingReader.hh"
 #include "semver.hh"
 namespace LibTinyThing {
 class TinyThingReader::Private {

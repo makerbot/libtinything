@@ -8,8 +8,8 @@
 #include <cstdlib>
 #include <cmath>
 
-#include "tinything/TinyThingReader.hh"
-#include "tinything/TinyThingConstants.hh"
+#include "TinyThingReader.hh"
+#include "TinyThingConstants.hh"
 #include "miniunzip/unzip.h"
 #include "miniunzip/zip.h"
 

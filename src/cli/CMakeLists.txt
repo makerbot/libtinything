@@ -1,2 +1,0 @@
-add_executable(dot_makerbot_writer writer.cc)
-target_link_libraries(dot_makerbot_writer tinything)

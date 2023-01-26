@@ -1,5 +1,5 @@
 
-#include "tinything/TinyThingConstants.hh"
+#include "TinyThingConstants.hh"
 
 namespace LibTinyThing {
     // TODO(pshaw): defining values here to get past linker errors

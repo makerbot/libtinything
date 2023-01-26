@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#include "tinything/TinyThingWriter.hh"
+#include "TinyThingWriter.hh"
 
 enum ExitCode {
   ExitCodeSuccess = 0,
